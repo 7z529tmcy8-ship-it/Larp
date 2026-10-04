@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wallet">
+<meta name="theme-color" content="#f2f2f7">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Wallet</title>
+<style>
+  :root {
+    --bg: #f2f2f7;
+    --fg: #000;
+    --muted: #8e8e93;
+    --sheet: #fff;
+    --sep: rgba(60,60,67,.18);
+    --blue: #0a84ff;
+    --red: #ff3b30;
+    --green: #34c759;
+    --cw: calc(min(100vw, 480px) - 32px);
+    --ch: calc(var(--cw) / 1.586);
+    --peek: 58px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    overflow-x: hidden;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+  /* ---------- Home ---------- */
+  .app { max-width: 480px; margin: 0 auto; min-height: 100%; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 40px); }
+  .header { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 14px; }
+  .header h1 { font-size: 34px; font-weight: 700; letter-spacing: .3px; margin: 0; }
+  .plus { width: 32px; height: 32px; border-radius: 50%; background: #000; display: grid; place-items: center; }
+  .plus svg { width: 16px; height: 16px; }
+
+  .stack { position: relative; padding-bottom: 20px; }
+  .stack .card + .card { margin-top: calc(var(--peek) - var(--ch)); }
+  .stack .card { transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+  .stack .card:active { transform: translateY(-6px); }
+  .empty { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 15px; line-height: 1.4; }
+
+  /* ---------- Card ---------- */
+  .card {
+    position: relative; width: var(--cw); height: var(--ch);
+    border-radius: 14px; overflow: hidden; color: #fff;
+    box-shadow: 0 -1px 0 rgba(255,255,255,.25) inset, 0 4px 14px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.12);
+    background-size: cover; background-position: center;
+  }
+  .card::after { /* subtle sheen */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(160deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 40%);
+  }
+  .card.dark-text { color: #1c1c1e; }
+  .c-name { position: absolute; top: 16px; left: 18px; font-size: 19px; font-weight: 600; letter-spacing: .2px; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .c-bal { position: absolute; top: 17px; right: 18px; font-size: 17px; font-weight: 600; }
+  .c-num { position: absolute; bottom: 16px; left: 18px; font-size: 15px; font-weight: 500; letter-spacing: 1px; opacity: .92; }
+  .c-net { position: absolute; bottom: 12px; right: 16px; }
+  .net-visa { font-size: 26px; font-weight: 900; font-style: italic; letter-spacing: -.5px; }
+  .net-text { font-size: 15px; font-weight: 800; letter-spacing: .6px; }
+  .net-mc { display: flex; }
+  .net-mc i { width: 30px; height: 30px; border-radius: 50%; display: block; }
+  .net-mc i:first-child { background: #eb001b; }
+  .net-mc i:last-child { background: #f79e1b; margin-left: -12px; opacity: .85; }
+
+  /* ---------- Screens & sheets ---------- */
+  .screen {
+    position: fixed; inset: 0; background: var(--bg); z-index: 20;
+    transform: translateX(100%); transition: transform .38s cubic-bezier(.2,.8,.2,1);
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.open { transform: none; }
+  .screen-inner { max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 30px); }
+  .nav { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 10px; }
+  .nav button { color: var(--blue); font-size: 17px; }
+  .nav .done { font-weight: 600; }
+
+  .group { background: var(--sheet); border-radius: 12px; overflow: hidden; margin: 22px 0; }
+  .row { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 16px; font-size: 17px; border-bottom: .5px solid var(--sep); }
+  .row:last-child { border-bottom: 0; }
+  .row .val { color: var(--muted); }
+  .row.danger { color: var(--red); justify-content: center; }
+  .row.action { color: var(--blue); justify-content: center; }
+  .caption { color: var(--muted); font-size: 13px; text-transform: uppercase; margin: 0 16px -14px; }
+
+  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 30; }
+  .backdrop.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 31;
+    max-width: 480px; margin: 0 auto; max-height: 94vh; overflow-y: auto;
+    background: var(--bg); border-radius: 12px 12px 0 0;
+    transform: translateY(100%); transition: transform .4s cubic-bezier(.2,.8,.2,1);
+    padding: 0 16px calc(env(safe-area-inset-bottom) + 24px);
+  }
+  .sheet.open { transform: none; }
+  .sheet .nav { position: sticky; top: 0; background: var(--bg); z-index: 2; padding-top: 8px; height: 52px; }
+  .sheet .nav h2 { font-size: 17px; font-weight: 600; margin: 0; }
+  .preview { display: flex; justify-content: center; margin: 8px 0 4px; }
+
+  .field { display: flex; align-items: center; min-height: 46px; padding: 0 16px; border-bottom: .5px solid var(--sep); font-size: 17px; }
+  .field:last-child { border-bottom: 0; }
+  .field label { width: 120px; flex: none; }
+  .field input, .field select { flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; font-size: 17px; background: transparent; color: var(--fg); text-align: right; -webkit-appearance: none; appearance: none; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 12px; padding: 14px 16px; }
+  .sw { width: 38px; height: 38px; border-radius: 50%; box-shadow: 0 0 0 .5px rgba(0,0,0,.2); position: relative; }
+  .sw.sel::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2.5px solid var(--blue); }
+  .upload-row { display: flex; gap: 10px; padding: 12px 16px; }
+  .btn { flex: 1; height: 44px; border-radius: 10px; background: rgba(10,132,255,.12); color: var(--blue); font-weight: 600; font-size: 16px; }
+  .btn.secondary { background: rgba(255,59,48,.1); color: var(--red); }
+  .hint { color: var(--muted); font-size: 13px; padding: 0 16px 12px; line-height: 1.35; }
+
+  /* Secret trigger zone (where the side button sits) */
+  .side-zone { position: fixed; top: 80px; right: 0; width: 34px; height: 260px; z-index: 15; }
+
+  /* ---------- Pay mode ---------- */
+  .pay {
+    position: fixed; inset: 0; z-index: 50; color: #fff;
+    background: rgba(28,28,30,.0);
+    -webkit-backdrop-filter: blur(0px); backdrop-filter: blur(0px);
+    pointer-events: none; transition: background .35s, backdrop-filter .35s, -webkit-backdrop-filter .35s;
+  }
+  .pay.open { background: rgba(18,18,20,.82); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%); pointer-events: auto; }
+  .pay-inner { max-width: 480px; margin: 0 auto; height: 100%; position: relative; padding-top: calc(env(safe-area-inset-top) + 64px); }
+  .pay-cancel { position: absolute; top: calc(env(safe-area-inset-top) + 14px); left: 18px; font-size: 17px; color: #fff; opacity: 0; transition: opacity .3s .2s; }
+  .pay.open .pay-cancel { opacity: 1; }
+  .pay-card-wrap { display: flex; justify-content: center; transform: translateY(110vh); transition: transform .55s cubic-bezier(.17,.89,.3,1.08); }
+  .pay.open .pay-card-wrap { transform: none; }
+  .pay-card-wrap .card { box-shadow: 0 18px 40px rgba(0,0,0,.45), 0 0 0 .5px rgba(255,255,255,.15); }
+
+  .pay-status { height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; opacity: 0; transition: opacity .3s .25s; }
+  .pay.open .pay-status { opacity: 1; }
+  .pay-label { font-size: 17px; font-weight: 500; min-height: 22px; text-align: center; }
+
+  .glyph { width: 74px; height: 74px; position: relative; }
+  .glyph svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .glyph .face, .glyph .ring, .glyph .check, .glyph .reader { transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1); transform-origin: 50% 50%; }
+  .glyph .ring, .glyph .check, .glyph .reader { opacity: 0; }
+
+  .glyph.scanning .face { animation: facePulse 1s ease-in-out infinite; }
+  .glyph.scanning .face .brackets { animation: bracketsIn 1s ease-in-out infinite; transform-origin: 30px 30px; }
+  .glyph.scanning .ring { opacity: 1; animation: spin 1s linear infinite; }
+
+  .glyph.success .face { opacity: 0; transform: scale(.6); }
+  .glyph.success .check { opacity: 1; }
+  .glyph.success .check path { animation: draw .45s .05s ease-out forwards; }
+  .glyph.success .check circle { animation: draw .45s ease-out forwards; }
+
+  .glyph.ready .face, .glyph.ready .check { opacity: 0; }
+  .glyph.ready .reader { opacity: 1; }
+  .glyph.ready .reader .wave { animation: wave 1.6s ease-out infinite; opacity: 0; }
+  .glyph.ready .reader .wave:nth-of-type(2) { animation-delay: .25s; }
+  .glyph.ready .reader .wave:nth-of-type(3) { animation-delay: .5s; }
+
+  .check circle, .check path { stroke-dasharray: 200; stroke-dashoffset: 200; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes facePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(.94); } }
+  @keyframes bracketsIn { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes wave { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+
+  .pay-others { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 10px); display: flex; flex-direction: column; align-items: center; transform: translateY(60vh); transition: transform .6s .08s cubic-bezier(.17,.89,.3,1.04); }
+  .pay.open .pay-others { transform: none; }
+  .pay-others .card { height: 50px; margin-top: -14px; border-radius: 12px; transform-origin: top center; }
+  .pay-others .card:first-child { margin-top: 0; }
+  .pay-others .card .c-num, .pay-others .card .c-net { display: none; }
+  .pay-others .card .c-name, .pay-others .card .c-bal { top: 9px; font-size: 15px; }
+
+  .shake { animation: shake .45s; }
+  @keyframes shake { 20%,60% { transform: translateX(-10px); } 40%,80% { transform: translateX(10px); } }
+
+  .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 30px); transform: translate(-50%, 30px); background: rgba(30,30,30,.92); color: #fff; padding: 10px 16px; border-radius: 20px; font-size: 14px; opacity: 0; transition: .3s; z-index: 80; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1 id="title">Wallet</h1>
+    <button class="plus" id="addBtn" aria-label="Karte hinzufügen">
+      <svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="stack" id="stack"></div>
+</div>
+
+<div class="side-zone" id="sideZone"></div>
+
+<!-- Card detail -->
+<div class="screen" id="detail">
+  <div class="screen-inner">
+    <div class="nav"><button id="detailBack">‹ Wallet</button><button class="done" id="detailPay">Bezahlen</button></div>
+    <div class="preview" id="detailCard"></div>
+    <div class="group" id="detailInfo"></div>
+    <div class="group">
+      <button class="row action" style="width:100%" id="detailEdit">Karte bearbeiten</button>
+      <button class="row danger" style="width:100%" id="detailDelete">Karte entfernen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / edit sheet -->
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="nav"><button id="sheetCancel">Abbrechen</button><h2 id="sheetTitle">Karte hinzufügen</h2><button class="done" id="sheetSave">Fertig</button></div>
+  <div class="preview" id="preview"></div>
+
+  <div class="group">
+    <div class="field"><label for="fName">Name</label><input id="fName" maxlength="24" placeholder="z. B. Girokonto"></div>
+    <div class="field"><label for="fLast4">Endziffern</label><input id="fLast4" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+    <div class="field"><label for="fBal">Betrag (opt.)</label><input id="fBal" maxlength="14" placeholder="z. B. 11,60 €"></div>
+    <div class="field"><label for="fNet">Netzwerk</label>
+      <select id="fNet">
+        <option value="visa">VISA</option>
+        <option value="mc">Mastercard</option>
+        <option value="amex">AMEX</option>
+        <option value="giro">girocard</option>
+        <option value="none">Keins</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="caption">Farbe</div>
+  <div class="group"><div class="swatches" id="swatches"></div></div>
+
+  <div class="caption">Eigenes Kartenbild</div>
+  <div class="group">
+    <div class="upload-row">
+      <button class="btn" id="uploadBtn">Bild hochladen</button>
+      <button class="btn secondary" id="removeImg" hidden>Bild entfernen</button>
+    </div>
+    <div class="hint">Das Bild wird automatisch auf Kartenformat zugeschnitten und ersetzt Farbe und Text.</div>
+    <input type="file" id="file" accept="image/*" hidden>
+  </div>
+</div>
+
+<!-- Pay mode -->
+<div class="pay" id="pay">
+  <div class="pay-inner">
+    <button class="pay-cancel" id="payCancel">Abbrechen</button>
+    <div class="pay-card-wrap" id="payCard"></div>
+    <div class="pay-status">
+      <div class="glyph" id="glyph">
+        <!-- Face ID -->
+        <svg class="face" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <g class="brackets">
+            <path d="M4 18V10a6 6 0 0 1 6-6h8"/><path d="M42 4h8a6 6 0 0 1 6 6v8"/>
+            <path d="M56 42v8a6 6 0 0 1-6 6h-8"/><path d="M18 56h-8a6 6 0 0 1-6-6v-8"/>
+          </g>
+          <path d="M20 21v5"/><path d="M40 21v5"/>
+          <path d="M31 21v12h-3"/>
+          <path d="M21 41c5 5 13 5 18 0"/>
+        </svg>
+        <!-- spinner ring -->
+        <svg class="ring" viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="30" r="37" stroke="rgba(255,255,255,.18)" stroke-width="2.5"/>
+          <circle cx="30" cy="30" r="37" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="40 200"/>
+        </svg>
+        <!-- success -->
+        <svg class="check" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="30" cy="30" r="27"/>
+          <path d="M18 31l8 8 16-17"/>
+        </svg>
+        <!-- hold near reader -->
+        <svg class="reader" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="12" width="22" height="38" rx="5"/>
+          <path d="M14 16h6"/>
+          <path class="wave" d="M36 24c3 4 3 10 0 14"/>
+          <path class="wave" d="M42 19c5.5 7 5.5 17 0 24"/>
+          <path class="wave" d="M48 14c8 10 8 24 0 34"/>
+        </svg>
+      </div>
+      <div class="pay-label" id="payLabel"></div>
+    </div>
+    <div class="pay-others" id="payOthers"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const KEY = 'wallet.cards.v1';
+  const SWATCHES = [
+    { c: 'linear-gradient(135deg,#1c1c1e,#3a3a3c)', dark: false },
+    { c: 'linear-gradient(135deg,#0a3d91,#2f7be0 60%,#58a6ff)', dark: false },
+    { c: 'linear-gradient(135deg,#1f9d55,#3cc96b)', dark: false },
+    { c: 'linear-gradient(135deg,#5b0f1a,#9b1c2c 55%,#c3343f)', dark: false },
+    { c: 'linear-gradient(135deg,#f6d1e6,#e8b6f0 35%,#bfe3f7 70%,#f7e7a8)', dark: true },
+    { c: 'linear-gradient(135deg,#ececec,#ffffff 50%,#d9d9d9)', dark: true },
+    { c: 'linear-gradient(135deg,#b8860b,#e6c35c 50%,#a87b10)', dark: true },
+    { c: 'linear-gradient(135deg,#5e2ced,#a855f7)', dark: false },
+    { c: 'linear-gradient(135deg,#ff6a00,#ff9f43)', dark: false },
+    { c: 'linear-gradient(135deg,#6e6e73,#a1a1a6 50%,#6e6e73)', dark: false },
+  ];
+  const DEFAULTS = [
+    { name: 'Cash', last4: '', balance: '11,60 €', network: 'none', color: 0 },
+    { name: 'Kreditkarte', last4: '4821', network: 'mc', color: 4 },
+    { name: 'Girokonto', last4: '0937', network: 'giro', color: 5 },
+    { name: 'Freedom', last4: '2210', network: 'visa', color: 1 },
+    { name: 'Debit', last4: '7765', network: 'visa', color: 2 },
+    { name: 'Rewards', last4: '5502', network: 'mc', color: 3 },
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  const uid = () => Math.random().toString(36).slice(2, 10);
+
+  let cards = load();
+  let currentId = null;
+  let editingId = null;
+  let draft = null;
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return DEFAULTS.map((c) => ({ id: uid(), image: null, ...c }));
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(cards)); return true; }
+    catch (e) { toast('Speicher voll – kleineres Bild versuchen'); return false; }
+  }
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function netHTML(n) {
+    if (n === 'visa') return '<span class="net-visa">VISA</span>';
+    if (n === 'mc') return '<span class="net-mc"><i></i><i></i></span>';
+    if (n === 'amex') return '<span class="net-text">AMEX</span>';
+    if (n === 'giro') return '<span class="net-text" style="font-style:italic;text-transform:lowercase">girocard</span>';
+    return '';
+  }
+  function cardHTML(c) {
+    if (c.image) {
+      return `<div class="card" data-id="${c.id}" style="background-image:url('${c.image}')"></div>`;
+    }
+    const sw = SWATCHES[c.color] || SWATCHES[0];
+    return `<div class="card ${sw.dark ? 'dark-text' : ''}" data-id="${c.id}" style="background:${sw.c}">
+      <div class="c-name">${esc(c.name)}</div>
+      ${c.balance ? `<div class="c-bal">${esc(c.balance)}</div>` : ''}
+      ${c.last4 ? `<div class="c-num">•••• ${esc(c.last4)}</div>` : ''}
+      <div class="c-net">${netHTML(c.network)}</div>
+    </div>`;
+  }
+
+  /* ---------- Home ---------- */
+  function render() {
+    const s = $('stack');
+    s.innerHTML = cards.length
+      ? cards.map(cardHTML).join('')
+      : '<div class="empty">Noch keine Karten.<br>Tippe auf + um eine Karte hinzuzufügen.</div>';
+  }
+  $('stack').addEventListener('click', (e) => {
+    const el = e.target.closest('.card'); if (!el) return;
+    openDetail(el.dataset.id);
+  });
+
+  /* ---------- Detail ---------- */
+  function openDetail(id) {
+    const c = cards.find((x) => x.id === id); if (!c) return;
+    currentId = id;
+    $('detailCard').innerHTML = cardHTML(c);
+    const net = { visa: 'VISA', mc: 'Mastercard', amex: 'American Express', giro: 'girocard', none: '—' }[c.network] || '—';
+    $('detailInfo').innerHTML = `
+      <div class="row"><span>Name</span><span class="val">${esc(c.name || '—')}</span></div>
+      <div class="row"><span>Kartennummer</span><span class="val">${c.last4 ? '•••• ' + esc(c.last4) : '—'}</span></div>
+      <div class="row"><span>Netzwerk</span><span class="val">${net}</span></div>
+      ${c.balance ? `<div class="row"><span>Guthaben</span><span class="val">${esc(c.balance)}</span></div>` : ''}`;
+    $('detail').classList.add('open');
+  }
+  $('detailBack').onclick = () => $('detail').classList.remove('open');
+  $('detailPay').onclick = () => openPay(currentId);
+  $('detailEdit').onclick = () => openSheet(currentId);
+  $('detailDelete').onclick = () => {
+    if (!confirm('Diese Karte entfernen?')) return;
+    cards = cards.filter((c) => c.id !== currentId);
+    save(); render();
+    $('detail').classList.remove('open');
+  };
+
+  /* ---------- Add / Edit ---------- */
+  function openSheet(id) {
+    editingId = id || null;
+    const src = id ? cards.find((c) => c.id === id) : null;
+    draft = src ? { ...src } : { id: uid(), name: '', last4: '', balance: '', network: 'visa', color: 1, image: null };
+    $('sheetTitle').textContent = id ? 'Karte bearbeiten' : 'Karte hinzufügen';
+    $('fName').value = draft.name; $('fLast4').value = draft.last4; $('fBal').value = draft.balance || ''; $('fNet').value = draft.network;
+    renderSwatches(); updatePreview();
+    $('backdrop').classList.add('open'); $('sheet').classList.add('open');
+  }
+  function closeSheet() {
+    $('backdrop').classList.remove('open'); $('sheet').classList.remove('open');
+    $('file').value = '';
+  }
+  function renderSwatches() {
+    $('swatches').innerHTML = SWATCHES.map((s, i) =>
+      `<button class="sw ${i === draft.color && !draft.image ? 'sel' : ''}" data-i="${i}" style="background:${s.c}"></button>`).join('');
+  }
+  function updatePreview() {
+    $('preview').innerHTML = cardHTML({ ...draft, name: draft.name || 'Neue Karte' });
+    $('removeImg').hidden = !draft.image;
+  }
+  $('swatches').addEventListener('click', (e) => {
+    const b = e.target.closest('.sw'); if (!b) return;
+    draft.color = +b.dataset.i; draft.image = null;
+    renderSwatches(); updatePreview();
+  });
+  ['fName', 'fLast4', 'fBal', 'fNet'].forEach((id) => $(id).addEventListener('input', () => {
+    if (id === 'fLast4') $(id).value = $(id).value.replace(/\D/g, '').slice(0, 4);
+    draft.name = $('fName').value.trim();
+    draft.last4 = $('fLast4').value;
+    draft.balance = $('fBal').value.trim();
+    draft.network = $('fNet').value;
+    updatePreview();
+  }));
+  $('uploadBtn').onclick = () => $('file').click();
+  $('removeImg').onclick = () => { draft.image = null; renderSwatches(); updatePreview(); };
+  $('file').addEventListener('change', async () => {
+    const f = $('file').files[0]; if (!f) return;
+    try { draft.image = await cropToCard(f); renderSwatches(); updatePreview(); }
+    catch (e) { toast('Bild konnte nicht geladen werden'); }
+  });
+  $('addBtn').onclick = () => openSheet(null);
+  $('sheetCancel').onclick = closeSheet;
+  $('backdrop').onclick = closeSheet;
+  $('sheetSave').onclick = () => {
+    if (!draft.name && !draft.image) { $('fName').focus(); toast('Bitte einen Namen eingeben'); return; }
+    const prev = cards.slice();
+    if (editingId) cards = cards.map((c) => (c.id === editingId ? draft : c));
+    else cards.push(draft);
+    if (!save()) { cards = prev; return; }
+    render(); closeSheet();
+    if (editingId) openDetail(editingId);
+  };
+
+  function cropToCard(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const ratio = 1.586;
+        let sw = img.naturalWidth, sh = sw / ratio;
+        if (sh > img.naturalHeight) { sh = img.naturalHeight; sw = sh * ratio; }
+        const sx = (img.naturalWidth - sw) / 2, sy = (img.naturalHeight - sh) / 2;
+        const w = Math.round(Math.min(900, sw)), h = Math.round(w / ratio);
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(cv.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(); };
+      img.src = url;
+    });
+  }
+
+  /* ---------- Pay mode ---------- */
+  let payToken = 0;
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function openPay(id) {
+    if (!cards.length) { toast('Keine Karten vorhanden'); return; }
+    const sel = cards.find((c) => c.id === id) || cards.find((c) => c.network !== 'none') || cards[0];
+    renderPay(sel.id);
+    $('detail').classList.remove('open');
+    closeSheet();
+    requestAnimationFrame(() => requestAnimationFrame(() => $('pay').classList.add('open')));
+    runAuth();
+  }
+  function renderPay(id) {
+    currentId = id;
+    const c = cards.find((x) => x.id === id);
+    $('payCard').innerHTML = cardHTML(c);
+    $('payOthers').innerHTML = cards.filter((x) => x.id !== id).slice(-5).map(cardHTML).join('');
+  }
+  async function runAuth() {
+    const t = ++payToken;
+    const g = $('glyph'), label = $('payLabel');
+    g.className = 'glyph'; label.textContent = '';
+    await wait(650); if (t !== payToken) return;
+    g.className = 'glyph scanning'; label.textContent = 'Face ID';
+    await wait(1400); if (t !== payToken) return;
+    g.className = 'glyph success'; label.textContent = '';
+    await wait(750); if (t !== payToken) return;
+    g.className = 'glyph ready'; label.textContent = 'Ans Lesegerät halten';
+  }
+  function closePay() {
+    payToken++;
+    $('pay').classList.remove('open');
+    setTimeout(() => { if (!$('pay').classList.contains('open')) $('glyph').className = 'glyph'; }, 400);
+  }
+  $('payCancel').onclick = closePay;
+  $('payOthers').addEventListener('click', (e) => {
+    const el = e.target.closest('.card'); if (!el) return;
+    const wrap = $('payCard');
+    wrap.style.transition = 'transform .25s ease-in'; wrap.style.transform = 'translateY(110vh)';
+    setTimeout(() => {
+      renderPay(el.dataset.id);
+      wrap.style.transition = ''; wrap.style.transform = '';
+      runAuth();
+    }, 250);
+  });
+  // swipe the card down to dismiss
+  (() => {
+    let y0 = null, dy = 0;
+    const w = $('payCard');
+    w.addEventListener('touchstart', (e) => { y0 = e.touches[0].clientY; dy = 0; w.style.transition = 'none'; }, { passive: true });
+    w.addEventListener('touchmove', (e) => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); w.style.transform = `translateY(${dy}px)`; }, { passive: true });
+    w.addEventListener('touchend', () => {
+      w.style.transition = ''; w.style.transform = '';
+      if (dy > 120) closePay();
+      y0 = null;
+    });
+  })();
+
+  /* ---------- Secret double-tap trigger ---------- */
+  function onDoubleTap(el, fn) {
+    let last = 0;
+    el.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - last < 350) { e.preventDefault(); last = 0; fn(); } else last = now;
+    });
+    el.addEventListener('dblclick', fn); // desktop testing
+  }
+  onDoubleTap($('sideZone'), () => openPay(null));
+  onDoubleTap($('title'), () => openPay(null));
+  document.addEventListener('keydown', (e) => { if (e.key === 'p') openPay(null); if (e.key === 'Escape') closePay(); });
+
+  render();
+})();
+</script>
+</body>
+</html>
