@@ -123,55 +123,35 @@
   /* Secret trigger zone (where the side button sits) */
   .side-zone { position: fixed; top: 80px; right: 0; width: 34px; height: 260px; z-index: 15; }
 
-  /* ---------- Pay mode ---------- */
-  .pay { position: fixed; inset: 0; z-index: 50; color: #fff; visibility: hidden; }
+  /* ---------- Pay mode (measured from a real iOS screen recording, 390pt wide) ---------- */
+  .pay { position: fixed; inset: 0; z-index: 50; visibility: hidden; overflow: hidden; --cw: calc(min(100vw, 480px) - 36px); }
   .pay.open { visibility: visible; }
   .pay-bg {
     position: absolute; inset: 0; opacity: 0; will-change: opacity;
-    background: rgba(0,0,0,.93);
-    -webkit-backdrop-filter: blur(28px) saturate(150%); backdrop-filter: blur(28px) saturate(150%);
+    background: rgba(242,242,247,.975);
+    -webkit-backdrop-filter: blur(30px) saturate(160%); backdrop-filter: blur(30px) saturate(160%);
   }
-  .pay-inner { max-width: 480px; margin: 0 auto; height: 100%; position: relative; padding-top: calc(env(safe-area-inset-top) + 64px); }
-  .pay-cancel { position: absolute; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top) + 56px); opacity: 0; } /* invisible tap area to close */
-  .pay-card-wrap { display: flex; justify-content: center; will-change: transform; transform: translateY(110vh); }
+  .pay-inner { max-width: 480px; margin: 0 auto; height: 100%; position: relative; }
+  .pay-close { position: absolute; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top) + 12px); }
+  .pay-card-wrap { position: absolute; left: 18px; top: max(62px, calc(env(safe-area-inset-top) + 15px)); will-change: transform; z-index: 2; }
   .pay-drag { will-change: transform; }
-  .pay-card-wrap .card { box-shadow: 0 18px 40px rgba(0,0,0,.45), 0 0 0 .5px rgba(255,255,255,.15); }
+  .pay .card { border-radius: 13px; box-shadow: 0 10px 28px -8px rgba(0,0,0,.28), 0 0 0 .5px rgba(0,0,0,.08); }
+  .pay .card::after { display: none; }
 
-  .pay-status { height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; opacity: 0; }
-  .pay-label { font-size: 17px; font-weight: 500; min-height: 22px; text-align: center; will-change: opacity, transform; }
-
-  .glyph { width: 74px; height: 74px; position: relative; }
-  .glyph svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .glyph > svg {
-    opacity: 0; transform: scale(.7); transform-origin: 50% 50%; will-change: transform, opacity;
-    transition: opacity .22s ease, transform var(--spring-d, .5s) var(--spring, cubic-bezier(.2,.9,.25,1.05));
+  .pay-status {
+    position: absolute; left: 0; right: 0;
+    top: calc(max(62px, calc(env(safe-area-inset-top) + 15px)) + var(--ch) + 47px);
+    display: flex; flex-direction: column; align-items: center;
   }
-  .glyph.face .face, .glyph.scanning .ring, .glyph.success .check, .glyph.ready .reader { opacity: 1; transform: none; }
-  .glyph.scanning .face { opacity: 0; transform: scale(.55); }
-  .glyph.success .ring { opacity: 0; transform: scale(1.15); }
-  .glyph.ready .check { opacity: 0; transform: scale(.8); }
+  .pay-label { margin-top: 28px; font-size: 17px; color: #86868b; letter-spacing: -.2px; min-height: 22px; text-align: center; will-change: opacity; }
 
-  .glyph .face .brackets { transform-origin: 30px 30px; transition: transform .45s cubic-bezier(.3,0,.2,1); }
-  .glyph.scanning .face .brackets { transform: rotate(90deg) scale(.8); }
-  .ring .spin { transform-origin: 30px 30px; animation: spin .9s linear infinite; }
+  .glyph { width: 64px; height: 64px; position: relative; }
+  .glyph svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .glyph .g { opacity: 0; transform-box: view-box; transform-origin: 32px 32px; will-change: transform, opacity; }
+  .glyph .face { color: #b4b4ba; }
 
-  .check circle, .check path { stroke-dasharray: 1; stroke-dashoffset: 1; }
-  .glyph.success .check circle, .glyph.ready .check circle { stroke-dashoffset: 0; transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1); }
-  .glyph.success .check path, .glyph.ready .check path { stroke-dashoffset: 0; transition: stroke-dashoffset .35s .28s cubic-bezier(.4,0,.2,1); }
-
-  .reader .wave { opacity: 0; }
-  .glyph.ready .reader .wave { animation: wave 1.6s ease-out infinite; }
-  .glyph.ready .reader .wave:nth-of-type(2) { animation-delay: .22s; }
-  .glyph.ready .reader .wave:nth-of-type(3) { animation-delay: .44s; }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes wave { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
-
-  .pay-others { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 10px); display: flex; flex-direction: column; align-items: center; }
-  .pay-others .card { height: 50px; margin-top: -14px; border-radius: 12px; will-change: transform; transform: translateY(70vh); }
-  .pay-others .card:first-child { margin-top: 0; }
-  .pay-others .card .c-num, .pay-others .card .c-net { display: none; }
-  .pay-others .card .c-name, .pay-others .card .c-bal { top: 9px; font-size: 15px; }
+  .pay-peek { position: absolute; left: 18px; top: calc(100% - 69px); z-index: 1; will-change: transform; }
+  .pay-peek .card { transform-origin: top center; }
 
   .shake { animation: shake .45s; }
   @keyframes shake { 20%,60% { transform: translateX(-10px); } 40%,80% { transform: translateX(10px); } }
@@ -246,42 +226,45 @@
 <div class="pay" id="pay">
   <div class="pay-bg" id="payBg"></div>
   <div class="pay-inner">
-    <button class="pay-cancel" id="payCancel" aria-label="Schließen"></button>
+    <button class="pay-close" id="payCancel" aria-label="Schließen"></button>
     <div class="pay-card-wrap" id="payCard"><div class="pay-drag" id="payDrag"></div></div>
     <div class="pay-status" id="payStatus">
       <div class="glyph" id="glyph">
-        <!-- Face ID -->
-        <svg class="face" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <g class="brackets">
-            <path d="M4 18V10a6 6 0 0 1 6-6h8"/><path d="M42 4h8a6 6 0 0 1 6 6v8"/>
-            <path d="M56 42v8a6 6 0 0 1-6 6h-8"/><path d="M18 56h-8a6 6 0 0 1-6-6v-8"/>
+        <svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <defs>
+            <linearGradient id="gyro" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#5ee3e0"/><stop offset=".5" stop-color="#2f8cff"/><stop offset="1" stop-color="#b07cff"/>
+            </linearGradient>
+            <clipPath id="circleClip"><circle cx="32" cy="32" r="29.5"/></clipPath>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>
+          </defs>
+          <!-- Face ID glyph -->
+          <g class="g face" id="gFace" stroke="currentColor" stroke-width="3">
+            <path d="M6 19v-6a7 7 0 0 1 7-7h6"/><path d="M45 6h6a7 7 0 0 1 7 7v6"/>
+            <path d="M58 45v6a7 7 0 0 1-7 7h-6"/><path d="M19 58h-6a7 7 0 0 1-7-7v-6"/>
+            <path d="M22 23v4"/><path d="M42 23v4"/>
+            <path d="M33 23v11h-2.5"/>
+            <path d="M23 42c5 4.5 13 4.5 18 0"/>
           </g>
-          <path d="M20 21v5"/><path d="M40 21v5"/>
-          <path d="M31 21v12h-3"/>
-          <path d="M21 41c5 5 13 5 18 0"/>
-        </svg>
-        <!-- spinner ring -->
-        <svg class="ring" viewBox="0 0 60 60" fill="none">
-          <circle cx="30" cy="30" r="27" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
-          <circle class="spin" cx="30" cy="30" r="27" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="38 200"/>
-        </svg>
-        <!-- success -->
-        <svg class="check" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="30" cy="30" r="27" pathLength="1" transform="rotate(-90 30 30)"/>
-          <path d="M18 31l8 8 16-17" pathLength="1"/>
-        </svg>
-        <!-- hold near reader -->
-        <svg class="reader" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="6" y="12" width="22" height="38" rx="5"/>
-          <path d="M14 16h6"/>
-          <path class="wave" d="M36 24c3 4 3 10 0 14"/>
-          <path class="wave" d="M42 19c5.5 7 5.5 17 0 24"/>
-          <path class="wave" d="M48 14c8 10 8 24 0 34"/>
+          <!-- gyroscope rings (the Face ID "spin") -->
+          <g class="g" id="gGlow" filter="url(#glow)" stroke="url(#gyro)" stroke-width="4" opacity="0">
+            <circle cx="32" cy="32" r="28"/>
+          </g>
+          <ellipse class="g" id="gRingA" cx="32" cy="32" rx="28" ry="28" stroke="url(#gyro)" stroke-width="3"/>
+          <ellipse class="g" id="gRingB" cx="32" cy="32" rx="28" ry="28" stroke="url(#gyro)" stroke-width="3"/>
+          <!-- final ring + phone -->
+          <circle class="g" id="gCircle" cx="32" cy="32" r="30.5" stroke="#007aff" stroke-width="3.3"/>
+          <g clip-path="url(#circleClip)">
+            <g class="g" id="gPhone">
+              <rect x="20.5" y="13" width="23" height="40" rx="5.5" fill="rgba(0,122,255,.16)" stroke="#007aff" stroke-width="2.6"/>
+              <rect x="27.5" y="14.6" width="9" height="3" rx="1.5" fill="#007aff"/>
+            </g>
+          </g>
         </svg>
       </div>
       <div class="pay-label" id="payLabel"></div>
     </div>
-    <div class="pay-others" id="payOthers"></div>
+    <div class="pay-peek" id="payPeek"></div>
   </div>
 </div>
 
@@ -484,10 +467,12 @@
     pts[64] = 1;
     return { duration: Math.round(T * 1000), easing: LINEAR_OK ? `linear(${pts.join(', ')})` : fallback };
   }
-  const SPRING_CARD = spring({ stiffness: 190, damping: 21 });    // card flying in, tiny overshoot
-  const SPRING_STACK = spring({ stiffness: 210, damping: 25 });   // card stack at the bottom
+  const SPRING_DROP = spring({ stiffness: 300, damping: 27 });    // card dropping in from the top
+  const SPRING_PEEK = spring({ stiffness: 260, damping: 28 });    // next card rising at the bottom
+  const SPRING_SWAP = spring({ stiffness: 170, damping: 24 });    // cards swapping places
   const SPRING_SNAP = spring({ stiffness: 400, damping: 30 });    // snap back after drag
-  const SPRING_UI = spring({ stiffness: 320, damping: 24 });      // glyph / sheets
+  const SPRING_POP = spring({ stiffness: 420, damping: 22 });     // glyph pops
+  const SPRING_UI = spring({ stiffness: 320, damping: 30 });      // sheets / screens
   const OUT = 'cubic-bezier(.4,0,1,1)';
   document.documentElement.style.setProperty('--spring', SPRING_UI.easing);
   document.documentElement.style.setProperty('--spring-d', SPRING_UI.duration + 'ms');
@@ -495,10 +480,12 @@
   /* ---------- Pay mode ---------- */
   let payToken = 0;
   let payOpen = false;
+  let peekId = null;
   let anims = [];
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const pay = $('pay'), bg = $('payBg'), wrap = $('payCard'), drag = $('payDrag'),
-    others = $('payOthers'), status = $('payStatus'), cancelBtn = $('payCancel'), glyph = $('glyph'), label = $('payLabel');
+  const pay = $('pay'), bg = $('payBg'), wrap = $('payCard'), drag = $('payDrag'), peek = $('payPeek'),
+    status = $('payStatus'), label = $('payLabel');
+  const G = { face: $('gFace'), glow: $('gGlow'), a: $('gRingA'), b: $('gRingB'), circle: $('gCircle'), phone: $('gPhone') };
 
   function play(el, frames, opts) {
     const a = el.animate(frames, { fill: 'both', ...opts });
@@ -506,6 +493,7 @@
     return a;
   }
   function stopAll() { anims.forEach((a) => a.cancel()); anims = []; }
+  const offTop = () => -(wrap.offsetTop + wrap.offsetHeight + 30);
 
   function openPay(id) {
     if (!cards.length) { toast('Keine Karten vorhanden'); return; }
@@ -515,88 +503,124 @@
     renderPay(sel.id);
     $('detail').classList.remove('open');
     closeSheet();
-    stopAll();
+    stopAll(); resetGlyph();
     pay.classList.add('open');
-    $('themeColor').content = '#000';
-    play(bg, [{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2,0,0,1)' });
-    play(wrap, [{ transform: 'translateY(105vh) scale(.94)' }, { transform: 'translateY(0) scale(1)' }], SPRING_CARD);
-    [...others.children].forEach((el, i) =>
-      play(el, [{ transform: 'translateY(70vh)' }, { transform: 'translateY(0)' }], { ...SPRING_STACK, delay: 70 + i * 28 }));
-    play(cancelBtn, [{ opacity: 0 }, { opacity: 1 }], { duration: 250, delay: 180, easing: 'ease-out' });
-    play(status, [{ opacity: 0 }, { opacity: 1 }], { duration: 250, delay: 160, easing: 'ease-out' });
-    runAuth(380);
+    play(bg, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.2,0,0,1)' });
+    play(wrap, [{ transform: `translateY(${offTop()}px)` }, { transform: 'translateY(0)' }], { ...SPRING_DROP, delay: 90 });
+    play(peek, [{ transform: 'translateY(90px)' }, { transform: 'translateY(0)' }], { ...SPRING_PEEK, delay: 140 });
+    runAuth(200);
   }
 
   function renderPay(id) {
     currentId = id;
     const c = cards.find((x) => x.id === id);
     drag.innerHTML = cardHTML(c);
-    others.innerHTML = cards.filter((x) => x.id !== id).slice(-5).map(cardHTML).join('');
+    const rest = cards.filter((x) => x.id !== id);
+    const next = rest[0] || null;
+    peekId = next ? next.id : null;
+    peek.innerHTML = next ? cardHTML(next) : '';
   }
 
-  function setLabel(text) {
-    if (label.textContent === text) return;
-    if (!label.textContent) { label.textContent = text; label.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'ease-out' }); return; }
-    const a = label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
-    a.onfinish = () => {
+  /* Face ID → ring → "hold near reader", frame-matched to the recording */
+  function resetGlyph() {
+    Object.values(G).forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+    label.getAnimations().forEach((a) => a.cancel());
+    label.textContent = ''; label.style.opacity = '';
+  }
+  function g(el, frames, opts) { return el.animate(frames, { fill: 'both', ...opts }); }
+  function showLabel(text, delay = 0) {
+    label.getAnimations().forEach((a) => a.cancel());
+    const out = label.animate([{ opacity: label.textContent ? 1 : 0 }, { opacity: 0 }], { duration: 160, delay, fill: 'forwards', easing: 'ease-in' });
+    out.onfinish = () => {
       label.textContent = text;
-      a.cancel();
-      if (text) label.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'ease-out' });
+      out.cancel();
+      label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, fill: 'both', easing: 'ease-out' });
     };
   }
 
   async function runAuth(delay = 0) {
     const t = ++payToken;
-    glyph.className = 'glyph'; label.textContent = '';
+    resetGlyph();
     await wait(delay); if (t !== payToken) return;
-    glyph.className = 'glyph face'; setLabel('Face ID');
-    await wait(420); if (t !== payToken) return;
-    glyph.className = 'glyph scanning';
-    await wait(1150); if (t !== payToken) return;
-    glyph.className = 'glyph success'; setLabel('');
+
+    // 1. grey Face ID glyph fades in, then turns blue (≈ 0–140 ms)
+    g(G.face, [
+      { opacity: 0, transform: 'scale(.92)', color: '#b4b4ba' },
+      { opacity: 1, transform: 'scale(1)', color: '#b4b4ba', offset: .35 },
+      { opacity: 1, transform: 'scale(1)', color: '#4f86e8' },
+    ], { duration: 260, easing: 'ease-out' });
+    label.textContent = 'Face ID';
+    label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: 'both', easing: 'ease-out' });
+    await wait(300); if (t !== payToken) return;
+
+    // 2. glyph glows and dissolves into two spinning rings (gyroscope)
+    g(G.face, [
+      { opacity: 1, transform: 'scale(1)', color: '#4f86e8', filter: 'blur(0px)' },
+      { opacity: .8, transform: 'scale(1.02)', color: '#3fb8f0', filter: 'blur(.8px)', offset: .4 },
+      { opacity: 0, transform: 'scale(.86)', color: '#3fb8f0', filter: 'blur(2px)' },
+    ], { duration: 260, easing: 'ease-in-out' });
+    g(G.glow, [{ opacity: 0 }, { opacity: .9, offset: .45 }, { opacity: 0 }], { duration: 520, delay: 60, easing: 'ease-in-out' });
+    g(G.a, [
+      { opacity: 0, transform: 'rotate(-30deg) scaleX(1)' },
+      { opacity: 1, transform: 'rotate(40deg) scaleX(.42)', offset: .35 },
+      { opacity: 1, transform: 'rotate(130deg) scaleX(.55)', offset: .65 },
+      { opacity: 0, transform: 'rotate(180deg) scaleX(1)' },
+    ], { duration: 520, delay: 90, easing: 'cubic-bezier(.3,0,.3,1)' });
+    g(G.b, [
+      { opacity: 0, transform: 'rotate(60deg) scaleY(1)' },
+      { opacity: 1, transform: 'rotate(-10deg) scaleY(.4)', offset: .35 },
+      { opacity: 1, transform: 'rotate(-100deg) scaleY(.6)', offset: .65 },
+      { opacity: 0, transform: 'rotate(-150deg) scaleY(1)' },
+    ], { duration: 520, delay: 90, easing: 'cubic-bezier(.3,0,.3,1)' });
+    // 3. rings settle into one clean blue circle
+    g(G.circle, [{ opacity: 0, transform: 'scale(1.08)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 300, delay: 420, easing: 'cubic-bezier(.2,.8,.2,1)' });
     await wait(900); if (t !== payToken) return;
-    glyph.className = 'glyph ready'; setLabel('Ans Lesegerät halten');
+
+    // 4. label fades, phone rises into the circle, new label
+    label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards', easing: 'ease-in' }).onfinish = () => {
+      if (t !== payToken) return;
+      label.getAnimations().forEach((a) => a.cancel());
+      label.textContent = 'An das Lesegerät halten';
+      label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: 'both', easing: 'ease-out' });
+    };
+    g(G.phone, [{ opacity: 1, transform: 'translateY(46px)' }, { opacity: 1, transform: 'translateY(0)' }], { ...SPRING_POP, delay: 120 });
   }
 
   async function closePay() {
     if (!payOpen) return;
     payOpen = false;
     payToken++;
-    const dur = 300;
     const from = getComputedStyle(drag).transform;
     stopAll();
-    play(drag, [{ transform: from === 'none' ? 'none' : from }, { transform: 'translateY(0)' }], { duration: 0 });
-    const a = play(wrap, [{ transform: 'translateY(0)' }, { transform: 'translateY(105vh)' }], { duration: dur, easing: OUT });
-    [...others.children].reverse().forEach((el, i) =>
-      play(el, [{ transform: 'translateY(0)' }, { transform: 'translateY(70vh)' }], { duration: dur, delay: i * 18, easing: OUT }));
-    play(status, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-in' });
-    play(cancelBtn, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-in' });
-    play(bg, [{ opacity: 1 }, { opacity: 0 }], { duration: dur + 60, delay: 60, easing: 'ease-in-out' });
+    if (from && from !== 'none') play(drag, [{ transform: from }, { transform: from }], { duration: 0 });
+    const a = play(wrap, [{ transform: 'translateY(0)' }, { transform: `translateY(${offTop()}px)` }], { duration: 280, easing: OUT });
+    play(peek, [{ transform: 'translateY(0)' }, { transform: 'translateY(100px)' }], { duration: 240, easing: OUT });
+    play(status, [{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: 'ease-in' });
+    play(bg, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: 120, easing: 'ease-in-out' });
     await a.finished.catch(() => {});
-    await wait(120);
+    await wait(110);
     if (payOpen) return;
-    stopAll();
+    stopAll(); resetGlyph();
     drag.style.transform = '';
     pay.classList.remove('open');
-    $('themeColor').content = '#f2f2f7';
-    glyph.className = 'glyph'; label.textContent = '';
   }
-  cancelBtn.onclick = closePay;
+  $('payCancel').onclick = closePay;
 
-  // switch card: current one drops, new one springs up, Face ID runs again
-  others.addEventListener('click', (e) => {
-    const el = e.target.closest('.card'); if (!el || !payOpen) return;
-    payToken++;
-    glyph.className = 'glyph'; setLabel('');
-    const down = wrap.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(105vh)' }], { duration: 220, easing: OUT, fill: 'forwards' });
-    anims.push(down);
-    down.onfinish = () => {
-      if (!payOpen) return;
-      renderPay(el.dataset.id);
-      play(wrap, [{ transform: 'translateY(105vh) scale(.94)' }, { transform: 'translateY(0) scale(1)' }], SPRING_CARD);
-      [...others.children].forEach((c, i) => play(c, [{ transform: 'translateY(30px)' }, { transform: 'translateY(0)' }], { ...SPRING_STACK, delay: i * 20 }));
-      runAuth(250);
-    };
+  // tap the peeking card: it rises to the top while the current one slides down
+  peek.addEventListener('click', () => {
+    if (!payOpen || !peekId) return;
+    const oldId = currentId;
+    const dist = peek.offsetTop - wrap.offsetTop;
+    payToken++; resetGlyph();
+    [wrap, peek].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+    renderPay(peekId);
+    // show the previous card in the peek slot, then let both travel
+    peekId = oldId; peek.innerHTML = cardHTML(cards.find((c) => c.id === oldId));
+    peek.style.zIndex = 3;
+    play(wrap, [{ transform: `translateY(${dist}px)` }, { transform: 'translateY(0)' }], SPRING_SWAP);
+    const down = play(peek, [{ transform: `translateY(${-dist}px)` }, { transform: 'translateY(0)' }], { ...SPRING_SWAP, delay: 60 });
+    down.finished.then(() => { peek.style.zIndex = ''; }).catch(() => {});
+    runAuth(380);
   });
 
   // swipe the card down to dismiss (follows the finger, rubber-bands upward)
