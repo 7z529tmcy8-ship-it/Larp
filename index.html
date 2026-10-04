@@ -77,7 +77,7 @@
   /* ---------- Screens & sheets ---------- */
   .screen {
     position: fixed; inset: 0; background: var(--bg); z-index: 20;
-    transform: translateX(100%); transition: transform .38s cubic-bezier(.2,.8,.2,1);
+    transform: translateX(100%); transition: transform var(--spring-d, .45s) var(--spring, cubic-bezier(.2,.8,.2,1));
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   .screen.open { transform: none; }
@@ -100,7 +100,7 @@
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 31;
     max-width: 480px; margin: 0 auto; max-height: 94vh; overflow-y: auto;
     background: var(--bg); border-radius: 12px 12px 0 0;
-    transform: translateY(100%); transition: transform .4s cubic-bezier(.2,.8,.2,1);
+    transform: translateY(100%); transition: transform var(--spring-d, .45s) var(--spring, cubic-bezier(.2,.8,.2,1));
     padding: 0 16px calc(env(safe-area-inset-bottom) + 24px);
   }
   .sheet.open { transform: none; }
@@ -124,55 +124,51 @@
   .side-zone { position: fixed; top: 80px; right: 0; width: 34px; height: 260px; z-index: 15; }
 
   /* ---------- Pay mode ---------- */
-  .pay {
-    position: fixed; inset: 0; z-index: 50; color: #fff;
-    background: rgba(28,28,30,.0);
-    -webkit-backdrop-filter: blur(0px); backdrop-filter: blur(0px);
-    pointer-events: none; transition: background .35s, backdrop-filter .35s, -webkit-backdrop-filter .35s;
+  .pay { position: fixed; inset: 0; z-index: 50; color: #fff; visibility: hidden; }
+  .pay.open { visibility: visible; }
+  .pay-bg {
+    position: absolute; inset: 0; opacity: 0; will-change: opacity;
+    background: rgba(14,14,16,.8);
+    -webkit-backdrop-filter: blur(28px) saturate(150%); backdrop-filter: blur(28px) saturate(150%);
   }
-  .pay.open { background: rgba(18,18,20,.82); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%); pointer-events: auto; }
   .pay-inner { max-width: 480px; margin: 0 auto; height: 100%; position: relative; padding-top: calc(env(safe-area-inset-top) + 64px); }
-  .pay-cancel { position: absolute; top: calc(env(safe-area-inset-top) + 14px); left: 18px; font-size: 17px; color: #fff; opacity: 0; transition: opacity .3s .2s; }
-  .pay.open .pay-cancel { opacity: 1; }
-  .pay-card-wrap { display: flex; justify-content: center; transform: translateY(110vh); transition: transform .55s cubic-bezier(.17,.89,.3,1.08); }
-  .pay.open .pay-card-wrap { transform: none; }
+  .pay-cancel { position: absolute; top: calc(env(safe-area-inset-top) + 14px); left: 18px; font-size: 17px; color: #fff; opacity: 0; }
+  .pay-card-wrap { display: flex; justify-content: center; will-change: transform; transform: translateY(110vh); }
+  .pay-drag { will-change: transform; }
   .pay-card-wrap .card { box-shadow: 0 18px 40px rgba(0,0,0,.45), 0 0 0 .5px rgba(255,255,255,.15); }
 
-  .pay-status { height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; opacity: 0; transition: opacity .3s .25s; }
-  .pay.open .pay-status { opacity: 1; }
-  .pay-label { font-size: 17px; font-weight: 500; min-height: 22px; text-align: center; }
+  .pay-status { height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; opacity: 0; }
+  .pay-label { font-size: 17px; font-weight: 500; min-height: 22px; text-align: center; will-change: opacity, transform; }
 
   .glyph { width: 74px; height: 74px; position: relative; }
   .glyph svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .glyph .face, .glyph .ring, .glyph .check, .glyph .reader { transition: opacity .25s, transform .35s cubic-bezier(.2,.8,.2,1); transform-origin: 50% 50%; }
-  .glyph .ring, .glyph .check, .glyph .reader { opacity: 0; }
+  .glyph > svg {
+    opacity: 0; transform: scale(.7); transform-origin: 50% 50%; will-change: transform, opacity;
+    transition: opacity .22s ease, transform var(--spring-d, .5s) var(--spring, cubic-bezier(.2,.9,.25,1.05));
+  }
+  .glyph.face .face, .glyph.scanning .ring, .glyph.success .check, .glyph.ready .reader { opacity: 1; transform: none; }
+  .glyph.scanning .face { opacity: 0; transform: scale(.55); }
+  .glyph.success .ring { opacity: 0; transform: scale(1.15); }
+  .glyph.ready .check { opacity: 0; transform: scale(.8); }
 
-  .glyph.scanning .face { animation: facePulse 1s ease-in-out infinite; }
-  .glyph.scanning .face .brackets { animation: bracketsIn 1s ease-in-out infinite; transform-origin: 30px 30px; }
-  .glyph.scanning .ring { opacity: 1; animation: spin 1s linear infinite; }
+  .glyph .face .brackets { transform-origin: 30px 30px; transition: transform .45s cubic-bezier(.3,0,.2,1); }
+  .glyph.scanning .face .brackets { transform: rotate(90deg) scale(.8); }
+  .ring .spin { transform-origin: 30px 30px; animation: spin .9s linear infinite; }
 
-  .glyph.success .face { opacity: 0; transform: scale(.6); }
-  .glyph.success .check { opacity: 1; }
-  .glyph.success .check path { animation: draw .45s .05s ease-out forwards; }
-  .glyph.success .check circle { animation: draw .45s ease-out forwards; }
+  .check circle, .check path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .glyph.success .check circle, .glyph.ready .check circle { stroke-dashoffset: 0; transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1); }
+  .glyph.success .check path, .glyph.ready .check path { stroke-dashoffset: 0; transition: stroke-dashoffset .35s .28s cubic-bezier(.4,0,.2,1); }
 
-  .glyph.ready .face, .glyph.ready .check { opacity: 0; }
-  .glyph.ready .reader { opacity: 1; }
-  .glyph.ready .reader .wave { animation: wave 1.6s ease-out infinite; opacity: 0; }
-  .glyph.ready .reader .wave:nth-of-type(2) { animation-delay: .25s; }
-  .glyph.ready .reader .wave:nth-of-type(3) { animation-delay: .5s; }
-
-  .check circle, .check path { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .reader .wave { opacity: 0; }
+  .glyph.ready .reader .wave { animation: wave 1.6s ease-out infinite; }
+  .glyph.ready .reader .wave:nth-of-type(2) { animation-delay: .22s; }
+  .glyph.ready .reader .wave:nth-of-type(3) { animation-delay: .44s; }
 
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes facePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(.94); } }
-  @keyframes bracketsIn { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-  @keyframes draw { to { stroke-dashoffset: 0; } }
   @keyframes wave { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
 
-  .pay-others { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 10px); display: flex; flex-direction: column; align-items: center; transform: translateY(60vh); transition: transform .6s .08s cubic-bezier(.17,.89,.3,1.04); }
-  .pay.open .pay-others { transform: none; }
-  .pay-others .card { height: 50px; margin-top: -14px; border-radius: 12px; transform-origin: top center; }
+  .pay-others { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 10px); display: flex; flex-direction: column; align-items: center; }
+  .pay-others .card { height: 50px; margin-top: -14px; border-radius: 12px; will-change: transform; transform: translateY(70vh); }
   .pay-others .card:first-child { margin-top: 0; }
   .pay-others .card .c-num, .pay-others .card .c-net { display: none; }
   .pay-others .card .c-name, .pay-others .card .c-bal { top: 9px; font-size: 15px; }
@@ -248,10 +244,11 @@
 
 <!-- Pay mode -->
 <div class="pay" id="pay">
+  <div class="pay-bg" id="payBg"></div>
   <div class="pay-inner">
     <button class="pay-cancel" id="payCancel">Abbrechen</button>
-    <div class="pay-card-wrap" id="payCard"></div>
-    <div class="pay-status">
+    <div class="pay-card-wrap" id="payCard"><div class="pay-drag" id="payDrag"></div></div>
+    <div class="pay-status" id="payStatus">
       <div class="glyph" id="glyph">
         <!-- Face ID -->
         <svg class="face" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -265,13 +262,13 @@
         </svg>
         <!-- spinner ring -->
         <svg class="ring" viewBox="0 0 60 60" fill="none">
-          <circle cx="30" cy="30" r="37" stroke="rgba(255,255,255,.18)" stroke-width="2.5"/>
-          <circle cx="30" cy="30" r="37" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="40 200"/>
+          <circle cx="30" cy="30" r="27" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
+          <circle class="spin" cx="30" cy="30" r="27" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="38 200"/>
         </svg>
         <!-- success -->
         <svg class="check" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="30" cy="30" r="27"/>
-          <path d="M18 31l8 8 16-17"/>
+          <circle cx="30" cy="30" r="27" pathLength="1" transform="rotate(-90 30 30)"/>
+          <path d="M18 31l8 8 16-17" pathLength="1"/>
         </svg>
         <!-- hold near reader -->
         <svg class="reader" viewBox="0 0 60 60" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
@@ -469,66 +466,161 @@
     });
   }
 
+  /* ---------- Spring physics (iOS-like) ---------- */
+  // Builds a CSS linear() easing that samples a real damped spring, so the
+  // motion has the same weight and slight overshoot as UIKit animations.
+  const LINEAR_OK = window.CSS && CSS.supports && CSS.supports('transition-timing-function', 'linear(0, 1)');
+  function spring({ stiffness = 200, damping = 22, mass = 1 } = {}, fallback = 'cubic-bezier(.2,.9,.25,1.05)') {
+    const w0 = Math.sqrt(stiffness / mass), z = damping / (2 * Math.sqrt(stiffness * mass));
+    const wd = w0 * Math.sqrt(Math.max(1e-6, 1 - z * z));
+    const x = (t) => z < 1
+      ? 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t))
+      : 1 - (1 + w0 * t) * Math.exp(-w0 * t);
+    let T = 0;
+    for (let t = 0; t < 4; t += 1 / 240) if (Math.abs(1 - x(t)) > 0.0015) T = t;
+    T += 1 / 60;
+    const pts = [];
+    for (let i = 0; i <= 64; i++) pts.push(+x((T * i) / 64).toFixed(4));
+    pts[64] = 1;
+    return { duration: Math.round(T * 1000), easing: LINEAR_OK ? `linear(${pts.join(', ')})` : fallback };
+  }
+  const SPRING_CARD = spring({ stiffness: 190, damping: 21 });    // card flying in, tiny overshoot
+  const SPRING_STACK = spring({ stiffness: 210, damping: 25 });   // card stack at the bottom
+  const SPRING_SNAP = spring({ stiffness: 400, damping: 30 });    // snap back after drag
+  const SPRING_UI = spring({ stiffness: 320, damping: 24 });      // glyph / sheets
+  const OUT = 'cubic-bezier(.4,0,1,1)';
+  document.documentElement.style.setProperty('--spring', SPRING_UI.easing);
+  document.documentElement.style.setProperty('--spring-d', SPRING_UI.duration + 'ms');
+
   /* ---------- Pay mode ---------- */
   let payToken = 0;
+  let payOpen = false;
+  let anims = [];
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const pay = $('pay'), bg = $('payBg'), wrap = $('payCard'), drag = $('payDrag'),
+    others = $('payOthers'), status = $('payStatus'), cancelBtn = $('payCancel'), glyph = $('glyph'), label = $('payLabel');
+
+  function play(el, frames, opts) {
+    const a = el.animate(frames, { fill: 'both', ...opts });
+    anims.push(a);
+    return a;
+  }
+  function stopAll() { anims.forEach((a) => a.cancel()); anims = []; }
 
   function openPay(id) {
     if (!cards.length) { toast('Keine Karten vorhanden'); return; }
-    const sel = cards.find((c) => c.id === id) || cards.find((c) => c.network !== 'none') || cards[0];
+    if (payOpen) return;
+    payOpen = true;
+    const sel = cards.find((c) => c.id === id) || cards[0]; // top card of the stack
     renderPay(sel.id);
     $('detail').classList.remove('open');
     closeSheet();
-    requestAnimationFrame(() => requestAnimationFrame(() => $('pay').classList.add('open')));
-    runAuth();
+    stopAll();
+    pay.classList.add('open');
+    play(bg, [{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2,0,0,1)' });
+    play(wrap, [{ transform: 'translateY(105vh) scale(.94)' }, { transform: 'translateY(0) scale(1)' }], SPRING_CARD);
+    [...others.children].forEach((el, i) =>
+      play(el, [{ transform: 'translateY(70vh)' }, { transform: 'translateY(0)' }], { ...SPRING_STACK, delay: 70 + i * 28 }));
+    play(cancelBtn, [{ opacity: 0 }, { opacity: 1 }], { duration: 250, delay: 180, easing: 'ease-out' });
+    play(status, [{ opacity: 0 }, { opacity: 1 }], { duration: 250, delay: 160, easing: 'ease-out' });
+    runAuth(380);
   }
+
   function renderPay(id) {
     currentId = id;
     const c = cards.find((x) => x.id === id);
-    $('payCard').innerHTML = cardHTML(c);
-    $('payOthers').innerHTML = cards.filter((x) => x.id !== id).slice(-5).map(cardHTML).join('');
+    drag.innerHTML = cardHTML(c);
+    others.innerHTML = cards.filter((x) => x.id !== id).slice(-5).map(cardHTML).join('');
   }
-  async function runAuth() {
+
+  function setLabel(text) {
+    if (label.textContent === text) return;
+    if (!label.textContent) { label.textContent = text; label.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'ease-out' }); return; }
+    const a = label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
+    a.onfinish = () => {
+      label.textContent = text;
+      a.cancel();
+      if (text) label.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'ease-out' });
+    };
+  }
+
+  async function runAuth(delay = 0) {
     const t = ++payToken;
-    const g = $('glyph'), label = $('payLabel');
-    g.className = 'glyph'; label.textContent = '';
-    await wait(650); if (t !== payToken) return;
-    g.className = 'glyph scanning'; label.textContent = 'Face ID';
-    await wait(1400); if (t !== payToken) return;
-    g.className = 'glyph success'; label.textContent = '';
-    await wait(750); if (t !== payToken) return;
-    g.className = 'glyph ready'; label.textContent = 'Ans Lesegerät halten';
+    glyph.className = 'glyph'; label.textContent = '';
+    await wait(delay); if (t !== payToken) return;
+    glyph.className = 'glyph face'; setLabel('Face ID');
+    await wait(420); if (t !== payToken) return;
+    glyph.className = 'glyph scanning';
+    await wait(1150); if (t !== payToken) return;
+    glyph.className = 'glyph success'; setLabel('');
+    await wait(900); if (t !== payToken) return;
+    glyph.className = 'glyph ready'; setLabel('Ans Lesegerät halten');
   }
-  function closePay() {
+
+  async function closePay() {
+    if (!payOpen) return;
+    payOpen = false;
     payToken++;
-    $('pay').classList.remove('open');
-    setTimeout(() => { if (!$('pay').classList.contains('open')) $('glyph').className = 'glyph'; }, 400);
+    const dur = 300;
+    const from = getComputedStyle(drag).transform;
+    stopAll();
+    play(drag, [{ transform: from === 'none' ? 'none' : from }, { transform: 'translateY(0)' }], { duration: 0 });
+    const a = play(wrap, [{ transform: 'translateY(0)' }, { transform: 'translateY(105vh)' }], { duration: dur, easing: OUT });
+    [...others.children].reverse().forEach((el, i) =>
+      play(el, [{ transform: 'translateY(0)' }, { transform: 'translateY(70vh)' }], { duration: dur, delay: i * 18, easing: OUT }));
+    play(status, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-in' });
+    play(cancelBtn, [{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-in' });
+    play(bg, [{ opacity: 1 }, { opacity: 0 }], { duration: dur + 60, delay: 60, easing: 'ease-in-out' });
+    await a.finished.catch(() => {});
+    await wait(120);
+    if (payOpen) return;
+    stopAll();
+    drag.style.transform = '';
+    pay.classList.remove('open');
+    glyph.className = 'glyph'; label.textContent = '';
   }
-  $('payCancel').onclick = closePay;
-  $('payOthers').addEventListener('click', (e) => {
-    const el = e.target.closest('.card'); if (!el) return;
-    const wrap = $('payCard');
-    wrap.style.transition = 'transform .25s ease-in'; wrap.style.transform = 'translateY(110vh)';
-    setTimeout(() => {
+  cancelBtn.onclick = closePay;
+
+  // switch card: current one drops, new one springs up, Face ID runs again
+  others.addEventListener('click', (e) => {
+    const el = e.target.closest('.card'); if (!el || !payOpen) return;
+    payToken++;
+    glyph.className = 'glyph'; setLabel('');
+    const down = wrap.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(105vh)' }], { duration: 220, easing: OUT, fill: 'forwards' });
+    anims.push(down);
+    down.onfinish = () => {
+      if (!payOpen) return;
       renderPay(el.dataset.id);
-      wrap.style.transition = ''; wrap.style.transform = '';
-      runAuth();
-    }, 250);
+      play(wrap, [{ transform: 'translateY(105vh) scale(.94)' }, { transform: 'translateY(0) scale(1)' }], SPRING_CARD);
+      [...others.children].forEach((c, i) => play(c, [{ transform: 'translateY(30px)' }, { transform: 'translateY(0)' }], { ...SPRING_STACK, delay: i * 20 }));
+      runAuth(250);
+    };
   });
-  // swipe the card down to dismiss
+
+  // swipe the card down to dismiss (follows the finger, rubber-bands upward)
   (() => {
-    let y0 = null, dy = 0;
-    const w = $('payCard');
-    w.addEventListener('touchstart', (e) => { y0 = e.touches[0].clientY; dy = 0; w.style.transition = 'none'; }, { passive: true });
-    w.addEventListener('touchmove', (e) => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); w.style.transform = `translateY(${dy}px)`; }, { passive: true });
-    w.addEventListener('touchend', () => {
-      w.style.transition = ''; w.style.transform = '';
-      if (dy > 120) closePay();
+    let y0 = null, dy = 0, t0 = 0, snap = null;
+    drag.addEventListener('touchstart', (e) => {
+      if (snap) { snap.cancel(); snap = null; }
+      y0 = e.touches[0].clientY; dy = 0; t0 = Date.now();
+    }, { passive: true });
+    drag.addEventListener('touchmove', (e) => {
+      if (y0 == null) return;
+      const d = e.touches[0].clientY - y0;
+      dy = d > 0 ? d : -Math.sqrt(-d) * 3; // resistance when pulled up
+      drag.style.transform = `translateY(${dy}px)`;
+    }, { passive: true });
+    drag.addEventListener('touchend', () => {
+      if (y0 == null) return;
+      const v = dy / Math.max(1, Date.now() - t0); // px per ms
       y0 = null;
+      if (dy > 140 || (dy > 40 && v > 0.6)) { closePay(); return; }
+      snap = drag.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }], SPRING_SNAP);
+      drag.style.transform = '';
     });
   })();
 
-  /* ---------- Secret double-tap trigger ---------- */
+  /* ---------- Triggers ---------- */
   function onDoubleTap(el, fn) {
     let last = 0;
     el.addEventListener('touchend', (e) => {
@@ -541,7 +633,19 @@
   onDoubleTap($('title'), () => openPay(null));
   document.addEventListener('keydown', (e) => { if (e.key === 'p') openPay(null); if (e.key === 'Escape') closePay(); });
 
+  // URL trigger: …/index.html#pay opens pay mode directly.
+  // Used by an iOS Shortcut bound to Back Tap / Action Button (see README).
+  function checkHash() {
+    if (location.hash === '#pay') {
+      history.replaceState(null, '', location.pathname + location.search);
+      setTimeout(() => openPay(null), 60);
+    }
+  }
+  window.addEventListener('hashchange', checkHash);
+  window.addEventListener('pageshow', checkHash);
+
   render();
+  checkHash();
 })();
 </script>
 </body>
