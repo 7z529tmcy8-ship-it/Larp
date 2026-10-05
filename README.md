@@ -17,3 +17,9 @@ Websites können die Lautstärketasten nicht abfragen. Stattdessen:
 
 Hinweis: Der Kurzbefehl öffnet die Seite in Safari. Karten deshalb auch in Safari anlegen –
 Safari und die Home-Bildschirm-Version haben getrennten Speicher.
+
+## Fake-Home-Bildschirm
+
+Wallet → „⋯“ → Screenshot vom Home-Bildschirm hochladen → „Jetzt anzeigen“ (oder „Beim Öffnen anzeigen“).
+Doppeltippen irgendwo öffnet Apple Pay, oben links 2 Sek. gedrückt halten führt zurück zur Wallet.
+Am besten als Home-Bildschirm-App starten (Vollbild), damit der Screenshot exakt passt.

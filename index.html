@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Wallet">
 <meta name="theme-color" content="#f2f2f7" id="themeColor">
 <link rel="apple-touch-icon" href="icon.png">
@@ -121,6 +121,35 @@
   .hint { color: var(--muted); font-size: 13px; padding: 0 16px 12px; line-height: 1.35; }
 
   /* Secret trigger zone (where the side button sits) */
+  /* Header buttons */
+  .hbtns { display: flex; gap: 10px; }
+  .more { width: 32px; height: 32px; border-radius: 50%; background: rgba(120,120,128,.16); display: grid; place-items: center; }
+  .more svg { width: 18px; height: 18px; }
+
+  /* iOS switch */
+  .switch { position: relative; width: 51px; height: 31px; flex: none; -webkit-appearance: none; appearance: none; margin: 0;
+    background: rgba(120,120,128,.16); border-radius: 16px; transition: background .25s; cursor: pointer; }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.16); transition: transform .25s cubic-bezier(.3,.7,.3,1.2); }
+  .switch:checked { background: var(--green); }
+  .switch:checked::after { transform: translateX(20px); }
+  .home-thumb { width: 64px; height: 138px; border-radius: 10px; background: #ddd center/cover; box-shadow: 0 0 0 .5px rgba(0,0,0,.15); flex: none; }
+  .home-row { display: flex; gap: 14px; align-items: center; padding: 14px 16px; }
+  .home-row .btns { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .home-row .btn { flex: none; height: 38px; font-size: 15px; }
+  .field input.switch { flex: none; width: 51px; text-align: left; }
+
+  /* Fake home screen (a screenshot of the real one) */
+  .fake-home { position: fixed; inset: 0; z-index: 40; background: #000 top center / cover no-repeat; display: none; touch-action: manipulation; }
+  .fake-home.show { display: block; }
+  .fake-exit { position: absolute; top: 0; left: 0; width: 90px; height: 90px; }
+
+  /* "Pay with passcode" after a failed Face ID */
+  .pay-code { position: absolute; left: 0; right: 0; bottom: 96px; margin: 0 auto; width: max-content; padding: 10px 18px;
+    font-size: 17px; color: #007aff; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .pay-code.show { opacity: 1; pointer-events: auto; }
+  .pay-status.retry { cursor: pointer; }
+
   .side-zone { position: fixed; top: 80px; right: 0; width: 34px; height: 260px; z-index: 15; }
 
   /* ---------- Pay mode (measured from a real iOS screen recording, 390pt wide) ---------- */
@@ -165,9 +194,14 @@
 <div class="app">
   <div class="header">
     <h1 id="title">Wallet</h1>
-    <button class="plus" id="addBtn" aria-label="Karte hinzufügen">
-      <svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
-    </button>
+    <div class="hbtns">
+      <button class="plus" id="addBtn" aria-label="Karte hinzufügen">
+        <svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="more" id="setBtn" aria-label="Einstellungen">
+        <svg viewBox="0 0 18 18" fill="#000"><circle cx="3.5" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="14.5" cy="9" r="1.6"/></svg>
+      </button>
+    </div>
   </div>
   <div class="stack" id="stack"></div>
 </div>
@@ -186,6 +220,34 @@
     </div>
   </div>
 </div>
+
+<!-- Settings sheet -->
+<div class="sheet" id="settings">
+  <div class="nav"><span style="width:80px"></span><h2>Einstellungen</h2><button class="done" id="setDone" style="width:80px;text-align:right">Fertig</button></div>
+
+  <div class="caption">Fake-Home-Bildschirm</div>
+  <div class="group">
+    <div class="home-row">
+      <div class="home-thumb" id="homeThumb"></div>
+      <div class="btns">
+        <button class="btn" id="homeUpload">Screenshot hochladen</button>
+        <button class="btn" id="homeShow">Jetzt anzeigen</button>
+        <button class="btn secondary" id="homeRemove" hidden>Entfernen</button>
+      </div>
+    </div>
+    <div class="field"><label style="width:auto;flex:1">Beim Öffnen anzeigen</label><input type="checkbox" class="switch" id="homeOnStart"></div>
+    <input type="file" id="homeFile" accept="image/*" hidden>
+  </div>
+  <div class="hint" style="padding-top:8px">Mach einen Screenshot von deinem Home-Bildschirm und lade ihn hier hoch. Im Fake-Home: <b>Doppeltippen</b> irgendwo = Apple Pay. <b>Oben links 2 Sek. gedrückt halten</b> = zurück zur Wallet.</div>
+
+  <div class="caption">Face ID</div>
+  <div class="group">
+    <div class="field"><label style="width:auto;flex:1">Erster Versuch schlägt fehl</label><input type="checkbox" class="switch" id="failFirst"></div>
+  </div>
+  <div class="hint" style="padding-top:8px">Face ID wackelt beim ersten Mal und klappt erst nach einem Tipp aufs Symbol oder auf „Mit Code bezahlen“.</div>
+</div>
+
+<div class="fake-home" id="fakeHome"><div class="fake-exit" id="fakeExit"></div></div>
 
 <!-- Add / edit sheet -->
 <div class="backdrop" id="backdrop"></div>
@@ -264,6 +326,7 @@
       </div>
       <div class="pay-label" id="payLabel"></div>
     </div>
+    <button class="pay-code" id="payCode">Mit Code bezahlen</button>
     <div class="pay-peek" id="payPeek"></div>
   </div>
 </div>
@@ -479,6 +542,7 @@
 
   /* ---------- Pay mode ---------- */
   let payToken = 0;
+  let failNext = false;
   let payOpen = false;
   let peekId = null;
   let anims = [];
@@ -504,6 +568,7 @@
     $('detail').classList.remove('open');
     closeSheet();
     stopAll(); resetGlyph();
+    failNext = settings.failFirst;
     pay.classList.add('open');
     play(bg, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.2,0,0,1)' });
     play(wrap, [{ transform: `translateY(${offTop()}px)` }, { transform: 'translateY(0)' }], { ...SPRING_DROP, delay: 90 });
@@ -523,6 +588,8 @@
 
   /* Face ID → ring → "hold near reader", frame-matched to the recording */
   function resetGlyph() {
+    status.classList.remove('retry');
+    $('payCode').classList.remove('show');
     Object.values(G).forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
     label.getAnimations().forEach((a) => a.cancel());
     label.textContent = ''; label.style.opacity = '';
@@ -552,6 +619,26 @@
     label.textContent = 'Face ID';
     label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: 'both', easing: 'ease-out' });
     await wait(300); if (t !== payToken) return;
+
+    if (failNext) {
+      // Face ID "doesn't recognise" her: glyph shakes and greys out
+      failNext = false;
+      await wait(550); if (t !== payToken) return;
+      g(G.face, [
+        { opacity: 1, transform: 'translateX(0)', color: '#4f86e8' },
+        { transform: 'translateX(-10px)', offset: .14 },
+        { transform: 'translateX(9px)', offset: .32 },
+        { transform: 'translateX(-7px)', offset: .5 },
+        { transform: 'translateX(4px)', offset: .68 },
+        { transform: 'translateX(-2px)', offset: .84 },
+        { opacity: 1, transform: 'translateX(0)', color: '#b4b4ba' },
+      ], { duration: 560, easing: 'linear' });
+      await wait(600); if (t !== payToken) return;
+      showLabel('Erneut versuchen');
+      status.classList.add('retry');
+      $('payCode').classList.add('show');
+      return;
+    }
 
     // 2. glyph glows and dissolves into two spinning rings (gyroscope)
     g(G.face, [
@@ -605,6 +692,9 @@
     pay.classList.remove('open');
   }
   $('payCancel').onclick = closePay;
+  const retry = () => { if (payOpen && status.classList.contains('retry')) runAuth(0); };
+  status.addEventListener('click', retry);
+  $('payCode').addEventListener('click', retry);
 
   // tap the peeking card: it rises to the top while the current one slides down
   peek.addEventListener('click', () => {
@@ -646,6 +736,85 @@
     });
   })();
 
+  /* ---------- Settings & fake home screen ---------- */
+  const SKEY = 'wallet.settings.v1', HKEY = 'wallet.home.v1';
+  let settings = { failFirst: false, homeOnStart: false };
+  try { settings = { ...settings, ...JSON.parse(localStorage.getItem(SKEY) || '{}') }; } catch (e) {}
+  let homeImg = null;
+  try { homeImg = localStorage.getItem(HKEY); } catch (e) {}
+  const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch (e) {} };
+
+  function syncSettingsUI() {
+    $('failFirst').checked = settings.failFirst;
+    $('homeOnStart').checked = settings.homeOnStart;
+    $('homeThumb').style.backgroundImage = homeImg ? `url('${homeImg}')` : '';
+    $('homeRemove').hidden = !homeImg;
+    $('homeShow').disabled = !homeImg;
+    $('homeShow').style.opacity = homeImg ? 1 : .4;
+  }
+  $('setBtn').onclick = () => { syncSettingsUI(); $('backdrop').classList.add('open'); $('settings').classList.add('open'); };
+  const closeSettings = () => { $('backdrop').classList.remove('open'); $('settings').classList.remove('open'); };
+  $('setDone').onclick = closeSettings;
+  $('backdrop').addEventListener('click', closeSettings);
+  $('failFirst').onchange = (e) => { settings.failFirst = e.target.checked; saveSettings(); };
+  $('homeOnStart').onchange = (e) => { settings.homeOnStart = e.target.checked; saveSettings(); };
+  $('homeUpload').onclick = () => $('homeFile').click();
+  $('homeRemove').onclick = () => {
+    homeImg = null; settings.homeOnStart = false; saveSettings();
+    try { localStorage.removeItem(HKEY); } catch (e) {}
+    syncSettingsUI();
+  };
+  $('homeShow').onclick = () => { if (!homeImg) return; closeSettings(); showFakeHome(); };
+  $('homeFile').addEventListener('change', async () => {
+    const f = $('homeFile').files[0]; $('homeFile').value = ''; if (!f) return;
+    try {
+      const data = await prepHomeShot(f);
+      localStorage.setItem(HKEY, data);
+      homeImg = data; syncSettingsUI();
+    } catch (e) { toast('Bild zu groß oder nicht lesbar'); }
+  });
+
+  // Scale the screenshot down and paint over its (frozen) status bar, so the
+  // real, live status bar of the phone is the only one visible on top.
+  function prepHomeShot(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const w = Math.min(1179, img.naturalWidth), h = Math.round(img.naturalHeight * (w / img.naturalWidth));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const sb = Math.round(w * 0.14);              // status bar height (≈ 54pt on a 390pt screen)
+        const tiny = document.createElement('canvas'); tiny.width = 12; tiny.height = 4;
+        // blur = downscale the wallpaper strip just below the status bar, then upscale
+        tiny.getContext('2d').drawImage(cv, 0, sb, w, Math.round(sb * .3), 0, 0, 12, 4);
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(tiny, 0, 0, 12, 4, 0, 0, w, sb + 2);
+        URL.revokeObjectURL(url);
+        let q = .82, out = cv.toDataURL('image/jpeg', q);
+        while (out.length > 1500000 && q > .4) { q -= .1; out = cv.toDataURL('image/jpeg', q); }
+        resolve(out);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(); };
+      img.src = url;
+    });
+  }
+
+  function showFakeHome() {
+    if (!homeImg) return;
+    const fh = $('fakeHome');
+    fh.style.backgroundImage = `url('${homeImg}')`;
+    fh.classList.add('show');
+  }
+  function hideFakeHome() { $('fakeHome').classList.remove('show'); }
+  (() => {
+    let timer = null;
+    const ex = $('fakeExit');
+    ex.addEventListener('touchstart', () => { timer = setTimeout(() => { hideFakeHome(); toast('Fake-Home beendet'); }, 2000); }, { passive: true });
+    ['touchend', 'touchcancel', 'touchmove'].forEach((ev) => ex.addEventListener(ev, () => clearTimeout(timer)));
+  })();
+
   /* ---------- Triggers ---------- */
   function onDoubleTap(el, fn) {
     let last = 0;
@@ -656,6 +825,7 @@
     el.addEventListener('dblclick', fn); // desktop testing
   }
   onDoubleTap($('sideZone'), () => openPay(null));
+  onDoubleTap($('fakeHome'), () => openPay(null));
   onDoubleTap($('title'), () => openPay(null));
   document.addEventListener('keydown', (e) => { if (e.key === 'p') openPay(null); if (e.key === 'Escape') closePay(); });
 
@@ -671,6 +841,7 @@
   window.addEventListener('pageshow', checkHash);
 
   render();
+  if (settings.homeOnStart && homeImg) showFakeHome();
   checkHash();
 })();
 </script>
