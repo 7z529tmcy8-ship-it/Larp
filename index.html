@@ -144,7 +144,6 @@
   /* Fake home screen (a screenshot of the real one) */
   .fake-home { position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); z-index: 40; background: #000 top center / cover no-repeat; display: none; touch-action: manipulation; }
   .fake-home.show { display: block; }
-  .fake-exit { position: absolute; top: 0; left: 0; width: 90px; height: 90px; }
 
   /* "Pay with passcode" after a failed Face ID */
   .pay-code { position: absolute; left: 0; right: 0; bottom: 96px; margin: 0 auto; width: max-content; padding: 10px 18px;
@@ -181,8 +180,8 @@
   .glyph .g { opacity: 0; transform-box: view-box; transform-origin: 32px 32px; will-change: transform, opacity; }
   .glyph .face { color: #b4b4ba; }
 
-  .pay-peek { position: absolute; left: 18px; top: calc(100% - 69px); z-index: 1; will-change: transform; }
-  .pay-peek .card { transform-origin: top center; }
+  .pay-peek { position: absolute; left: 18px; top: calc(100% - 69px - var(--pn, 0) * 15px); z-index: 1; will-change: transform; }
+  .peek-item { position: absolute; left: 0; top: 0; will-change: transform; }
 
   .shake { animation: shake .45s; }
   @keyframes shake { 20%,60% { transform: translateX(-10px); } 40%,80% { transform: translateX(10px); } }
@@ -240,7 +239,7 @@
     <div class="field"><label style="width:auto;flex:1">Beim Öffnen anzeigen</label><input type="checkbox" class="switch" id="homeOnStart"></div>
     <input type="file" id="homeFile" accept="image/*" hidden>
   </div>
-  <div class="hint" style="padding-top:8px">Mach einen Screenshot von deinem Home-Bildschirm und lade ihn hier hoch. Im Fake-Home: <b>Doppeltippen</b> irgendwo = Apple Pay. <b>Oben links 2 Sek. gedrückt halten</b> = zurück zur Wallet.</div>
+  <div class="hint" style="padding-top:8px">Mach einen Screenshot von deinem Home-Bildschirm und lade ihn hier hoch. Im Fake-Home: <b>Doppeltippen</b> irgendwo = Apple Pay. <b>Irgendwo 1 Sek. gedrückt halten</b> = zurück zur Wallet.</div>
 
   <div class="caption">Face ID</div>
   <div class="group">
@@ -249,7 +248,7 @@
   <div class="hint" style="padding-top:8px">Face ID wackelt beim ersten Mal und klappt erst nach einem Tipp aufs Symbol oder auf „Mit Code bezahlen“.</div>
 </div>
 
-<div class="fake-home" id="fakeHome"><div class="fake-exit" id="fakeExit"></div></div>
+<div class="fake-home" id="fakeHome"></div>
 
 <!-- Add / edit sheet -->
 <div class="backdrop" id="backdrop"></div>
@@ -546,7 +545,6 @@
   let payToken = 0;
   let failNext = false;
   let payOpen = false;
-  let peekId = null;
   let anims = [];
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const pay = $('pay'), bg = $('payBg'), wrap = $('payCard'), drag = $('payDrag'), peek = $('payPeek'),
@@ -574,7 +572,9 @@
     pay.classList.add('open');
     play(bg, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.2,0,0,1)' });
     play(wrap, [{ transform: `translateY(${offTop()}px)` }, { transform: 'translateY(0)' }], { ...SPRING_DROP, delay: 90 });
-    play(peek, [{ transform: 'translateY(90px)' }, { transform: 'translateY(0)' }], { ...SPRING_PEEK, delay: 140 });
+    play(peek, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)' }], { duration: 0 });
+    [...peek.children].forEach((el, i) =>
+      play(el, [{ transform: `translateY(${110 + i * 12}px)` }, { transform: 'translateY(0)' }], { ...SPRING_PEEK, delay: 130 + i * 30 }));
     runAuth(200);
   }
 
@@ -583,9 +583,9 @@
     const c = cards.find((x) => x.id === id);
     drag.innerHTML = cardHTML(c);
     const rest = cards.filter((x) => x.id !== id);
-    const next = rest[0] || null;
-    peekId = next ? next.id : null;
-    peek.innerHTML = next ? cardHTML(next) : '';
+    peek.style.setProperty('--pn', Math.max(0, rest.length - 1));
+    peek.innerHTML = rest.map((x, i) =>
+      `<div class="peek-item" data-id="${x.id}" style="top:${i * 15}px">${cardHTML(x)}</div>`).join('');
   }
 
   /* Face ID → ring → "hold near reader", frame-matched to the recording */
@@ -698,20 +698,26 @@
   status.addEventListener('click', retry);
   $('payCode').addEventListener('click', retry);
 
-  // tap the peeking card: it rises to the top while the current one slides down
-  peek.addEventListener('click', () => {
-    if (!payOpen || !peekId) return;
+  // tap a card in the bottom stack: it rises to the top, the current one drops into the stack
+  peek.addEventListener('click', (e) => {
+    const item = e.target.closest('.peek-item');
+    if (!payOpen || !item) return;
+    const top = (el) => el.getBoundingClientRect().top;
+    const before = { [currentId]: top(wrap) };
+    [...peek.children].forEach((el) => { before[el.dataset.id] = top(el); });
     const oldId = currentId;
-    const dist = peek.offsetTop - wrap.offsetTop;
     payToken++; resetGlyph();
-    [wrap, peek].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
-    renderPay(peekId);
-    // show the previous card in the peek slot, then let both travel
-    peekId = oldId; peek.innerHTML = cardHTML(cards.find((c) => c.id === oldId));
-    peek.style.zIndex = 3;
-    play(wrap, [{ transform: `translateY(${dist}px)` }, { transform: 'translateY(0)' }], SPRING_SWAP);
-    const down = play(peek, [{ transform: `translateY(${-dist}px)` }, { transform: 'translateY(0)' }], { ...SPRING_SWAP, delay: 60 });
-    down.finished.then(() => { peek.style.zIndex = ''; }).catch(() => {});
+    [wrap, peek, ...peek.children].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+    renderPay(item.dataset.id);
+    peek.style.zIndex = 3; // the card going down passes in front, like on iOS
+    play(wrap, [{ transform: `translateY(${before[currentId] - top(wrap)}px)` }, { transform: 'translateY(0)' }], SPRING_SWAP);
+    let last;
+    [...peek.children].forEach((el) => {
+      const d = before[el.dataset.id] - top(el);
+      last = play(el, [{ transform: `translateY(${d}px)` }, { transform: 'translateY(0)' }],
+        { ...SPRING_SWAP, delay: el.dataset.id === oldId ? 60 : 0 });
+    });
+    if (last) last.finished.then(() => { peek.style.zIndex = ''; }).catch(() => {});
     runAuth(380);
   });
 
@@ -825,17 +831,31 @@
   }
   function hideFakeHome() { $('fakeHome').classList.remove('show'); document.documentElement.classList.remove('fh'); }
   (() => {
-    let timer = null;
-    const ex = $('fakeExit');
-    ex.addEventListener('touchstart', () => { timer = setTimeout(() => { hideFakeHome(); toast('Fake-Home beendet'); }, 2000); }, { passive: true });
-    ['touchend', 'touchcancel', 'touchmove'].forEach((ev) => ex.addEventListener(ev, () => clearTimeout(timer)));
+    const fh = $('fakeHome');
+    let timer = null, x0 = 0, y0 = 0;
+    const cancel = () => { clearTimeout(timer); timer = null; };
+    const exit = () => { cancel(); hideFakeHome(); toast('Bearbeitungsmodus'); };
+    fh.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 1) return cancel();
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+      timer = setTimeout(exit, 1000);
+    }, { passive: true });
+    fh.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      if (Math.hypot(t.clientX - x0, t.clientY - y0) > 12) cancel();
+    }, { passive: true });
+    fh.addEventListener('touchend', cancel);
+    fh.addEventListener('touchcancel', cancel);
+    fh.addEventListener('contextmenu', (e) => { e.preventDefault(); exit(); }); // desktop: right click
   })();
 
   /* ---------- Triggers ---------- */
   function onDoubleTap(el, fn) {
-    let last = 0;
+    let last = 0, down = 0;
+    el.addEventListener('touchstart', () => { down = Date.now(); }, { passive: true });
     el.addEventListener('touchend', (e) => {
       const now = Date.now();
+      if (now - down > 300) { last = 0; return; } // was a long press
       if (now - last < 350) { e.preventDefault(); last = 0; fn(); } else last = now;
     });
     el.addEventListener('dblclick', fn); // desktop testing
