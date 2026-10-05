@@ -26,6 +26,8 @@
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; height: 100%; }
+  html { background: var(--bg); }
+  html.fh { background: #000; }
   body {
     background: var(--bg);
     color: var(--fg);
@@ -76,7 +78,7 @@
 
   /* ---------- Screens & sheets ---------- */
   .screen {
-    position: fixed; inset: 0; background: var(--bg); z-index: 20;
+    position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); background: var(--bg); z-index: 20;
     transform: translateX(100%); transition: transform var(--spring-d, .45s) var(--spring, cubic-bezier(.2,.8,.2,1));
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
@@ -94,14 +96,14 @@
   .row.action { color: var(--blue); justify-content: center; }
   .caption { color: var(--muted); font-size: 13px; text-transform: uppercase; margin: 0 16px -14px; }
 
-  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 30; }
+  .backdrop { position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 30; }
   .backdrop.open { opacity: 1; pointer-events: auto; }
   .sheet {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 31;
+    position: fixed; left: 0; right: 0; bottom: calc(-1 * var(--gap, 0px)); z-index: 31;
     max-width: 480px; margin: 0 auto; max-height: 94vh; overflow-y: auto;
     background: var(--bg); border-radius: 12px 12px 0 0;
     transform: translateY(100%); transition: transform var(--spring-d, .45s) var(--spring, cubic-bezier(.2,.8,.2,1));
-    padding: 0 16px calc(env(safe-area-inset-bottom) + 24px);
+    padding: 0 16px calc(env(safe-area-inset-bottom) + 24px + var(--gap, 0px));
   }
   .sheet.open { transform: none; }
   .sheet .nav { position: sticky; top: 0; background: var(--bg); z-index: 2; padding-top: 8px; height: 52px; }
@@ -140,7 +142,7 @@
   .field input.switch { flex: none; width: 51px; text-align: left; }
 
   /* Fake home screen (a screenshot of the real one) */
-  .fake-home { position: fixed; inset: 0; z-index: 40; background: #000 top center / cover no-repeat; display: none; touch-action: manipulation; }
+  .fake-home { position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); z-index: 40; background: #000 top center / cover no-repeat; display: none; touch-action: manipulation; }
   .fake-home.show { display: block; }
   .fake-exit { position: absolute; top: 0; left: 0; width: 90px; height: 90px; }
 
@@ -153,7 +155,7 @@
   .side-zone { position: fixed; top: 80px; right: 0; width: 34px; height: 260px; z-index: 15; }
 
   /* ---------- Pay mode (measured from a real iOS screen recording, 390pt wide) ---------- */
-  .pay { position: fixed; inset: 0; z-index: 50; visibility: hidden; overflow: hidden; --cw: calc(min(100vw, 480px) - 36px); }
+  .pay { position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); z-index: 50; visibility: hidden; overflow: hidden; --cw: calc(min(100vw, 480px) - 36px); }
   .pay.open { visibility: visible; }
   .pay-bg {
     position: absolute; inset: 0; opacity: 0; will-change: opacity;
@@ -736,6 +738,19 @@
     });
   })();
 
+  /* ---------- Home-screen app viewport fix ----------
+     iOS home-screen apps with a translucent status bar report a viewport that
+     is shorter than the screen, which leaves an empty strip at the bottom.
+     Measure the missing height once and let full-screen layers extend into it. */
+  function fixViewport() {
+    const standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+    const portraitH = Math.max(screen.height, screen.width);
+    const gap = standalone && innerHeight < innerWidth * 3 ? Math.max(0, Math.min(80, portraitH - innerHeight)) : 0;
+    document.documentElement.style.setProperty('--gap', gap + 'px');
+  }
+  fixViewport();
+  addEventListener('orientationchange', () => setTimeout(fixViewport, 400));
+
   /* ---------- Settings & fake home screen ---------- */
   const SKEY = 'wallet.settings.v1', HKEY = 'wallet.home.v1';
   let settings = { failFirst: false, homeOnStart: false };
@@ -806,8 +821,9 @@
     const fh = $('fakeHome');
     fh.style.backgroundImage = `url('${homeImg}')`;
     fh.classList.add('show');
+    document.documentElement.classList.add('fh');
   }
-  function hideFakeHome() { $('fakeHome').classList.remove('show'); }
+  function hideFakeHome() { $('fakeHome').classList.remove('show'); document.documentElement.classList.remove('fh'); }
   (() => {
     let timer = null;
     const ex = $('fakeExit');
