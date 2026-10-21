@@ -72,6 +72,7 @@
   .ptitle h1.norm { text-transform: none; }
   .sub { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; text-align: center; margin: 14px 0 6px; }
   .note { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .ta { width: 100%; border: 0; outline: 0; border-radius: 16px; background: var(--panel); color: var(--txt); padding: 12px 16px; font: inherit; font-size: 16px; resize: vertical; }
 
   /* ---------- pills ---------- */
   .pill { display: block; width: 100%; height: 44px; border-radius: 22px; background: var(--pill); color: var(--pill-txt); font-size: 14px; font-weight: 800; text-transform: uppercase; box-shadow: inset 0 -3px 0 rgba(0,0,0,.16); margin-bottom: 9px; }
@@ -344,7 +345,10 @@
     ['Story', 25000, .22, 'A short film with actors, locations and a twist at the end.'],
     ['Cinematic', 120000, .35, 'Blockbuster budget, drones, cars and a skyline at sunset.'],
   ];
-  const NPC_NAMES = ['Kay Brix', 'Lio Vance', 'MC Salvo', 'Jaye Moon', 'Ricco 7', 'Nyla Grey', 'Baba Zed', 'Toni Faust', 'Kilo Mane', 'Sami Drift', 'Yung Pfand', 'Leni Lux', 'Dari Blue', 'Ozan 44', 'Vex Royal', 'Mona Kash'];
+  const NPC_NAMES = ['yungpalo', '234', 'c4rl', 'djunis', 'toujour', 'fdg', 'ufo361', '6eyno', 'beslik', 'levin liam'];
+  const OLD_NPC = ['Kay Brix', 'Lio Vance', 'MC Salvo', 'Jaye Moon', 'Ricco 7'];
+  const PRICES = [0.99, 1.99, 2.99, 4.99, 7.99, 9.99, 12.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 69.99, 99.99];
+  const ALBUM_PRICE = 9.99;
   const WORDS1 = ['Berlin', 'Nachts', 'Kein', 'Gold', 'Blaue', 'Letzte', 'Mama', 'Paris', 'Benz', 'Hoch', 'Million', 'Block', 'Neon', 'Ghetto', 'Winter', 'Bando'];
   const WORDS2 = ['Lichter', 'Liebe', 'Kette', 'Träume', 'Flex', 'Runde', 'Stadt', 'Pläne', 'Tränen', 'Zeit', 'Gang', 'Regen', 'Wellen', 'Herz', 'Story', 'Drip'];
   const FESTIVALS = [
@@ -394,12 +398,25 @@
      ===================================================================== */
   let S = null;
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Speicher voll – Cover-Bilder verkleinern'); } }
-  function load() { try { const r = localStorage.getItem(KEY); if (r) S = JSON.parse(r); } catch (e) {} }
-
-  function makeNpcs() {
-    return NPC_NAMES.map((n) => ({ name: n, listeners: Math.round(10 ** rnd(4.2, 7.6)), hit: songName() }));
+  function load() {
+    try { const r = localStorage.getItem(KEY); if (r) S = JSON.parse(r); } catch (e) {}
+    if (!S) return;
+    // older saves: swap the made-up artist names for the real ones
+    if (S.npcs.some((n) => OLD_NPC.includes(n.name))) S.npcs = makeNpcs(NPC_NAMES);
+    S.albums.forEach((a) => { if (a.price == null) a.price = ALBUM_PRICE; if (a.sold == null) a.sold = 0; if (a.salesRev == null) a.salesRev = 0; });
+    if (!S.tourPrices) S.tourPrices = TOURS.map((t) => t.price);
+    if (S.earnings.albums == null) S.earnings.albums = 0;
   }
-  function songName() { return Math.random() < .5 ? `${pick(WORDS1)} ${pick(WORDS2)}` : `${pick(WORDS1).toLowerCase()} x ${pick(NPC_NAMES).split(' ')[0].toLowerCase()}`; }
+
+  function makeNpcs(names = NPC_NAMES, keep = []) {
+    return names.map((n) => keep.find((k) => k.name === n) || { name: n, listeners: Math.round(10 ** rnd(5.2, 7.5)), hit: songName(n) });
+  }
+  // with an artist: "<word> x <artist>" like "suv's x djunis"; otherwise a two-word title
+  function songName(artist) {
+    if (artist) return `${pick(WORDS1).toLowerCase()} x ${artist}`;
+    const pool = S && S.npcs ? S.npcs.map((n) => n.name) : NPC_NAMES;
+    return Math.random() < .5 ? `${pick(WORDS1)} ${pick(WORDS2)}` : `${pick(WORDS1).toLowerCase()} x ${pick(pool)}`;
+  }
 
   function newGame(name, rich) {
     S = {
@@ -412,7 +429,8 @@
       trend: 'TRAP', trendWeeks: 6,
       label: null, partner: null, awards: [],
       lastIncome: { streams: 0, label: 0, streamsCount: 0 },
-      earnings: { streams: 0, festivals: 0, tours: 0, jobs: 0 },
+      earnings: { streams: 0, albums: 0, festivals: 0, tours: 0, jobs: 0 },
+      tourPrices: [30, 55, 85, 120],
       lastTour: -99,
     };
     welcomeMail();
@@ -423,7 +441,7 @@
   function makeRich() {
     Object.assign(S, { cash: 442041757, date: '2033-09-16', week: 400, listeners: 35535528, followers: 4200000 });
     Object.assign(S.talents, { studio: 100, charisma: 1, musicality: 100, rhythm: 100, songwriting: 100, virality: 52, video: 48, leadership: 10 });
-    const al = [['Free Sex', 0], ['Berlin Hates You', 2], ['Beeil Dich Wir Werden Erwachsen', 3]].map(([n, c]) => ({ id: uid(), name: n, cover: COVERS[c], week: 380 }));
+    const al = [['Free Sex', 0], ['Berlin Hates You', 2], ['Beeil Dich Wir Werden Erwachsen', 3]].map(([n, c]) => ({ id: uid(), name: n, cover: COVERS[c], week: 380, price: ALBUM_PRICE, sold: 0, salesRev: 0 }));
     S.albums = al;
     const songs = [
       ["suv's x djunis", 0, 73, 1922194699], ['bentayga x toujour', 1, 72, 1400000000], ['work it x fdg', 2, 70, 1300000000],
@@ -437,6 +455,7 @@
       return { id: uid(), title: t, albumId: a == null ? null : al[a].id, quality: q, genre: 'TRAP', feat: null, week: 381 + i + (i > 5 ? 6 : 0),
         streams: st, revenue: st * .001, weekly, debut: Math.round(st / 18), video: null };
     });
+    S.albums.forEach((a) => { a.sold = Math.round(S.songs.filter((x) => x.albumId === a.id).reduce((t, x) => t + x.streams, 0) / 1500); a.salesRev = a.sold * a.price * .7; });
     S.history = Array.from({ length: 52 }, (_, i) => Math.round(25163590 + (i / 51) * 10300000 + rnd(-3e5, 3e5)));
     S.history[51] = S.listeners;
     S.awards = [{ year: 2031, name: 'Song des Jahres', what: "suv's x djunis" }];
@@ -504,6 +523,16 @@
       report.labelCut += gross * (1 - labelShare());
     });
     report.streams = weekTotal;
+    // album sales: demand follows this week's streams of the album's songs, price scares buyers off
+    report.albumSales = 0; report.albumRev = 0;
+    S.albums.forEach((a) => {
+      const sold = albumWeekSales(a, true);
+      if (!sold) return;
+      const rev = sold * a.price * .7 * labelShare(); // 30 % go to the shops
+      a.sold += sold; a.salesRev += rev;
+      report.albumSales += sold; report.albumRev += rev;
+    });
+    S.cash += report.albumRev; S.earnings.albums += report.albumRev;
     S.cash += report.rev;
     S.earnings.streams += report.rev;
 
@@ -527,7 +556,7 @@
       report.events.push(`Neuer Trend: ${S.trend} ist gerade angesagt.`);
     }
     // npc drift
-    S.npcs.forEach((n) => { n.listeners = Math.round(n.listeners * rnd(.96, 1.05)); if (Math.random() < .15) n.hit = songName(); });
+    S.npcs.forEach((n) => { n.listeners = Math.round(n.listeners * rnd(.96, 1.05)); if (Math.random() < .15) n.hit = songName(n.name); });
 
     // awards at new year
     if (yearChanged) awardsCeremony(report);
@@ -801,6 +830,7 @@
         ${S.label ? `<div class="kv"><span>Anteil ${esc(S.label.name)}</span><span style="color:var(--salmon)">−${euro(li.label || 0)}</span></div>` : ''}
         <div class="h3">Karriere gesamt</div>
         <div class="kv"><span>Streaming</span><span>${euro(e.streams)}</span></div>
+        <div class="kv"><span>Album-Verkäufe</span><span>${euro(e.albums || 0)}</span></div>
         <div class="kv"><span>Festivals</span><span>${euro(e.festivals)}</span></div>
         <div class="kv"><span>Touren</span><span>${euro(e.tours)}</span></div>
         <div class="kv"><span>Nebenjobs</span><span>${euro(e.jobs)}</span></div>
@@ -813,6 +843,10 @@
       return `<div class="title">Settings</div>
         <div class="sub" style="text-align:left">Künstlername</div>
         <div class="inp"><input id="setName" maxlength="24" value="${esc(S.name)}"><button data-a="rename" aria-label="Speichern">${IC.plus}</button></div>
+        <div class="h3">Artists im Spiel</div>
+        <p class="note" style="margin:2px 0 8px">Ein Name pro Zeile. Sie tauchen bei Features, im Songboard, bei Artists und in der Inbox auf.</p>
+        <textarea id="artistList" class="ta" rows="7">${esc(S.npcs.map((n) => n.name).join('\n'))}</textarea>
+        <button class="big-btn c-green" data-a="saveArtists">Artists speichern</button>
         <div class="h3">Spielstand</div>
         <div class="kv"><span>Woche</span><span>${S.week}</span></div>
         <div class="kv"><span>Songs / Alben</span><span>${S.songs.length} / ${S.albums.length}</span></div>
@@ -841,6 +875,20 @@
     return S.albums.map((a) => ({ album: a, streams: S.songs.filter((s) => s.albumId === a.id).reduce((x, s) => x + s.streams, 0) })).sort((p, q) => q.streams - p.streams);
   }
   const jobPay = () => 300 + S.week * 4;
+  function albumWeekSales(a, random) {
+    const songs = S.songs.filter((x) => x.albumId === a.id && x.weekly.length);
+    if (!songs.length) return 0;
+    const streams = songs.reduce((t, x) => t + x.weekly[x.weekly.length - 1], 0);
+    const q = songs.reduce((t, x) => t + x.quality, 0) / songs.length;
+    const demand = streams / 900 * (.6 + q / 100) * (ALBUM_PRICE / a.price) ** 1.6;
+    return Math.round(demand * (random ? rnd(.85, 1.15) : 1));
+  }
+  const priceStep = (p, d) => {
+    let i = 0; PRICES.forEach((x, j) => { if (Math.abs(x - p) < Math.abs(PRICES[i] - p)) i = j; });
+    return PRICES[clamp(i + d, 0, PRICES.length - 1)];
+  };
+  const ticketStep = (p, d) => clamp(Math.round(p / 5) * 5 + d * 5, 5, 500);
+  const eur2 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
   /* =====================================================================
      Pushed screens
@@ -888,13 +936,15 @@
     },
 
     newAlbum() {
-      if (!draft) draft = { name: '', cover: COVERS[0] };
+      if (!draft) draft = { name: '', cover: COVERS[0], price: ALBUM_PRICE };
       return pTitle('New Album') + `
         <div class="bigcover" style="background:${coverCss(draft.cover)};background-size:cover;background-position:center"></div>
         <div class="sub">Album name</div>
         <div class="inp"><input id="albumName" maxlength="40" placeholder="Enter an album name" value="${esc(draft.name)}"><button data-a="createAlbum" aria-label="Erstellen">${IC.plus}</button></div>
         <div class="sub">Choose a cover</div>
         <div class="covers">${COVERS.slice(0, 4).map((c, i) => `<button class="${draft.cover === c ? 'on' : ''}" data-a="cover" data-i="${i}" style="background:${c}"></button>`).join('')}</div>
+        <div class="sub" style="margin:0">Album price</div>
+        <div class="sel"><button data-a="draftPrice" data-d="-1" aria-label="billiger">${IC.larr}</button><div class="val"><b>${eur2(draft.price)}</b></div><button data-a="draftPrice" data-d="1" aria-label="teurer">${IC.rarr}</button></div>
         <button class="big-btn c-teal" data-a="createAlbum">Create</button>
         <button class="big-btn c-green" data-a="uploadCover">Upload your own</button>`;
     },
@@ -924,15 +974,22 @@
       const st = albumStats();
       return pTitle('Albums') + (st.length ? st.map(({ album, streams }) => `<button class="srow" data-a="go" data-s="album" data-id="${album.id}">
           <div class="cov" style="background:${coverCss(album.cover)};background-size:cover;background-position:center"></div>
-          <div class="info"><b>${esc(album.name)}</b><small>${S.songs.filter((s) => s.albumId === album.id).length} Songs • ${de(streams)} streams</small></div></button>`).join('')
+          <div class="info"><b>${esc(album.name)}</b><small>${S.songs.filter((s) => s.albumId === album.id).length} Songs • ${compact(streams)} streams • ${compact(album.sold || 0)} sold • ${eur2(album.price)}</small></div></button>`).join('')
         : '<p class="note">Noch keine Alben.</p>') + '<button class="big-btn c-orange" data-a="go" data-s="newAlbum">New Album</button>';
     },
 
     album(p) {
       const a = S.albums.find((x) => x.id === p.id); if (!a) return pTitle('Album');
       const songs = S.songs.filter((s) => s.albumId === a.id);
+      const est = albumWeekSales(a, false);
       return pTitle(a.name, { norm: true }) + `<div class="bigcover" style="width:180px;height:180px;background:${coverCss(a.cover)};background-size:cover;background-position:center"></div>
         <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(songs.reduce((x, s) => x + s.streams, 0))}</b></div><div><small>SONGS</small><b>${songs.length}</b></div></div>
+        <div class="stats2"><div><small>ALBUMS SOLD</small><b>${compact(a.sold)}</b></div><div><small>SALES REVENUE</small><b>${euroK(a.salesRev)}</b></div></div>
+        <div class="sub" style="margin:4px 0 0">Album price</div>
+        <div class="sel"><button data-a="aprice" data-id="${a.id}" data-d="-1" aria-label="billiger">${IC.larr}</button>
+          <div class="val"><b>${eur2(a.price)}</b><span>~<span class="sk">${de(est)}</span>/Woche · ${euroK(est * a.price * .7 * labelShare())}</span></div>
+          <button data-a="aprice" data-id="${a.id}" data-d="1" aria-label="teurer">${IC.rarr}</button></div>
+        <p class="note" style="text-align:center;margin:4px 0 18px">Teurer = mehr pro Album, aber weniger Käufer. 30 % gehen an die Shops${S.label ? ', dein Label bekommt seinen Anteil' : ''}.</p>
         ${songs.length ? songs.map((s) => songRow(s)).join('') : '<p class="note">Noch keine Songs auf diesem Album. Wähle es bei NEW SONG unter „Assign album“ aus.</p>'}`;
     },
 
@@ -996,7 +1053,8 @@
         ${TOURS.map((t, i) => {
           const ok = f >= t.fame && cd >= 6 && S.energy >= t.energy && S.cash >= t.cost;
           return `<div class="card"><b>${t.name}</b> <span class="note">· ${t.shows} Shows · ab Fame ${grade(t.fame)}</span>
-            <p>Kosten ${euro(t.cost)} · ${t.energy} ⚡ · Ticket ${t.price} € · erwartet ca. ${euro(tourEstimate(t))} Umsatz</p>
+            <p>Kosten ${euro(t.cost)} · ${t.energy} ⚡ · ca. ${de(tourSold(i, false))}/${de(t.cap)} Tickets pro Show · erwartet ${euro(tourEstimate(i))} Umsatz</p>
+            <div class="sel"><button data-a="tprice" data-i="${i}" data-d="-1" aria-label="billiger">${IC.larr}</button><div class="val"><b>Ticket ${euro(S.tourPrices[i])}</b></div><button data-a="tprice" data-i="${i}" data-d="1" aria-label="teurer">${IC.rarr}</button></div>
             <button class="big-btn c-orange" data-a="tour" data-i="${i}" ${ok ? '' : 'disabled'} style="margin-bottom:0">${f < t.fame ? 'Zu wenig Fame' : 'Tour starten'}</button></div>`;
         }).join('')}`;
     },
@@ -1082,7 +1140,8 @@
     { name: 'Arena Tour', shows: 24, cap: 14000, price: 85, cost: 400000, energy: 70, fame: 62 },
     { name: 'Stadium Tour', shows: 30, cap: 55000, price: 120, cost: 3000000, energy: 90, fame: 82 },
   ];
-  const tourEstimate = (t) => Math.round(Math.min(t.cap, (S.listeners + S.followers) * .03 / t.shows) * t.shows * t.price);
+  const tourSold = (i, random) => { const t = TOURS[i], pr = S.tourPrices[i]; return Math.round(Math.min(t.cap, (S.listeners + S.followers) * .03 / t.shows * (t.price / pr) ** 1.4 * (random ? rnd(.7, 1.15) : 1))); };
+  const tourEstimate = (i) => tourSold(i, false) * TOURS[i].shows * S.tourPrices[i];
 
   /* =====================================================================
      Actions
@@ -1127,7 +1186,7 @@
       render();
     },
     genre(el) { keepSongInput(); draft.genre = el.dataset.g; render(); },
-    randTitle() { draft.title = songName().toLowerCase(); render(); },
+    randTitle() { draft.title = songName(draft.feat || undefined).toLowerCase(); render(); },
     createSong() {
       keepSongInput();
       const title = draft.title.trim();
@@ -1155,7 +1214,7 @@
       keepAlbumInput();
       const name = draft.name.trim();
       if (!name) { toast('Gib dem Album einen Namen'); $('#albumName').focus(); return; }
-      S.albums.push({ id: uid(), name, cover: draft.cover, week: S.week });
+      S.albums.push({ id: uid(), name, cover: draft.cover, week: S.week, price: draft.price, sold: 0, salesRev: 0 });
       save(); stack.pop(); draft = null; go('albums');
       toast(`Album „${name}“ erstellt – weise ihm bei NEW SONG Songs zu`);
     },
@@ -1179,7 +1238,7 @@
       const m = S.inbox.find((x) => x.id === el.dataset.id); if (!m || m.done) return;
       const a = m.action;
       if (!a) { m.done = true; save(); render(); return; }
-      if (a.type === 'feature') go('newSong', { feat: a.npc, mailId: m.id, title: `${S.name.split(' ')[0].toLowerCase()} x ${a.npc.split(' ')[0].toLowerCase()}` });
+      if (a.type === 'feature') go('newSong', { feat: a.npc, mailId: m.id, title: songName(a.npc) });
       else if (a.type === 'festival') go('festivalReview', { id: m.id });
       else if (a.type === 'label') go('label');
     },
@@ -1199,8 +1258,8 @@
     tour(el) {
       const t = TOURS[+el.dataset.i];
       if (S.energy < t.energy || S.cash < t.cost) return;
-      const sold = Math.round(Math.min(t.cap, (S.listeners + S.followers) * .03 / t.shows * rnd(.7, 1.15)));
-      const rev = sold * t.shows * t.price;
+      const sold = tourSold(+el.dataset.i, true);
+      const rev = sold * t.shows * S.tourPrices[+el.dataset.i];
       S.energy -= t.energy; S.cash += rev - t.cost; S.earnings.tours += rev - t.cost; S.lastTour = S.week;
       const fans = Math.round(sold * t.shows * .4);
       S.followers += fans; S.listeners += Math.round(fans * .5);
@@ -1252,6 +1311,14 @@
       const k = el.dataset.p;
       pickImage(900, 1.4).then((d) => { S.banners = S.banners || {}; S.banners[k] = d; save(); refreshPf(); }).catch(() => {});
     },
+    aprice(el) { const a = S.albums.find((x) => x.id === el.dataset.id); if (!a) return; a.price = priceStep(a.price, +el.dataset.d); save(); render(); },
+    draftPrice(el) { keepAlbumInput(); draft.price = priceStep(draft.price, +el.dataset.d); render(); },
+    tprice(el) { const i = +el.dataset.i; S.tourPrices[i] = ticketStep(S.tourPrices[i], +el.dataset.d); save(); render(); },
+    saveArtists() {
+      const names = [...new Set($('#artistList').value.split(/[\n,]/).map((x) => x.trim()).filter(Boolean))].slice(0, 40);
+      if (!names.length) { toast('Mindestens ein Name'); return; }
+      S.npcs = makeNpcs(names, S.npcs); save(); render(); toast(`${names.length} Artists gespeichert`);
+    },
     closeModal() {
       const bg = $('#modalBg'); if (bg.classList.contains('closing')) return;
       bg.classList.add('closing');
@@ -1301,7 +1368,7 @@
         body = `<h3>${pfState.popular ? 'Popular' : 'Latest'}<button class="tg ${pfState.popular ? 'on' : ''}" data-a="pfToggle" aria-label="Beliebt/Neu"></button></h3>
           ${list.length ? list.map((x, i) => `<div class="tr ${pfState.playing === x.id ? 'playing' : ''}" data-a="pfPlay" data-id="${x.id}"><span class="n">${i + 1}</span><i class="c" style="background:${coverCss(songCover(x))};background-size:cover;background-position:center"></i><div class="t"><b>${esc(x.title)}</b><small>${de(x.streams)}</small></div><span class="dots">•••</span></div>`).join('') : '<p class="empty">Noch keine veröffentlichten Songs.</p>'}
           <h3>Popular Releases</h3>
-          ${albums.length ? albums.map(({ album, streams }) => `<div class="tr"><i class="c" style="background:${coverCss(album.cover)};background-size:cover;background-position:center"></i><div class="t"><b>${esc(album.name)}</b><small>${yearAt(album.week)} • ${de(streams / 1500)} albums sold</small></div></div>`).join('') : '<p class="empty">Noch keine Alben.</p>'}`;
+          ${albums.length ? albums.map(({ album, streams }) => `<div class="tr"><i class="c" style="background:${coverCss(album.cover)};background-size:cover;background-position:center"></i><div class="t"><b>${esc(album.name)}</b><small>${yearAt(album.week)} • ${de(album.sold || 0)} albums sold</small></div></div>`).join('') : '<p class="empty">Noch keine Alben.</p>'}`;
       } else if (pfState.tab === 'events') {
         const inv = S.inbox.filter((m) => m.action && m.action.type === 'festival' && !m.done);
         const past = S.festivals.slice().reverse();
@@ -1367,6 +1434,7 @@
     modal(`<h2>Woche ${S.week}</h2><p class="note">${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}</p>
       <div class="kv"><span>Streams</span><span>${de(r.streams)}</span></div>
       <div class="kv"><span>Einnahmen</span><span style="color:var(--cash)">+${euro(r.rev)}</span></div>
+      ${r.albumSales ? `<div class="kv"><span>Album-Verkäufe</span><span>${de(r.albumSales)} · <span style="color:var(--cash)">+${euro(r.albumRev)}</span></span></div>` : ''}
       ${r.labelCut ? `<div class="kv"><span>Label-Anteil</span><span style="color:var(--salmon)">−${euro(r.labelCut)}</span></div>` : ''}
       <div class="kv"><span>Monatliche Hörer</span><span>${de(S.listeners)} (${S.listeners - lBefore >= 0 ? '+' : ''}${de(S.listeners - lBefore)})</span></div>
       <div class="kv"><span>Energie</span><span>⚡ ${S.energy} aufgefüllt</span></div>

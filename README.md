@@ -12,6 +12,8 @@ Karriere-Simulator fürs iPhone, nachgebaut nach einer Bildschirmaufnahme.
   Songboard, Awards (jedes Jahr im Januar), Label-Verträge.
 - **Home**: Inbox (Features, Festivals, Labels, Fanpost), Relationship, Social, Trends.
 - **$**: Einnahmen-Übersicht und Nebenjob für den Anfang.
+- **Preise**: Albumpreis im Album (Musik → Albums), Ticketpreise bei Tour.
+- **Artists**: Liste unter Einstellungen bearbeiten (ein Name pro Zeile).
 
 Ohne neue Songs sinken die Hörerzahlen langsam – regelmäßig veröffentlichen.
 
