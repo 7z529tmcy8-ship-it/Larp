@@ -1,25 +1,20 @@
-# Wallet (Spaß-Version)
+# Rap Star Sim
 
-Nachbau des Wallet-Looks fürs iPhone. Kein echtes Geld, keine echten Zahlungen.
+Karriere-Simulator fürs iPhone, nachgebaut nach einer Bildschirmaufnahme.
 
-## Bezahl-Modus öffnen
+## Spielen
 
-- Doppeltippen am rechten Bildschirmrand (Höhe der Seitentaste) oder auf „Wallet“
-- Seite mit `#pay` am Ende aufrufen, z. B. `https://…/larp/#pay`
+- Seite öffnen → Künstlername eingeben → „Karriere starten“ (bei null) oder „Reich starten“.
+- **END WEEK** schließt die Woche ab: Songs sammeln Streams, Streams bringen Geld und Hörer,
+  die Energie füllt sich wieder auf und neue Nachrichten landen in der Inbox.
+- **Talent**: Skills mit Energie verbessern (Kosten = nächstes Level). Studio mit Geld ausbauen.
+- **Musik**: New Song, New Album (eigenes Cover möglich), Musikvideos, Festivals, Tour,
+  Songboard, Awards (jedes Jahr im Januar), Label-Verträge.
+- **Home**: Inbox (Features, Festivals, Labels, Fanpost), Relationship, Social, Trends.
+- **$**: Einnahmen-Übersicht und Nebenjob für den Anfang.
 
-## Hardware-Auslöser (statt Lauter-Taste)
+Ohne neue Songs sinken die Hörerzahlen langsam – regelmäßig veröffentlichen.
 
-Websites können die Lautstärketasten nicht abfragen. Stattdessen:
+## Installieren
 
-1. App **Kurzbefehle** → neuer Kurzbefehl → Aktion **„URL öffnen“** → `https://…/larp/#pay`
-2. **Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen → Doppeltippen** → den Kurzbefehl wählen
-   (iPhone 15 Pro und neuer: alternativ **Einstellungen → Aktionstaste → Kurzbefehl**)
-
-Hinweis: Der Kurzbefehl öffnet die Seite in Safari. Karten deshalb auch in Safari anlegen –
-Safari und die Home-Bildschirm-Version haben getrennten Speicher.
-
-## Fake-Home-Bildschirm
-
-Wallet → „⋯“ → Screenshot vom Home-Bildschirm hochladen → „Jetzt anzeigen“ (oder „Beim Öffnen anzeigen“).
-Doppeltippen irgendwo öffnet Apple Pay, irgendwo 1 Sek. gedrückt halten führt zurück zur Wallet.
-Am besten als Home-Bildschirm-App starten (Vollbild), damit der Screenshot exakt passt.
+Safari → Teilen → „Zum Home-Bildschirm“. Der Spielstand wird lokal auf dem Handy gespeichert.

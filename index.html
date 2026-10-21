@@ -6,32 +6,35 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Wallet">
-<meta name="theme-color" content="#f2f2f7" id="themeColor">
+<meta name="apple-mobile-web-app-title" content="Rap Star">
+<meta name="theme-color" content="#23272c">
 <link rel="apple-touch-icon" href="icon.png">
-<title>Wallet</title>
+<title>Rap Star Sim</title>
 <style>
   :root {
-    --bg: #f2f2f7;
-    --fg: #000;
-    --muted: #8e8e93;
-    --sheet: #fff;
-    --sep: rgba(60,60,67,.18);
-    --blue: #0a84ff;
-    --red: #ff3b30;
-    --green: #34c759;
-    --cw: calc(min(100vw, 480px) - 32px);
-    --ch: calc(var(--cw) / 1.586);
-    --peek: 58px;
+    --bg: #23272c;
+    --panel: #40464d;
+    --panel2: #4b5159;
+    --bar: #5c636b;
+    --pill: #e6e6e6;
+    --pill-txt: #1d2125;
+    --txt: #f2f3f4;
+    --muted: #7d848c;
+    --orange: #e9963f;
+    --green: #76a477;
+    --salmon: #ea7a6b;
+    --teal: #7f9ea6;
+    --olive: #a59b5e;
+    --pink: #c9a3c4;
+    --cash: #93c493;
+    --energy: #ef5b4b;
+    --gap: 0px;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; }
-  html { background: var(--bg); }
-  html.fh { background: #000; }
+  html, body { margin: 0; height: 100%; background: var(--bg); }
   body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    color: var(--txt);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -webkit-user-select: none; user-select: none;
     -webkit-touch-callout: none;
@@ -39,715 +42,1112 @@
     overflow-x: hidden;
   }
   button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  input { font: inherit; }
 
-  /* ---------- Home ---------- */
-  .app { max-width: 480px; margin: 0 auto; min-height: 100%; padding: calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 40px); }
-  .header { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 14px; }
-  .header h1 { font-size: 34px; font-weight: 700; letter-spacing: .3px; margin: 0; }
-  .plus { width: 32px; height: 32px; border-radius: 50%; background: #000; display: grid; place-items: center; }
-  .plus svg { width: 16px; height: 16px; }
+  #app { max-width: 480px; margin: 0 auto; min-height: 100%; padding: calc(env(safe-area-inset-top) + 10px) 20px calc(env(safe-area-inset-bottom) + 96px); }
+  #app.push { padding-bottom: calc(env(safe-area-inset-bottom) + 30px); }
 
-  .stack { position: relative; padding-bottom: 20px; }
-  .stack .card + .card { margin-top: calc(var(--peek) - var(--ch)); }
-  .stack .card { transition: transform .35s cubic-bezier(.2,.8,.2,1); }
-  .stack .card:active { transform: translateY(-6px); }
-  .empty { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 15px; line-height: 1.4; }
+  /* ---------- top bar ---------- */
+  .top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .top .money { font-size: 14px; font-weight: 700; color: var(--cash); line-height: 1.15; white-space: nowrap; }
+  .top .money .en { color: var(--energy); }
+  .top .date { text-align: center; font-size: 12px; font-weight: 800; line-height: 1.15; }
+  .top .date small { display: block; font-size: 9px; font-weight: 700; }
+  .endweek { justify-self: end; height: 36px; padding: 0 22px; border-radius: 18px; background: var(--green); color: #1c2a1d; font-size: 14px; font-weight: 800; box-shadow: inset 0 -3px 0 rgba(0,0,0,.2); }
+  .bolt { color: var(--energy); }
 
-  /* ---------- Card ---------- */
-  .card {
-    position: relative; width: var(--cw); height: var(--ch);
-    border-radius: 14px; overflow: hidden; color: #fff;
-    box-shadow: 0 -1px 0 rgba(255,255,255,.25) inset, 0 4px 14px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.12);
-    background-size: cover; background-position: center;
-  }
-  .card::after { /* subtle sheen */
-    content: ""; position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(160deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 40%);
-  }
-  .card.dark-text { color: #1c1c1e; }
-  .c-name { position: absolute; top: 16px; left: 18px; font-size: 19px; font-weight: 600; letter-spacing: .2px; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .c-bal { position: absolute; top: 17px; right: 18px; font-size: 17px; font-weight: 600; }
-  .c-num { position: absolute; bottom: 16px; left: 18px; font-size: 15px; font-weight: 500; letter-spacing: 1px; opacity: .92; }
-  .c-net { position: absolute; bottom: 12px; right: 16px; }
-  .net-visa { font-size: 26px; font-weight: 900; font-style: italic; letter-spacing: -.5px; }
-  .net-text { font-size: 15px; font-weight: 800; letter-spacing: .6px; }
-  .net-mc { display: flex; }
-  .net-mc i { width: 30px; height: 30px; border-radius: 50%; display: block; }
-  .net-mc i:first-child { background: #eb001b; }
-  .net-mc i:last-child { background: #f79e1b; margin-left: -12px; opacity: .85; }
+  /* ---------- titles ---------- */
+  .title { font-size: 40px; font-weight: 900; letter-spacing: -.5px; margin: 6px 0 14px; line-height: 1; text-transform: uppercase; }
+  .title .dim { color: #565d65; }
+  .ptitle { display: flex; align-items: center; gap: 10px; margin: 4px 0 6px; min-height: 48px; }
+  .ptitle .back { width: 30px; height: 40px; display: grid; place-items: center; flex: none; }
+  .ptitle .back svg { width: 12px; height: 20px; }
+  .ptitle .en { font-size: 15px; font-weight: 700; color: var(--energy); flex: none; }
+  .ptitle h1 { flex: 1; text-align: right; margin: 0; font-size: 36px; font-weight: 900; letter-spacing: -.5px; line-height: 1; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ptitle h1.norm { text-transform: none; }
+  .sub { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; text-align: center; margin: 14px 0 6px; }
+  .note { font-size: 13px; color: var(--muted); line-height: 1.4; }
 
-  /* ---------- Screens & sheets ---------- */
-  .screen {
-    position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); background: var(--bg); z-index: 20;
-    transform: translateX(100%); transition: transform var(--spring-d, .45s) var(--spring, cubic-bezier(.2,.8,.2,1));
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
-  }
-  .screen.open { transform: none; }
-  .screen-inner { max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 30px); }
-  .nav { display: flex; justify-content: space-between; align-items: center; height: 44px; margin-bottom: 10px; }
-  .nav button { color: var(--blue); font-size: 17px; }
-  .nav .done { font-weight: 600; }
+  /* ---------- pills ---------- */
+  .pill { display: block; width: 100%; height: 44px; border-radius: 22px; background: var(--pill); color: var(--pill-txt); font-size: 14px; font-weight: 800; text-transform: uppercase; box-shadow: inset 0 -3px 0 rgba(0,0,0,.16); margin-bottom: 9px; }
+  .pill .cnt { color: var(--muted); font-weight: 700; }
+  .pill:disabled { opacity: .45; }
+  .chip { height: 32px; padding: 0 18px; border-radius: 16px; font-size: 13px; font-weight: 800; text-transform: uppercase; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); color: #222; }
+  .c-orange { background: var(--orange); } .c-green { background: var(--green); } .c-salmon { background: var(--salmon); }
+  .c-teal { background: var(--teal); } .c-olive { background: var(--olive); } .c-pink { background: var(--pink); } .c-gray { background: var(--pill); }
+  .big-btn { display: block; width: 100%; height: 46px; border-radius: 23px; font-size: 15px; font-weight: 800; text-transform: uppercase; color: #1d2125; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); margin: 10px 0 8px; }
+  .big-btn:disabled { opacity: .45; }
+  .row2 { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 12px 0; }
 
-  .group { background: var(--sheet); border-radius: 12px; overflow: hidden; margin: 22px 0; }
-  .row { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 0 16px; font-size: 17px; border-bottom: .5px solid var(--sep); }
-  .row:last-child { border-bottom: 0; }
-  .row .val { color: var(--muted); }
-  .row.danger { color: var(--red); justify-content: center; }
-  .row.action { color: var(--blue); justify-content: center; }
-  .caption { color: var(--muted); font-size: 13px; text-transform: uppercase; margin: 0 16px -14px; }
+  /* ---------- home ---------- */
+  .fame { position: relative; height: 40px; border-radius: 20px; background: var(--salmon); display: flex; align-items: center; padding: 0 12px 0 20px; gap: 14px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.15); }
+  .fame b { font-size: 14px; font-weight: 800; color: #3a1a15; white-space: nowrap; }
+  .fame .track { flex: 1; height: 20px; border-radius: 10px; background: rgba(255,255,255,.35); overflow: hidden; }
+  .fame .track i { display: block; height: 100%; background: #f1f1f1; border-radius: 10px; }
+  .platforms { display: flex; justify-content: space-between; padding: 22px 10px 16px; border-bottom: 1px solid #3a4047; }
+  .plat { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; }
+  .plat svg { width: 28px; height: 28px; }
+  .listeners { text-align: center; margin: 16px 0 4px; font-size: 19px; font-weight: 700; }
+  .listeners .plus { color: var(--cash); font-weight: 600; }
+  .listeners small { display: block; font-size: 11px; letter-spacing: 2px; color: #c9ccd0; font-weight: 600; margin-top: 3px; }
+  .chart { position: relative; height: 210px; margin: 6px 0 18px; }
+  .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .chart .yl { position: absolute; left: 0; font-size: 10px; color: #c9ccd0; font-weight: 600; }
 
-  .backdrop { position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 30; }
-  .backdrop.open { opacity: 1; pointer-events: auto; }
-  .sheet {
-    position: fixed; left: 0; right: 0; bottom: calc(-1 * var(--gap, 0px)); z-index: 31;
-    max-width: 480px; margin: 0 auto; max-height: 94vh; overflow-y: auto;
-    background: var(--bg); border-radius: 12px 12px 0 0;
-    transform: translateY(100%); transition: transform var(--spring-d, .45s) var(--spring, cubic-bezier(.2,.8,.2,1));
-    padding: 0 16px calc(env(safe-area-inset-bottom) + 24px + var(--gap, 0px));
-  }
-  .sheet.open { transform: none; }
-  .sheet .nav { position: sticky; top: 0; background: var(--bg); z-index: 2; padding-top: 8px; height: 52px; }
-  .sheet .nav h2 { font-size: 17px; font-weight: 600; margin: 0; }
-  .preview { display: flex; justify-content: center; margin: 8px 0 4px; }
+  /* ---------- talent ---------- */
+  .trow { display: flex; align-items: stretch; height: 70px; border-radius: 35px; background: var(--panel); margin-bottom: 12px; overflow: hidden; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+  .trow .lv { width: 98px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .trow .lv b { font-size: 38px; font-weight: 900; line-height: 1; }
+  .trow .lv small { font-size: 11px; color: #c9ccd0; font-weight: 700; margin-top: 2px; }
+  .trow .mid { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; padding-right: 14px; }
+  .trow .mid span { font-size: 10px; letter-spacing: 2.5px; color: #c9ccd0; font-weight: 600; text-transform: uppercase; }
+  .trow .mid i { display: block; height: 17px; border-radius: 9px; background: var(--bar); overflow: hidden; }
+  .trow .mid i em { display: block; height: 100%; background: #ececec; border-radius: 9px; }
+  .trow .up { width: 64px; flex: none; background: var(--green); display: grid; place-items: center; }
+  .trow .up.orange { background: var(--orange); }
+  .trow .up svg { width: 24px; height: 24px; }
+  .trow .up:disabled { background: #5a6168; }
+  .trow.locked { opacity: .55; }
+  .section { display: flex; align-items: center; gap: 10px; font-size: 34px; font-weight: 900; margin: 26px 0 14px; text-transform: uppercase; }
+  .section svg { width: 22px; height: 26px; }
 
-  .field { display: flex; align-items: center; min-height: 46px; padding: 0 16px; border-bottom: .5px solid var(--sep); font-size: 17px; }
-  .field:last-child { border-bottom: 0; }
-  .field label { width: 120px; flex: none; }
-  .field input, .field select { flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; font-size: 17px; background: transparent; color: var(--fg); text-align: right; -webkit-appearance: none; appearance: none; }
-  .swatches { display: flex; flex-wrap: wrap; gap: 12px; padding: 14px 16px; }
-  .sw { width: 38px; height: 38px; border-radius: 50%; box-shadow: 0 0 0 .5px rgba(0,0,0,.2); position: relative; }
-  .sw.sel::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2.5px solid var(--blue); }
-  .upload-row { display: flex; gap: 10px; padding: 12px 16px; }
-  .btn { flex: 1; height: 44px; border-radius: 10px; background: rgba(10,132,255,.12); color: var(--blue); font-weight: 600; font-size: 16px; }
-  .btn.secondary { background: rgba(255,59,48,.1); color: var(--red); }
-  .hint { color: var(--muted); font-size: 13px; padding: 0 16px 12px; line-height: 1.35; }
+  /* ---------- music ---------- */
+  .listhead { display: flex; justify-content: space-between; align-items: center; margin: 4px 0 6px; }
+  .listhead span { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+  .toplist { margin: 0 0 22px; min-height: 76px; }
+  .toplist div { font-size: 19px; font-weight: 800; line-height: 1.4; }
+  .toplist div small { font-size: 11px; color: var(--muted); font-weight: 700; margin-right: 4px; }
+  .toplist div em { font-style: normal; color: #5e656d; font-weight: 700; }
+  .toplist .empty { font-size: 14px; color: var(--muted); font-weight: 500; }
 
-  /* Secret trigger zone (where the side button sits) */
-  /* Header buttons */
-  .hbtns { display: flex; gap: 10px; }
-  .more { width: 32px; height: 32px; border-radius: 50%; background: rgba(120,120,128,.16); display: grid; place-items: center; }
-  .more svg { width: 18px; height: 18px; }
+  .srow { display: flex; align-items: center; height: 58px; border-radius: 14px; background: var(--panel); margin-bottom: 9px; overflow: hidden; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); width: 100%; text-align: left; }
+  .srow .info { flex: 1; min-width: 0; padding: 0 14px; }
+  .srow .info b { display: block; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .srow .info small { display: block; font-size: 11px; color: #c0c4c9; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .srow .q { width: 58px; height: 100%; background: var(--orange); color: #2a1a08; display: grid; place-items: center; font-size: 26px; font-weight: 900; flex: none; }
+  .srow .q.me { background: var(--salmon); }
+  .srow .cov { width: 42px; height: 42px; border-radius: 6px; margin-left: 8px; flex: none; background-size: cover; background-position: center; }
+  .srow.hl { outline: 2px solid var(--orange); }
 
-  /* iOS switch */
-  .switch { position: relative; width: 51px; height: 31px; flex: none; -webkit-appearance: none; appearance: none; margin: 0;
-    background: rgba(120,120,128,.16); border-radius: 16px; transition: background .25s; cursor: pointer; }
-  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff;
-    box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.16); transition: transform .25s cubic-bezier(.3,.7,.3,1.2); }
-  .switch:checked { background: var(--green); }
-  .switch:checked::after { transform: translateX(20px); }
-  .home-thumb { width: 64px; height: 138px; border-radius: 10px; background: #ddd center/cover; box-shadow: 0 0 0 .5px rgba(0,0,0,.15); flex: none; }
-  .home-row { display: flex; gap: 14px; align-items: center; padding: 14px 16px; }
-  .home-row .btns { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-  .home-row .btn { flex: none; height: 38px; font-size: 15px; }
-  .field input.switch { flex: none; width: 51px; text-align: left; }
+  /* ---------- forms ---------- */
+  .inp { display: flex; height: 48px; border-radius: 24px; background: var(--panel); overflow: hidden; }
+  .inp input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--txt); padding: 0 20px; font-size: 16px; }
+  .inp input::placeholder { color: #9aa0a6; }
+  .inp button { width: 54px; background: var(--green); display: grid; place-items: center; }
+  .inp button svg { width: 16px; height: 16px; }
+  .sel { display: flex; align-items: center; justify-content: space-between; margin: 2px 0; }
+  .sel button { width: 56px; height: 44px; display: grid; place-items: center; }
+  .sel button svg { width: 26px; height: 20px; }
+  .sel .val { flex: 1; text-align: center; }
+  .sel .val b { display: block; font-size: 17px; font-weight: 800; text-transform: uppercase; }
+  .sel .val span { font-size: 15px; font-weight: 600; }
+  .sel .val .sk { color: var(--cash); }
+  .sel .val .sk.low { color: var(--salmon); }
+  .total { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 10px; }
+  .total span { font-size: 11px; letter-spacing: 2px; color: #c9ccd0; font-weight: 600; }
+  .total b { font-size: 28px; font-weight: 600; color: var(--salmon); }
+  .avail { text-align: center; font-size: 10px; color: #c9ccd0; font-weight: 600; text-transform: uppercase; }
+  .genre .chip { width: 120px; height: 34px; opacity: .45; }
+  .genre .chip.on { opacity: 1; }
 
-  /* Fake home screen (a screenshot of the real one) */
-  .fake-home { position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); z-index: 40; background: #000 top center / cover no-repeat; display: none; touch-action: manipulation; }
-  .fake-home.show { display: block; }
+  .covers { display: flex; gap: 8px; justify-content: center; margin: 10px 0 20px; }
+  .covers button { width: 72px; height: 72px; border-radius: 4px; background-size: cover; background-position: center; }
+  .covers button.on { outline: 3px solid var(--green); outline-offset: 2px; }
+  .bigcover { width: 110px; height: 110px; margin: 6px auto 10px; border-radius: 4px; background-size: cover; background-position: center; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
 
-  /* "Pay with passcode" after a failed Face ID */
-  .pay-code { position: absolute; left: 0; right: 0; bottom: 96px; margin: 0 auto; width: max-content; padding: 10px 18px;
-    font-size: 17px; color: #007aff; opacity: 0; pointer-events: none; transition: opacity .25s; }
-  .pay-code.show { opacity: 1; pointer-events: auto; }
-  .pay-status.retry { cursor: pointer; }
+  /* ---------- song detail ---------- */
+  .sd-cov { width: 64px; height: 64px; border-radius: 6px; background-size: cover; background-position: center; flex: none; }
+  .sd-desc { color: #9aa0a6; font-size: 14px; line-height: 1.35; text-align: justify; margin: 14px 0 20px; }
+  .cert { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .disc { width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; color: #6b5f2a; box-shadow: inset 0 0 0 4px rgba(0,0,0,.15); }
+  .cert .r { text-align: right; }
+  .cert .r small { display: block; font-size: 10px; letter-spacing: 2px; color: #c9ccd0; font-weight: 600; }
+  .cert .r b { font-size: 28px; font-weight: 800; }
+  .stats2 { display: flex; justify-content: space-between; margin-bottom: 20px; }
+  .stats2 small { display: block; font-size: 10px; letter-spacing: 2px; color: #c9ccd0; font-weight: 600; }
+  .stats2 b { font-size: 30px; font-weight: 800; }
+  .stats2 div:last-child { text-align: right; }
+  .bars { display: flex; align-items: flex-end; gap: 4px; height: 90px; margin: 10px 20px 24px; }
+  .bars i { flex: 1; background: var(--green); border-radius: 2px 2px 0 0; min-height: 3px; }
 
-  .side-zone { position: fixed; top: 80px; right: 0; width: 34px; height: 260px; z-index: 15; }
+  /* ---------- inbox (white) ---------- */
+  .inbox { position: fixed; inset: 0; bottom: calc(-1 * var(--gap)); z-index: 30; background: #fff; color: #111; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .inbox .wrap { max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 20px calc(env(safe-area-inset-bottom) + 40px); }
+  .inbox .hd { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
+  .inbox .hd button { width: 36px; height: 36px; display: grid; place-items: center; }
+  .inbox .hd h1 { margin: 0; font-size: 40px; font-weight: 900; }
+  .inbox .intro { font-size: 13px; text-align: justify; line-height: 1.35; margin: 0 0 14px; }
+  .inbox .lbl { font-size: 11px; letter-spacing: 2px; color: #888; font-weight: 600; margin-bottom: 10px; }
+  .msg { padding: 14px 8px 18px; border-bottom: 1px solid #ccc; }
+  .msg .mh { display: flex; justify-content: space-between; align-items: flex-start; }
+  .msg .mh b { font-size: 15px; font-weight: 800; text-transform: uppercase; display: block; }
+  .msg .mh small { font-size: 11px; color: #333; }
+  .msg .chip { width: 134px; }
+  .msg .subj { font-size: 13px; font-weight: 700; margin: 12px 0 2px; }
+  .msg .body { font-size: 13px; color: #333; line-height: 1.35; }
+  .msg.unread .subj::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); margin-right: 6px; vertical-align: 1px; }
+  .msg.done { opacity: .45; }
 
-  /* ---------- Pay mode (measured from a real iOS screen recording, 390pt wide) ---------- */
-  .pay { position: fixed; inset: 0; bottom: calc(-1 * var(--gap, 0px)); z-index: 50; visibility: hidden; overflow: hidden; --cw: calc(min(100vw, 480px) - 36px); }
-  .pay.open { visibility: visible; }
-  .pay-bg {
-    position: absolute; inset: 0; opacity: 0; will-change: opacity;
-    background: rgba(242,242,247,.975);
-    -webkit-backdrop-filter: blur(30px) saturate(160%); backdrop-filter: blur(30px) saturate(160%);
-  }
-  .pay-inner { max-width: 480px; margin: 0 auto; height: 100%; position: relative; }
-  .pay-close { position: absolute; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top) + 12px); }
-  .pay-card-wrap { position: absolute; left: 18px; top: max(62px, calc(env(safe-area-inset-top) + 15px)); will-change: transform; z-index: 2; }
-  .pay-drag { will-change: transform; }
-  .pay .card { border-radius: 13px; box-shadow: 0 10px 28px -8px rgba(0,0,0,.28), 0 0 0 .5px rgba(0,0,0,.08); }
-  .pay .card::after { display: none; }
+  /* ---------- generic list rows ---------- */
+  .lrow { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #3a4047; gap: 12px; }
+  .lrow small { display: block; font-size: 10px; color: #9aa0a6; margin-bottom: 2px; }
+  .lrow b { font-size: 17px; font-weight: 800; }
+  .lrow .chip { flex: none; }
+  .kv { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #3a4047; font-size: 15px; gap: 10px; }
+  .kv span:last-child { font-weight: 700; text-align: right; }
+  .earn small { font-size: 11px; letter-spacing: 2px; color: #c9ccd0; font-weight: 600; }
+  .earn b { display: block; font-size: 26px; font-weight: 800; margin-bottom: 14px; }
+  .h3 { font-size: 18px; font-weight: 800; margin: 18px 0 4px; }
+  .card { background: var(--panel); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+  .card b { font-size: 17px; }
+  .card p { margin: 6px 0 0; font-size: 13px; color: #c0c4c9; line-height: 1.4; }
 
-  .pay-status {
-    position: absolute; left: 0; right: 0;
-    top: calc(max(62px, calc(env(safe-area-inset-top) + 15px)) + var(--ch) + 47px);
-    display: flex; flex-direction: column; align-items: center;
-  }
-  .pay-label { margin-top: 28px; font-size: 17px; color: #86868b; letter-spacing: -.2px; min-height: 22px; text-align: center; will-change: opacity; }
+  /* ---------- tab bar ---------- */
+  .tabs { position: fixed; left: 0; right: 0; bottom: calc(-1 * var(--gap)); z-index: 20; background: var(--bg); padding: 8px 16px calc(env(safe-area-inset-bottom) + 6px + var(--gap)); }
+  .tabs .in { max-width: 440px; margin: 0 auto; display: flex; justify-content: space-between; }
+  .tabs button { width: 72px; height: 56px; border-radius: 28px; display: grid; place-items: center; color: #c9ccd0; }
+  .tabs button svg { width: 22px; height: 22px; }
+  .tabs button.on { background: #15181b; }
+  .tabs button.on[data-t="home"] { color: var(--green); }
+  .tabs button.on[data-t="music"] { color: #5fd3d0; }
+  .tabs button.on[data-t="money"] { color: var(--orange); }
 
-  .glyph { width: 64px; height: 64px; position: relative; }
-  .glyph svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .glyph .g { opacity: 0; transform-box: view-box; transform-origin: 32px 32px; will-change: transform, opacity; }
-  .glyph .face { color: #b4b4ba; }
+  /* ---------- modal ---------- */
+  .modal-bg { position: fixed; inset: 0; bottom: calc(-1 * var(--gap)); background: rgba(0,0,0,.55); z-index: 40; display: none; align-items: flex-end; justify-content: center; }
+  .modal-bg.show { display: flex; }
+  .modal { width: 100%; max-width: 480px; background: #2c3136; border-radius: 22px 22px 0 0; padding: 22px 20px calc(env(safe-area-inset-bottom) + 18px + var(--gap)); max-height: 88vh; overflow-y: auto; animation: up .35s cubic-bezier(.2,.9,.25,1.05); }
+  @keyframes up { from { transform: translateY(100%); } }
+  .modal h2 { margin: 0 0 4px; font-size: 26px; font-weight: 900; text-transform: uppercase; }
 
-  .pay-peek { position: absolute; left: 18px; top: calc(100% - 69px - var(--pn, 0) * 15px); z-index: 1; will-change: transform; }
-  .peek-item { position: absolute; left: 0; top: 0; will-change: transform; }
-
-  .shake { animation: shake .45s; }
-  @keyframes shake { 20%,60% { transform: translateX(-10px); } 40%,80% { transform: translateX(10px); } }
-
-  .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 30px); transform: translate(-50%, 30px); background: rgba(30,30,30,.92); color: #fff; padding: 10px 16px; border-radius: 20px; font-size: 14px; opacity: 0; transition: .3s; z-index: 80; pointer-events: none; white-space: nowrap; }
+  .toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 86px); transform: translate(-50%, 20px); background: #f2f2f2; color: #111; padding: 10px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: .3s; z-index: 80; pointer-events: none; max-width: 90vw; text-align: center; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- start screen ---------- */
+  .start { padding-top: 40px; }
+  .start h1 { font-size: 46px; font-weight: 900; line-height: .95; margin: 30px 0 10px; text-transform: uppercase; }
+  .start p { color: #c0c4c9; line-height: 1.45; font-size: 15px; }
 </style>
 </head>
 <body>
-
-<div class="app">
-  <div class="header">
-    <h1 id="title">Wallet</h1>
-    <div class="hbtns">
-      <button class="plus" id="addBtn" aria-label="Karte hinzufügen">
-        <svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
-      </button>
-      <button class="more" id="setBtn" aria-label="Einstellungen">
-        <svg viewBox="0 0 18 18" fill="#000"><circle cx="3.5" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="14.5" cy="9" r="1.6"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="stack" id="stack"></div>
-</div>
-
-<div class="side-zone" id="sideZone"></div>
-
-<!-- Card detail -->
-<div class="screen" id="detail">
-  <div class="screen-inner">
-    <div class="nav"><button id="detailBack">‹ Wallet</button><button class="done" id="detailPay">Bezahlen</button></div>
-    <div class="preview" id="detailCard"></div>
-    <div class="group" id="detailInfo"></div>
-    <div class="group">
-      <button class="row action" style="width:100%" id="detailEdit">Karte bearbeiten</button>
-      <button class="row danger" style="width:100%" id="detailDelete">Karte entfernen</button>
-    </div>
-  </div>
-</div>
-
-<!-- Settings sheet -->
-<div class="sheet" id="settings">
-  <div class="nav"><span style="width:80px"></span><h2>Einstellungen</h2><button class="done" id="setDone" style="width:80px;text-align:right">Fertig</button></div>
-
-  <div class="caption">Fake-Home-Bildschirm</div>
-  <div class="group">
-    <div class="home-row">
-      <div class="home-thumb" id="homeThumb"></div>
-      <div class="btns">
-        <button class="btn" id="homeUpload">Screenshot hochladen</button>
-        <button class="btn" id="homeShow">Jetzt anzeigen</button>
-        <button class="btn secondary" id="homeRemove" hidden>Entfernen</button>
-      </div>
-    </div>
-    <div class="field"><label style="width:auto;flex:1">Beim Öffnen anzeigen</label><input type="checkbox" class="switch" id="homeOnStart"></div>
-    <input type="file" id="homeFile" accept="image/*" hidden>
-  </div>
-  <div class="hint" style="padding-top:8px">Mach einen Screenshot von deinem Home-Bildschirm und lade ihn hier hoch. Im Fake-Home: <b>Doppeltippen</b> irgendwo = Apple Pay. <b>Irgendwo 1 Sek. gedrückt halten</b> = zurück zur Wallet.</div>
-
-  <div class="caption">Face ID</div>
-  <div class="group">
-    <div class="field"><label style="width:auto;flex:1">Erster Versuch schlägt fehl</label><input type="checkbox" class="switch" id="failFirst"></div>
-  </div>
-  <div class="hint" style="padding-top:8px">Face ID wackelt beim ersten Mal und klappt erst nach einem Tipp aufs Symbol oder auf „Mit Code bezahlen“.</div>
-</div>
-
-<div class="fake-home" id="fakeHome"></div>
-
-<!-- Add / edit sheet -->
-<div class="backdrop" id="backdrop"></div>
-<div class="sheet" id="sheet">
-  <div class="nav"><button id="sheetCancel">Abbrechen</button><h2 id="sheetTitle">Karte hinzufügen</h2><button class="done" id="sheetSave">Fertig</button></div>
-  <div class="preview" id="preview"></div>
-
-  <div class="group">
-    <div class="field"><label for="fName">Name</label><input id="fName" maxlength="24" placeholder="z. B. Girokonto"></div>
-    <div class="field"><label for="fLast4">Endziffern</label><input id="fLast4" inputmode="numeric" maxlength="4" placeholder="1234"></div>
-    <div class="field"><label for="fBal">Betrag (opt.)</label><input id="fBal" maxlength="14" placeholder="z. B. 11,60 €"></div>
-    <div class="field"><label for="fNet">Netzwerk</label>
-      <select id="fNet">
-        <option value="visa">VISA</option>
-        <option value="mc">Mastercard</option>
-        <option value="amex">AMEX</option>
-        <option value="giro">girocard</option>
-        <option value="none">Keins</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="caption">Farbe</div>
-  <div class="group"><div class="swatches" id="swatches"></div></div>
-
-  <div class="caption">Eigenes Kartenbild</div>
-  <div class="group">
-    <div class="upload-row">
-      <button class="btn" id="uploadBtn">Bild hochladen</button>
-      <button class="btn secondary" id="removeImg" hidden>Bild entfernen</button>
-    </div>
-    <div class="hint">Das Bild wird automatisch auf Kartenformat zugeschnitten und ersetzt Farbe und Text.</div>
-    <input type="file" id="file" accept="image/*" hidden>
-  </div>
-</div>
-
-<!-- Pay mode -->
-<div class="pay" id="pay">
-  <div class="pay-bg" id="payBg"></div>
-  <div class="pay-inner">
-    <button class="pay-close" id="payCancel" aria-label="Schließen"></button>
-    <div class="pay-card-wrap" id="payCard"><div class="pay-drag" id="payDrag"></div></div>
-    <div class="pay-status" id="payStatus">
-      <div class="glyph" id="glyph">
-        <svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <defs>
-            <linearGradient id="gyro" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#5ee3e0"/><stop offset=".5" stop-color="#2f8cff"/><stop offset="1" stop-color="#b07cff"/>
-            </linearGradient>
-            <clipPath id="circleClip"><circle cx="32" cy="32" r="29.5"/></clipPath>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>
-          </defs>
-          <!-- Face ID glyph -->
-          <g class="g face" id="gFace" stroke="currentColor" stroke-width="3">
-            <path d="M6 19v-6a7 7 0 0 1 7-7h6"/><path d="M45 6h6a7 7 0 0 1 7 7v6"/>
-            <path d="M58 45v6a7 7 0 0 1-7 7h-6"/><path d="M19 58h-6a7 7 0 0 1-7-7v-6"/>
-            <path d="M22 23v4"/><path d="M42 23v4"/>
-            <path d="M33 23v11h-2.5"/>
-            <path d="M23 42c5 4.5 13 4.5 18 0"/>
-          </g>
-          <!-- gyroscope rings (the Face ID "spin") -->
-          <g class="g" id="gGlow" filter="url(#glow)" stroke="url(#gyro)" stroke-width="4" opacity="0">
-            <circle cx="32" cy="32" r="28"/>
-          </g>
-          <ellipse class="g" id="gRingA" cx="32" cy="32" rx="28" ry="28" stroke="url(#gyro)" stroke-width="3"/>
-          <ellipse class="g" id="gRingB" cx="32" cy="32" rx="28" ry="28" stroke="url(#gyro)" stroke-width="3"/>
-          <!-- final ring + phone -->
-          <circle class="g" id="gCircle" cx="32" cy="32" r="30.5" stroke="#007aff" stroke-width="3.3"/>
-          <g clip-path="url(#circleClip)">
-            <g class="g" id="gPhone">
-              <rect x="20.5" y="13" width="23" height="40" rx="5.5" fill="rgba(0,122,255,.16)" stroke="#007aff" stroke-width="2.6"/>
-              <rect x="27.5" y="14.6" width="9" height="3" rx="1.5" fill="#007aff"/>
-            </g>
-          </g>
-        </svg>
-      </div>
-      <div class="pay-label" id="payLabel"></div>
-    </div>
-    <button class="pay-code" id="payCode">Mit Code bezahlen</button>
-    <div class="pay-peek" id="payPeek"></div>
-  </div>
-</div>
-
+<div id="app"></div>
+<nav class="tabs" id="tabs" hidden><div class="in">
+  <button data-t="home" aria-label="Home"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2.5 11h2.8v9.5h5.2v-6h3v6h5.2V11h2.8z"/></svg></button>
+  <button data-t="talent" aria-label="Talent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6.5 8-6.5s7 2 8 6.5"/></svg></button>
+  <button data-t="music" aria-label="Musik"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 6.5A2.5 2.5 0 0 1 4.5 4h5l2 2.5h8A2.5 2.5 0 0 1 22 9v9.5a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 18.5z"/></svg></button>
+  <button data-t="money" aria-label="Geld"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-1-1.7-1.5-3-1.5-1.7 0-3 .9-3 2.2 0 3 6 1.6 6 4.4 0 1.3-1.3 2.2-3 2.2-1.4 0-2.6-.6-3.1-1.6M12 6v1.7m0 8.6V18"/></svg></button>
+  <button data-t="settings" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</div></nav>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
+<input type="file" id="file" accept="image/*" hidden>
 
 <script>
 (() => {
-  const KEY = 'wallet.cards.v1';
-  const SWATCHES = [
-    { c: 'linear-gradient(135deg,#1c1c1e,#3a3a3c)', dark: false },
-    { c: 'linear-gradient(135deg,#0a3d91,#2f7be0 60%,#58a6ff)', dark: false },
-    { c: 'linear-gradient(135deg,#1f9d55,#3cc96b)', dark: false },
-    { c: 'linear-gradient(135deg,#5b0f1a,#9b1c2c 55%,#c3343f)', dark: false },
-    { c: 'linear-gradient(135deg,#f6d1e6,#e8b6f0 35%,#bfe3f7 70%,#f7e7a8)', dark: true },
-    { c: 'linear-gradient(135deg,#ececec,#ffffff 50%,#d9d9d9)', dark: true },
-    { c: 'linear-gradient(135deg,#b8860b,#e6c35c 50%,#a87b10)', dark: true },
-    { c: 'linear-gradient(135deg,#5e2ced,#a855f7)', dark: false },
-    { c: 'linear-gradient(135deg,#ff6a00,#ff9f43)', dark: false },
-    { c: 'linear-gradient(135deg,#6e6e73,#a1a1a6 50%,#6e6e73)', dark: false },
+  'use strict';
+  /* =====================================================================
+     Data
+     ===================================================================== */
+  const KEY = 'rapstar.v1';
+  const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  const GRADES = ['F','D-','D','D+','C-','C','C+','B-','B','B+','A-','A','A+'];
+  const TALENTS = [
+    ['studio', 'Studio'], ['charisma', 'Charisma'], ['musicality', 'Musicality'], ['rhythm', 'Rhythm'],
+    ['songwriting', 'Songwriting'], ['virality', 'Virality'], ['video', 'Video'],
   ];
-  const DEFAULTS = [
-    { name: 'Cash', last4: '', balance: '11,60 €', network: 'none', color: 0 },
-    { name: 'Kreditkarte', last4: '4821', network: 'mc', color: 4 },
-    { name: 'Girokonto', last4: '0937', network: 'giro', color: 5 },
-    { name: 'Freedom', last4: '2210', network: 'visa', color: 1 },
-    { name: 'Debit', last4: '7765', network: 'visa', color: 2 },
-    { name: 'Rewards', last4: '5502', network: 'mc', color: 3 },
+  const BUSINESS = [['leadership', 'Leadership'], ['marketing', 'Marketing'], ['negotiation', 'Negotiation']];
+  const BUSINESS_FAME = 54; // grade B- unlocks business skills
+
+  const HIRES = {
+    artistry: [[null, 0, 0], ['Vocal Coach Mia', 35, 1500], ['Toni Faust', 60, 12000], ['Nyla Grey', 80, 75000], ['Kilo Mane', 95, 350000]],
+    writing: [[null, 0, 0], ['Ghostwriter Ben', 35, 1000], ['Lex Pen', 60, 10000], ['Sami Drift', 80, 60000], ['Baba Zed', 95, 300000]],
+    studio: [[null, 0, 0], ['Keller Studio', 35, 800], ['Blue Room', 60, 8000], ['Skyline Studios', 80, 50000], ['Gold Lane Studios', 95, 250000]],
+  };
+  const DIRECTORS = [[null, 0, 0], ['Handycam Hasan', 40, 2000], ['Mira Vision', 65, 25000], ['Neon Frames', 82, 150000], ['Oscar Klein', 95, 600000]];
+  const STYLES = [
+    ['Lyric', 0, 0, 'A raw, low-budget video that leans on authenticity and creativity over polish.'],
+    ['Performance', 5000, .12, 'You and a mic in front of a wall of lights. Clean, loud, effective.'],
+    ['Story', 25000, .22, 'A short film with actors, locations and a twist at the end.'],
+    ['Cinematic', 120000, .35, 'Blockbuster budget, drones, cars and a skyline at sunset.'],
+  ];
+  const NPC_NAMES = ['Kay Brix', 'Lio Vance', 'MC Salvo', 'Jaye Moon', 'Ricco 7', 'Nyla Grey', 'Baba Zed', 'Toni Faust', 'Kilo Mane', 'Sami Drift', 'Yung Pfand', 'Leni Lux', 'Dari Blue', 'Ozan 44', 'Vex Royal', 'Mona Kash'];
+  const WORDS1 = ['Berlin', 'Nachts', 'Kein', 'Gold', 'Blaue', 'Letzte', 'Mama', 'Paris', 'Benz', 'Hoch', 'Million', 'Block', 'Neon', 'Ghetto', 'Winter', 'Bando'];
+  const WORDS2 = ['Lichter', 'Liebe', 'Kette', 'Träume', 'Flex', 'Runde', 'Stadt', 'Pläne', 'Tränen', 'Zeit', 'Gang', 'Regen', 'Wellen', 'Herz', 'Story', 'Drip'];
+  const FESTIVALS = [
+    ['Splash Jam', 'Gräfenhainichen, Germany', 60000, 4], ['Frauenfeld Openair', 'Frauenfeld, Switzerland', 180000, 18],
+    ['Roskilde', 'Roskilde, Denmark', 130000, 25], ['Sziget', 'Óbuda Island, Budapest, Hungary', 450000, 35],
+    ['Donauinselfest', 'Vienna, Austria', 2600000, 30], ['Rolling Loud', 'Miami, Florida', 260000, 50],
+    ['Wireless', 'London, England', 150000, 45], ['Newport Jazz Festival', 'Newport, Rhode Island', 30000, 40],
+    ['Coachella', 'Indio, California', 710000, 70], ['Halftime Show', 'Super Bowl', 4600000, 92],
+  ];
+  const LABELS = ['Kopfnicker Records', 'Blackbox Music', 'Asphalt Gold', 'Nordlicht Entertainment', 'Crown Tier', 'Sunset Boulevard Records'];
+  const COVERS = [
+    'linear-gradient(160deg,#f3d3c9 0%,#c7b6d8 45%,#8fb3cf 100%)',
+    'radial-gradient(circle at 50% 40%,#ffb36b 0%,#a14b3a 35%,#1d1d2a 75%)',
+    'linear-gradient(180deg,#9fd0ef 0%,#f1e2b5 55%,#c48d4e 100%)',
+    'radial-gradient(circle at 30% 30%,#ffd46b 0%,#ff4d6d 40%,#3b1056 85%)',
+    'linear-gradient(135deg,#111 0%,#444 100%)',
+    'linear-gradient(135deg,#2bd2a0 0%,#1a4f8a 100%)',
   ];
 
-  const $ = (id) => document.getElementById(id);
+  const $ = (s, r = document) => r.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   const uid = () => Math.random().toString(36).slice(2, 10);
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const rint = (a, b) => Math.floor(rnd(a, b + 1));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const de = (n) => Math.round(n).toLocaleString('de-DE');
+  function compact(n) {
+    n = Math.round(n);
+    const a = Math.abs(n);
+    if (a >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+    if (a >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (a >= 1e4) return Math.round(n / 1e3) + 'K';
+    if (a >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(n);
+  }
+  const euro = (n) => de(n) + ' €';
+  function euroK(n) {
+    if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + ' €B';
+    if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + ' €M';
+    if (Math.abs(n) >= 1e3) return Math.round(n / 1e3) + ' €K';
+    return Math.round(n) + ' €';
+  }
 
-  let cards = load();
-  let currentId = null;
-  let editingId = null;
-  let draft = null;
+  /* =====================================================================
+     State
+     ===================================================================== */
+  let S = null;
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Speicher voll – Cover-Bilder verkleinern'); } }
+  function load() { try { const r = localStorage.getItem(KEY); if (r) S = JSON.parse(r); } catch (e) {} }
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    return DEFAULTS.map((c) => ({ id: uid(), image: null, ...c }));
+  function makeNpcs() {
+    return NPC_NAMES.map((n) => ({ name: n, listeners: Math.round(10 ** rnd(4.2, 7.6)), hit: songName() }));
   }
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(cards)); return true; }
-    catch (e) { toast('Speicher voll – kleineres Bild versuchen'); return false; }
-  }
-  function toast(msg) {
-    const t = $('toast'); t.textContent = msg; t.classList.add('show');
-    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+  function songName() { return Math.random() < .5 ? `${pick(WORDS1)} ${pick(WORDS2)}` : `${pick(WORDS1).toLowerCase()} x ${pick(NPC_NAMES).split(' ')[0].toLowerCase()}`; }
+
+  function newGame(name, rich) {
+    S = {
+      v: 1, name: name || 'Run It Up',
+      cash: 2500, energy: 100, date: '2026-01-05', week: 0,
+      talents: { studio: 1, charisma: 5, musicality: 5, rhythm: 5, songwriting: 5, virality: 5, video: 5, leadership: 1, marketing: 1, negotiation: 1 },
+      listeners: 0, followers: 50, history: [0],
+      songs: [], albums: [], inbox: [], festivals: [], posts: [],
+      npcs: makeNpcs(),
+      trend: 'TRAP', trendWeeks: 6,
+      label: null, partner: null, awards: [],
+      lastIncome: { streams: 0, label: 0, streamsCount: 0 },
+      earnings: { streams: 0, festivals: 0, tours: 0, jobs: 0 },
+      lastTour: -99,
+    };
+    welcomeMail();
+    if (rich) makeRich();
+    save();
   }
 
-  function netHTML(n) {
-    if (n === 'visa') return '<span class="net-visa">VISA</span>';
-    if (n === 'mc') return '<span class="net-mc"><i></i><i></i></span>';
-    if (n === 'amex') return '<span class="net-text">AMEX</span>';
-    if (n === 'giro') return '<span class="net-text" style="font-style:italic;text-transform:lowercase">girocard</span>';
-    return '';
+  function makeRich() {
+    Object.assign(S, { cash: 442041757, date: '2033-09-16', week: 400, listeners: 35535528, followers: 4200000 });
+    Object.assign(S.talents, { studio: 100, charisma: 1, musicality: 100, rhythm: 100, songwriting: 100, virality: 52, video: 48, leadership: 10 });
+    const al = [['Free Sex', 0], ['Berlin Hates You', 2], ['Beeil Dich Wir Werden Erwachsen', 3]].map(([n, c]) => ({ id: uid(), name: n, cover: COVERS[c], week: 380 }));
+    S.albums = al;
+    const songs = [
+      ["suv's x djunis", 0, 73, 1922194699], ['bentayga x toujour', 1, 72, 1400000000], ['work it x fdg', 2, 70, 1300000000],
+      ['boom! x c4rl', null, 73, 342601697], ['361 x ufo', null, 67, 117633970], ['kalte gasse x 6eyno', null, 71, 342226685],
+      ['aszendent x beslik', null, 63, 200628717], ['berliner mf x djunis', null, 71, 324588150], ['ysp x c4rl', null, 68, 433117053],
+      ['sterling x c4rl', null, 67, 446169863], ['tuesday x 234', null, 67, 843493337], ['dienstag x 234', 0, 64, 806514528],
+    ];
+    S.songs = songs.map(([t, a, q, st], i) => {
+      const weekly = []; let w = st / 60;
+      for (let k = 0; k < 24; k++) { weekly.unshift(Math.round(w * rnd(.8, 1.2))); w *= 1.04; }
+      return { id: uid(), title: t, albumId: a == null ? null : al[a].id, quality: q, genre: 'TRAP', feat: null, week: 381 + i + (i > 5 ? 6 : 0),
+        streams: st, revenue: st * .001, weekly, debut: Math.round(st / 18), video: null };
+    });
+    S.history = Array.from({ length: 52 }, (_, i) => Math.round(25163590 + (i / 51) * 10300000 + rnd(-3e5, 3e5)));
+    S.history[51] = S.listeners;
+    S.awards = [{ year: 2031, name: 'Song des Jahres', what: "suv's x djunis" }];
   }
-  function cardHTML(c) {
-    if (c.image) {
-      return `<div class="card" data-id="${c.id}" style="background-image:url('${c.image}')"></div>`;
+
+  /* ---------- derived values ---------- */
+  const fameScore = () => clamp(Math.round(Math.log10(S.listeners + S.followers * .5 + 1) / 7.9 * 100), 0, 100);
+  const grade = (f = fameScore()) => GRADES[clamp(Math.floor(f / (100 / GRADES.length)), 0, GRADES.length - 1)];
+  const maxEnergy = () => 100 + S.talents.leadership;
+  const talentTotal = () => Math.round(Object.values(S.talents).reduce((a, b) => a + b, 0) / 10);
+  const totalListens = () => S.songs.reduce((a, s) => a + s.streams, 0);
+  const selfSkill = {
+    artistry: () => Math.round((S.talents.charisma + S.talents.musicality + S.talents.rhythm) / 3),
+    writing: () => S.talents.songwriting,
+    studio: () => S.talents.studio,
+    video: () => S.talents.video,
+  };
+  const songAlbum = (s) => S.albums.find((a) => a.id === s.albumId);
+  const songCover = (s) => (songAlbum(s) || {}).cover || COVERS[Math.abs(hash(s.id)) % COVERS.length];
+  const coverCss = (c) => (c && c.startsWith('data:') ? `url('${c}')` : c);
+  function hash(t) { let h = 0; for (const ch of String(t)) h = (h * 31 + ch.charCodeAt(0)) | 0; return h; }
+  function dateObj(iso = S.date) { const [y, m, d] = iso.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); }
+  const dateShort = (iso) => { const d = dateObj(iso); return `${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCDate()).padStart(2, '0')}/${d.getUTCFullYear()}`; };
+  const year = () => dateObj().getUTCFullYear();
+  const labelShare = () => (S.label ? S.label.keep : 1);
+
+  /* =====================================================================
+     Weekly simulation
+     ===================================================================== */
+  function songWeekStreams(s) {
+    const age = S.week - s.week - 1; // 0 = release week
+    const feat = s.feat ? (S.npcs.find((n) => n.name === s.feat) || { listeners: 0 }).listeners : 0;
+    let audience = S.listeners + S.followers * .5 + 2000 + feat * .25 * Math.max(0, 1 - age / 8);
+    audience *= 1 - clamp(audience / 9e7, 0, .9); // market saturation
+    const q = (s.quality / 100) ** 1.6;
+    let mult = (1 + S.talents.virality / 150) * (1 + S.talents.marketing / 120);
+    if (S.label) mult *= S.label.boost;
+    if (s.video) mult *= 1 + s.video.bonus * Math.max(.3, 1 - (S.week - s.video.week) / 20);
+    if (s.genre === S.trend) mult *= 1.1;
+    const decay = .87 ** age + .03;
+    return Math.round(audience * 1.15 * q * mult * decay * rnd(.85, 1.2));
+  }
+
+  function endWeek() {
+    const report = { streams: 0, rev: 0, labelCut: 0, events: [] };
+    const fameBefore = grade();
+    const lBefore = S.listeners;
+    S.week++;
+    const d = dateObj(); d.setUTCDate(d.getUTCDate() + 7);
+    const newDate = d.toISOString().slice(0, 10);
+    const yearChanged = newDate.slice(0, 4) !== S.date.slice(0, 4);
+    S.date = newDate;
+
+    // streams & money
+    let weekTotal = 0;
+    S.songs.forEach((s) => {
+      if (S.week - s.week < 1) return;
+      const st = songWeekStreams(s);
+      const gross = st * .004;
+      s.streams += st; s.revenue += gross * labelShare();
+      s.weekly.push(st); if (s.weekly.length > 26) s.weekly.shift();
+      if (S.week - s.week === 1) s.debut = st;
+      weekTotal += st;
+      report.rev += gross * labelShare();
+      report.labelCut += gross * (1 - labelShare());
+    });
+    report.streams = weekTotal;
+    S.cash += report.rev;
+    S.earnings.streams += report.rev;
+
+    // listeners & followers
+    const target = weekTotal * .55 + S.followers * .15;
+    S.listeners = Math.round(S.listeners * .55 + target * .45);
+    S.followers = Math.round(S.followers * 1.002 + weekTotal * .004 * (1 + S.talents.charisma / 100));
+    S.history.push(S.listeners); if (S.history.length > 52) S.history.shift();
+
+    // relationship
+    if (S.partner) {
+      S.partner.love = clamp(S.partner.love - 3, 0, 100);
+      if (S.partner.love <= 0) { report.events.push(`${S.partner.name} hat Schluss gemacht.`); S.partner = null; }
     }
-    const sw = SWATCHES[c.color] || SWATCHES[0];
-    return `<div class="card ${sw.dark ? 'dark-text' : ''}" data-id="${c.id}" style="background:${sw.c}">
-      <div class="c-name">${esc(c.name)}</div>
-      ${c.balance ? `<div class="c-bal">${esc(c.balance)}</div>` : ''}
-      ${c.last4 ? `<div class="c-num">•••• ${esc(c.last4)}</div>` : ''}
-      <div class="c-net">${netHTML(c.network)}</div>
+    // label term
+    if (S.label) { S.label.weeksLeft--; if (S.label.weeksLeft === 0) report.events.push(`Dein Vertrag mit ${S.label.name} ist ausgelaufen – du kannst ihn jetzt kündigen oder weiterlaufen lassen.`); }
+
+    // trend
+    if (--S.trendWeeks <= 0) {
+      S.trend = S.trend === 'TRAP' ? 'CLEAN' : 'TRAP'; S.trendWeeks = rint(4, 9);
+      report.events.push(`Neuer Trend: ${S.trend} ist gerade angesagt.`);
+    }
+    // npc drift
+    S.npcs.forEach((n) => { n.listeners = Math.round(n.listeners * rnd(.96, 1.05)); if (Math.random() < .15) n.hit = songName(); });
+
+    // awards at new year
+    if (yearChanged) awardsCeremony(report);
+
+    // mail
+    const before = S.inbox.length;
+    weeklyMail();
+    const newMail = S.inbox.length - before;
+    if (newMail) report.events.push(`${newMail} neue Nachricht${newMail > 1 ? 'en' : ''} in der Inbox.`);
+
+    S.energy = maxEnergy();
+    S.lastIncome = { streams: report.rev, label: report.labelCut, streamsCount: weekTotal };
+    const fameAfter = grade();
+    if (fameAfter !== fameBefore) report.events.unshift(`Fame: ${fameBefore} → ${fameAfter}`);
+    save();
+    showReport(report, lBefore);
+  }
+
+  function awardsCeremony(report) {
+    const y = year() - 1;
+    const yearStreams = (s) => s.weekly.slice(-52).reduce((a, b) => a + b, 0);
+    const best = S.songs.slice().sort((a, b) => yearStreams(b) - yearStreams(a))[0];
+    const topNpc = Math.max(...S.npcs.map((n) => n.listeners)) * 6;
+    const won = [];
+    if (best && yearStreams(best) > topNpc) won.push({ year: y, name: 'Song des Jahres', what: best.title });
+    if (fameScore() >= 85) won.push({ year: y, name: 'Artist des Jahres', what: S.name });
+    if (S.week < 60 && fameScore() >= 35) won.push({ year: y, name: 'Newcomer des Jahres', what: S.name });
+    const albumsY = S.albums.map((a) => ({ a, st: S.songs.filter((s) => s.albumId === a.id).reduce((x, s) => x + yearStreams(s), 0) })).sort((p, q) => q.st - p.st);
+    if (albumsY[0] && albumsY[0].st > topNpc * 2) won.push({ year: y, name: 'Album des Jahres', what: albumsY[0].a.name });
+    S.awards.push(...won);
+    if (won.length) { S.followers = Math.round(S.followers * (1 + .05 * won.length)); report.events.push(`🏆 Awards ${y}: ${won.map((w) => w.name).join(', ')}!`); }
+    else report.events.push(`Awards ${y}: diesmal leer ausgegangen.`);
+  }
+
+  /* ---------- inbox generation ---------- */
+  function mail(from, tag, subj, body, action) {
+    S.inbox.unshift({ id: uid(), from, tag, subj, body, date: S.date, read: false, done: false, action: action || null });
+    if (S.inbox.length > 60) S.inbox.length = 60;
+  }
+  function welcomeMail() {
+    mail('Mama', 'FAN', 'Ich bin stolz auf dich', `Egal was alle sagen, ${S.name}: mach deine Musik. Und iss was Richtiges.`);
+  }
+  function weeklyMail() {
+    const f = fameScore();
+    const anySong = S.songs.length ? pick(S.songs).title : null;
+    if (anySong && Math.random() < .25 + f / 200) {
+      mail('Fan Mail', 'FAN', pick([`Bro. "${anySong}".`, `${anySong} läuft bei mir auf Repeat`, `Ich höre ${anySong} im Bus`]),
+        pick([`I heard your music and immediately started overthinking my whole life.`, `Mein ganzer Jahrgang feiert dich. Bitte mehr davon.`, `${S.name} you could steal my wallet and I'd say thank you for touching it.`]));
+    }
+    if (f >= 12 && Math.random() < .3) {
+      const pool = S.npcs.filter((n) => n.listeners < (S.listeners + 2e4) * 3).sort(() => Math.random() - .5);
+      const n = pool[0];
+      if (n) mail(n.name, 'FEATURE', `${S.name}, you free to hop on a track? - ${n.name}`, `I got the beat, the vibe, the hook… just need you to complete it, ${S.name}.`, { type: 'feature', npc: n.name });
+    }
+    const fes = FESTIVALS.filter((x) => x[3] <= f && !S.festivals.some((p) => p.name === x[0] && p.year === year()) && !S.inbox.some((m) => m.action && m.action.type === 'festival' && !m.done && m.action.name === x[0]));
+    if (fes.length && Math.random() < .12 + f / 250) {
+      const x = pick(fes);
+      const fee = Math.round((x[2] * .05 + S.listeners * .02) * (1 + S.talents.negotiation / 100) / 100) * 100;
+      mail(x[0], 'FESTIVAL', `You're on ${x[0]}'s Booking Radar`, `We are reaching out with interest in adding you to the ${x[0]} lineup. Your sound feels fresh, your audience is engaged, and we believe you would be a great fit.`,
+        { type: 'festival', name: x[0], place: x[1], attended: x[2], fee });
+    }
+    if (!S.label && f >= 30 && Math.random() < .12) {
+      const offer = makeLabelOffer();
+      mail(offer.name, 'LABEL', 'Wir wollen dich signen', `${offer.name} bietet dir ${euro(offer.advance)} Vorschuss. Du behältst ${Math.round(offer.keep * 100)} % deiner Streaming-Einnahmen, dafür pushen wir dich überall (+${Math.round((offer.boost - 1) * 100)} % Streams).`, { type: 'label', offer });
+    }
+  }
+  function makeLabelOffer() {
+    const neg = S.talents.negotiation;
+    return { name: pick(LABELS), advance: Math.round((S.listeners * .4 + 8000) * (1 + neg / 80) / 1000) * 1000, keep: +clamp(.25 + neg / 400 + rnd(0, .1), .2, .6).toFixed(2), boost: +(1.3 + rnd(0, .3)).toFixed(2), weeks: 52 };
+  }
+
+  /* =====================================================================
+     Navigation & rendering
+     ===================================================================== */
+  let tab = 'home';
+  let stack = [];        // pushed screens [{name, p}]
+  let draft = null;      // form state for create screens
+  let after = [];
+  const app = $('#app');
+
+  function go(name, p = {}) { stack.push({ name, p }); draft = null; render(true); }
+  function back() { stack.pop(); draft = null; render(true); }
+  function setTab(t) { tab = t; stack = []; draft = null; render(true); }
+  document.querySelectorAll('#tabs button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.t)));
+
+  const IC = {
+    back: '<svg viewBox="0 0 12 20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>',
+    up: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3 4 12h5v9h6v-9h5z"/></svg>',
+    right: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M21 12 12 4v5H3v6h9v5z"/></svg>',
+    larr: '<svg viewBox="0 0 26 20" fill="#5d646c"><path d="M1 10 11 1v6h14v6H11v6z"/></svg>',
+    rarr: '<svg viewBox="0 0 26 20" fill="#5d646c"><path d="M25 10 15 1v6H1v6h14v6z"/></svg>',
+    plus: '<svg viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>',
+    lock: '<svg viewBox="0 0 22 26" fill="#5d646c"><path d="M5 11V7a6 6 0 0 1 12 0v4h1.5A2.5 2.5 0 0 1 21 13.5v9a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 1 22.5v-9A2.5 2.5 0 0 1 3.5 11zm3 0h6V7a3 3 0 0 0-6 0z"/></svg>',
+    x: '<svg viewBox="0 0 16 16" width="16" height="16"><path d="M2 2l12 12M14 2 2 14" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg>',
+    lockSmall: '<svg viewBox="0 0 22 26" width="16" height="18" fill="#9aa0a6"><path d="M5 11V7a6 6 0 0 1 12 0v4h1.5A2.5 2.5 0 0 1 21 13.5v9a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 1 22.5v-9A2.5 2.5 0 0 1 3.5 11zm3 0h6V7a3 3 0 0 0-6 0z"/></svg>',
+  };
+
+  function topBar() {
+    const d = dateObj();
+    return `<div class="top">
+      <div class="money">${euro(S.cash)}<br><span class="en">⚡${S.energy} | ${maxEnergy()}</span></div>
+      <div class="date">${MONTHS[d.getUTCMonth()]}<small>${d.getUTCDate()}, ${d.getUTCFullYear()}</small></div>
+      <button class="endweek" data-a="endweek">END WEEK</button>
+    </div>`;
+  }
+  function pTitle(title, { energy = false, norm = false, extra = '' } = {}) {
+    return `<div class="ptitle"><button class="back" data-a="back">${IC.back}</button>${energy ? `<span class="en">⚡ ${S.energy}</span>` : ''}<h1 class="${norm ? 'norm' : ''}">${esc(title)}</h1>${extra}</div>`;
+  }
+
+  function render(scrollTop) {
+    if (!S) { renderStart(); return; }
+    const top = stack[stack.length - 1];
+    $('#tabs').hidden = !!(top && top.name === 'inbox');
+    document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === tab));
+    app.classList.toggle('push', !!top);
+    app.innerHTML = top ? (SCREENS[top.name] || (() => ''))(top.p) : topBar() + TABS[tab]();
+    if (scrollTop) window.scrollTo(0, 0);
+    after.forEach((f) => f()); after = [];
+  }
+
+  /* ---------- start ---------- */
+  function renderStart() {
+    $('#tabs').hidden = true;
+    app.classList.add('push');
+    app.innerHTML = `<div class="start">
+      <h1>Rap<br>Star<br><span style="color:#565d65">Sim</span></h1>
+      <p>Schreib Songs, bau dein Studio aus, sammel Streams und Fans, spiel Festivals und werd zur Legende. Jede Woche zählt – drück <b>END WEEK</b>, um sie abzuschließen.</p>
+      <div class="sub" style="text-align:left;margin-top:30px">Dein Künstlername</div>
+      <div class="inp"><input id="startName" maxlength="24" placeholder="z. B. Run It Up" value="Run It Up"></div>
+      <button class="big-btn c-green" data-a="start" style="margin-top:22px">Karriere starten</button>
+      <button class="big-btn c-gray" data-a="startRich">Reich starten (wie im Video)</button>
+      <p class="note" style="text-align:center">Gespeichert wird automatisch auf diesem Handy.</p>
     </div>`;
   }
 
-  /* ---------- Home ---------- */
-  function render() {
-    const s = $('stack');
-    s.innerHTML = cards.length
-      ? cards.map(cardHTML).join('')
-      : '<div class="empty">Noch keine Karten.<br>Tippe auf + um eine Karte hinzuzufügen.</div>';
-  }
-  $('stack').addEventListener('click', (e) => {
-    const el = e.target.closest('.card'); if (!el) return;
-    openDetail(el.dataset.id);
-  });
+  /* =====================================================================
+     Tabs
+     ===================================================================== */
+  const TABS = {
+    home() {
+      const f = fameScore();
+      const unread = S.inbox.filter((m) => !m.read).length;
+      const h = S.history;
+      const delta = S.listeners - h[0];
+      return `
+      <div class="fame"><b>FAME | ${grade(f)}</b><div class="track"><i style="width:${Math.max(4, f)}%"></i></div></div>
+      <div class="platforms">
+        <div class="plat" style="background:#1fbf5c"><svg viewBox="0 0 28 28" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round"><path d="M7 11v6M11.5 8v12M16 10v8M20.5 12.5v3"/></svg></div>
+        <div class="plat" style="background:#fb2c48"><svg viewBox="0 0 28 28" fill="#fff"><path d="M20 4v14.5a3.5 3.5 0 1 1-2.2-3.25V9.2L11 10.6v9.9a3.5 3.5 0 1 1-2.2-3.25V6.5z"/></svg></div>
+        <div class="plat" style="background:#0b0b0b;box-shadow:0 0 0 1px #333"><svg viewBox="0 0 28 28" fill="#fff"><path d="M10 7l12 7-12 7z"/></svg></div>
+      </div>
+      <div class="listeners"><span class="plus" style="color:${delta < 0 ? 'var(--salmon)' : 'var(--cash)'}">${delta >= 0 ? '+' : ''}${de(delta)}</span> Listeners<small>LAST 12 MONTHS</small></div>
+      ${chartSvg(h)}
+      <button class="pill" data-a="go" data-s="inbox">Inbox <span class="cnt">(${unread})</span></button>
+      <button class="pill" data-a="go" data-s="relationship">Relationship</button>
+      <button class="pill" data-a="go" data-s="social">Social</button>
+      <button class="pill" data-a="go" data-s="trends">Trends</button>
+      <button class="pill" data-a="go" data-s="label">Record Label</button>`;
+    },
 
-  /* ---------- Detail ---------- */
-  function openDetail(id) {
-    const c = cards.find((x) => x.id === id); if (!c) return;
-    currentId = id;
-    $('detailCard').innerHTML = cardHTML(c);
-    const net = { visa: 'VISA', mc: 'Mastercard', amex: 'American Express', giro: 'girocard', none: '—' }[c.network] || '—';
-    $('detailInfo').innerHTML = `
-      <div class="row"><span>Name</span><span class="val">${esc(c.name || '—')}</span></div>
-      <div class="row"><span>Kartennummer</span><span class="val">${c.last4 ? '•••• ' + esc(c.last4) : '—'}</span></div>
-      <div class="row"><span>Netzwerk</span><span class="val">${net}</span></div>
-      ${c.balance ? `<div class="row"><span>Guthaben</span><span class="val">${esc(c.balance)}</span></div>` : ''}`;
-    $('detail').classList.add('open');
-  }
-  $('detailBack').onclick = () => $('detail').classList.remove('open');
-  $('detailPay').onclick = () => openPay(currentId);
-  $('detailEdit').onclick = () => openSheet(currentId);
-  $('detailDelete').onclick = () => {
-    if (!confirm('Diese Karte entfernen?')) return;
-    cards = cards.filter((c) => c.id !== currentId);
-    save(); render();
-    $('detail').classList.remove('open');
-  };
-
-  /* ---------- Add / Edit ---------- */
-  function openSheet(id) {
-    editingId = id || null;
-    const src = id ? cards.find((c) => c.id === id) : null;
-    draft = src ? { ...src } : { id: uid(), name: '', last4: '', balance: '', network: 'visa', color: 1, image: null };
-    $('sheetTitle').textContent = id ? 'Karte bearbeiten' : 'Karte hinzufügen';
-    $('fName').value = draft.name; $('fLast4').value = draft.last4; $('fBal').value = draft.balance || ''; $('fNet').value = draft.network;
-    renderSwatches(); updatePreview();
-    $('backdrop').classList.add('open'); $('sheet').classList.add('open');
-  }
-  function closeSheet() {
-    $('backdrop').classList.remove('open'); $('sheet').classList.remove('open');
-    $('file').value = '';
-  }
-  function renderSwatches() {
-    $('swatches').innerHTML = SWATCHES.map((s, i) =>
-      `<button class="sw ${i === draft.color && !draft.image ? 'sel' : ''}" data-i="${i}" style="background:${s.c}"></button>`).join('');
-  }
-  function updatePreview() {
-    $('preview').innerHTML = cardHTML({ ...draft, name: draft.name || 'Neue Karte' });
-    $('removeImg').hidden = !draft.image;
-  }
-  $('swatches').addEventListener('click', (e) => {
-    const b = e.target.closest('.sw'); if (!b) return;
-    draft.color = +b.dataset.i; draft.image = null;
-    renderSwatches(); updatePreview();
-  });
-  ['fName', 'fLast4', 'fBal', 'fNet'].forEach((id) => $(id).addEventListener('input', () => {
-    if (id === 'fLast4') $(id).value = $(id).value.replace(/\D/g, '').slice(0, 4);
-    draft.name = $('fName').value.trim();
-    draft.last4 = $('fLast4').value;
-    draft.balance = $('fBal').value.trim();
-    draft.network = $('fNet').value;
-    updatePreview();
-  }));
-  $('uploadBtn').onclick = () => $('file').click();
-  $('removeImg').onclick = () => { draft.image = null; renderSwatches(); updatePreview(); };
-  $('file').addEventListener('change', async () => {
-    const f = $('file').files[0]; if (!f) return;
-    try { draft.image = await cropToCard(f); renderSwatches(); updatePreview(); }
-    catch (e) { toast('Bild konnte nicht geladen werden'); }
-  });
-  $('addBtn').onclick = () => openSheet(null);
-  $('sheetCancel').onclick = closeSheet;
-  $('backdrop').onclick = closeSheet;
-  $('sheetSave').onclick = () => {
-    if (!draft.name && !draft.image) { $('fName').focus(); toast('Bitte einen Namen eingeben'); return; }
-    const prev = cards.slice();
-    if (editingId) cards = cards.map((c) => (c.id === editingId ? draft : c));
-    else cards.push(draft);
-    if (!save()) { cards = prev; return; }
-    render(); closeSheet();
-    if (editingId) openDetail(editingId);
-  };
-
-  function cropToCard(file) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        const ratio = 1.586;
-        let sw = img.naturalWidth, sh = sw / ratio;
-        if (sh > img.naturalHeight) { sh = img.naturalHeight; sw = sh * ratio; }
-        const sx = (img.naturalWidth - sw) / 2, sy = (img.naturalHeight - sh) / 2;
-        const w = Math.round(Math.min(900, sw)), h = Math.round(w / ratio);
-        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-        cv.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-        URL.revokeObjectURL(url);
-        resolve(cv.toDataURL('image/jpeg', 0.82));
+    talent() {
+      const lockedBiz = fameScore() < BUSINESS_FAME;
+      const row = ([k, label], locked) => {
+        const v = S.talents[k];
+        const isStudio = k === 'studio';
+        const cost = v + 1;
+        const btn = locked
+          ? `<button class="up" disabled>${IC.lockSmall}</button>`
+          : isStudio
+            ? `<button class="up orange" data-a="go" data-s="studio">${IC.right}</button>`
+            : `<button class="up" data-a="train" data-k="${k}" ${v >= 100 ? 'disabled' : ''}>${IC.up}</button>`;
+        return `<div class="trow ${locked ? 'locked' : ''}">
+          <div class="lv"><b>${v}</b>${isStudio || v >= 100 ? '' : `<small>${cost} <span class="bolt">⚡</span></small>`}</div>
+          <div class="mid"><span>${label}</span><i><em style="width:${v}%"></em></i></div>${btn}</div>`;
       };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(); };
-      img.src = url;
-    });
+      return `<div class="title"><span class="dim">${talentTotal()}</span> Talent</div>
+        ${TALENTS.map((t) => row(t, false)).join('')}
+        <div class="section">${lockedBiz ? IC.lock : ''} Business</div>
+        ${lockedBiz ? `<p class="note" style="margin:-6px 0 14px">Wird mit Fame ${GRADES[Math.ceil(BUSINESS_FAME / (100 / GRADES.length))]} freigeschaltet.</p>` : ''}
+        ${BUSINESS.map((t) => row(t, lockedBiz)).join('')}
+        <p class="note">Leadership: +1 max. Energie pro Level · Marketing: mehr Streams · Negotiation: bessere Gagen & Deals.</p>`;
+    },
+
+    music() {
+      const songs = S.songs.slice().sort((a, b) => b.streams - a.streams).slice(0, 3);
+      const albums = albumStats().slice(0, 3);
+      return `<div class="title"><span class="dim">${compact(totalListens())}</span> Listens</div>
+        <div class="listhead"><span>Most popular songs</span><button class="chip c-orange" data-a="go" data-s="newSong">New Song</button></div>
+        <div class="toplist">${songs.length ? songs.map((s, i) => `<div><small>${i + 1}</small>${esc(s.title)}<em>, ${compact(s.streams)}</em></div>`).join('') : '<p class="empty">Noch keine Songs. Tipp auf NEW SONG.</p>'}</div>
+        <div class="listhead"><span>Most popular albums</span><button class="chip c-orange" data-a="go" data-s="newAlbum">New Album</button></div>
+        <div class="toplist">${albums.length ? albums.map((a, i) => `<div><small>${i + 1}</small>${esc(a.album.name)}<em>, ${compact(a.streams)}</em></div>`).join('') : '<p class="empty">Noch keine Alben.</p>'}</div>
+        <div class="row2"><button class="chip c-olive" data-a="go" data-s="awards" style="width:134px">Awards</button><button class="chip c-teal" data-a="go" data-s="songboard" style="width:134px">Songboard</button></div>
+        ${[['songs', 'Songs'], ['albums', 'Albums'], ['artists', 'Artists'], ['label', 'Contract'], ['festivals', 'Festival'], ['tour', 'Tour'], ['videoPick', 'Video']].map(([s, l]) => `<button class="pill" data-a="go" data-s="${s}">${l}</button>`).join('')}`;
+    },
+
+    money() {
+      const li = S.lastIncome;
+      const e = S.earnings;
+      return `<div class="title"><span class="dim">$</span> Money</div>
+        <div class="earn"><small>CASH</small><b style="color:var(--cash)">${euro(S.cash)}</b></div>
+        <div class="h3">Letzte Woche</div>
+        <div class="kv"><span>Streams</span><span>${de(li.streamsCount || 0)}</span></div>
+        <div class="kv"><span>Streaming-Einnahmen</span><span>${euro(li.streams || 0)}</span></div>
+        ${S.label ? `<div class="kv"><span>Anteil ${esc(S.label.name)}</span><span style="color:var(--salmon)">−${euro(li.label || 0)}</span></div>` : ''}
+        <div class="h3">Karriere gesamt</div>
+        <div class="kv"><span>Streaming</span><span>${euro(e.streams)}</span></div>
+        <div class="kv"><span>Festivals</span><span>${euro(e.festivals)}</span></div>
+        <div class="kv"><span>Touren</span><span>${euro(e.tours)}</span></div>
+        <div class="kv"><span>Nebenjobs</span><span>${euro(e.jobs)}</span></div>
+        <div class="h3">Nebenjob</div>
+        <p class="note">Kellnern, Lager, Merch-Stand – bringt Geld für die ersten Studio-Sessions.</p>
+        <button class="big-btn c-green" data-a="job" ${S.energy < 20 ? 'disabled' : ''}>Schicht arbeiten · 20 ⚡ · +${euro(jobPay())}</button>`;
+    },
+
+    settings() {
+      return `<div class="title">Settings</div>
+        <div class="sub" style="text-align:left">Künstlername</div>
+        <div class="inp"><input id="setName" maxlength="24" value="${esc(S.name)}"><button data-a="rename" aria-label="Speichern">${IC.plus}</button></div>
+        <div class="h3">Spielstand</div>
+        <div class="kv"><span>Woche</span><span>${S.week}</span></div>
+        <div class="kv"><span>Songs / Alben</span><span>${S.songs.length} / ${S.albums.length}</span></div>
+        <div class="kv"><span>Follower</span><span>${de(S.followers)}</span></div>
+        <button class="big-btn c-salmon" data-a="reset" style="margin-top:26px">Neues Spiel</button>
+        <button class="big-btn c-gray" data-a="resetRich">Neu starten: reich (wie im Video)</button>
+        <p class="note" style="text-align:center">Der Spielstand wird automatisch auf diesem Handy gespeichert.</p>`;
+    },
+  };
+
+  function chartSvg(h) {
+    const W = 340, H = 200;
+    let lo = Math.min(...h), hi = Math.max(...h);
+    if (hi - lo < 10) hi = lo + 10;
+    const pad = (hi - lo) * .15; lo = Math.max(0, lo - pad); hi += pad;
+    const n = Math.max(2, h.length);
+    const pts = h.map((v, i) => [56 + (i / (n - 1)) * (W - 60), H - 10 - ((v - lo) / (hi - lo)) * (H - 20)]);
+    if (h.length === 1) pts.push([W - 4, pts[0][1]]);
+    const ticks = [0, 1, 2, 3].map((i) => lo + ((hi - lo) * (3 - i)) / 3);
+    return `<div class="chart">
+      ${ticks.map((t, i) => `<span class="yl" style="top:${4 + i * 60}px">${de(t)}</span>`).join('')}
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polyline fill="none" stroke="#e9963f" stroke-width="2.2" stroke-linejoin="round" points="${pts.map((p) => p.join(',')).join(' ')}"/>
+      ${pts.map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="1.8" fill="#e9963f"/>`).join('')}</svg></div>`;
   }
-
-  /* ---------- Spring physics (iOS-like) ---------- */
-  // Builds a CSS linear() easing that samples a real damped spring, so the
-  // motion has the same weight and slight overshoot as UIKit animations.
-  const LINEAR_OK = window.CSS && CSS.supports && CSS.supports('transition-timing-function', 'linear(0, 1)');
-  function spring({ stiffness = 200, damping = 22, mass = 1 } = {}, fallback = 'cubic-bezier(.2,.9,.25,1.05)') {
-    const w0 = Math.sqrt(stiffness / mass), z = damping / (2 * Math.sqrt(stiffness * mass));
-    const wd = w0 * Math.sqrt(Math.max(1e-6, 1 - z * z));
-    const x = (t) => z < 1
-      ? 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t))
-      : 1 - (1 + w0 * t) * Math.exp(-w0 * t);
-    let T = 0;
-    for (let t = 0; t < 4; t += 1 / 240) if (Math.abs(1 - x(t)) > 0.0015) T = t;
-    T += 1 / 60;
-    const pts = [];
-    for (let i = 0; i <= 64; i++) pts.push(+x((T * i) / 64).toFixed(4));
-    pts[64] = 1;
-    return { duration: Math.round(T * 1000), easing: LINEAR_OK ? `linear(${pts.join(', ')})` : fallback };
+  function albumStats() {
+    return S.albums.map((a) => ({ album: a, streams: S.songs.filter((s) => s.albumId === a.id).reduce((x, s) => x + s.streams, 0) })).sort((p, q) => q.streams - p.streams);
   }
-  const SPRING_DROP = spring({ stiffness: 300, damping: 27 });    // card dropping in from the top
-  const SPRING_PEEK = spring({ stiffness: 260, damping: 28 });    // next card rising at the bottom
-  const SPRING_SWAP = spring({ stiffness: 170, damping: 24 });    // cards swapping places
-  const SPRING_SNAP = spring({ stiffness: 400, damping: 30 });    // snap back after drag
-  const SPRING_POP = spring({ stiffness: 420, damping: 22 });     // glyph pops
-  const SPRING_UI = spring({ stiffness: 320, damping: 30 });      // sheets / screens
-  const OUT = 'cubic-bezier(.4,0,1,1)';
-  document.documentElement.style.setProperty('--spring', SPRING_UI.easing);
-  document.documentElement.style.setProperty('--spring-d', SPRING_UI.duration + 'ms');
+  const jobPay = () => 300 + S.week * 4;
 
-  /* ---------- Pay mode ---------- */
-  let payToken = 0;
-  let failNext = false;
-  let payOpen = false;
-  let anims = [];
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const pay = $('pay'), bg = $('payBg'), wrap = $('payCard'), drag = $('payDrag'), peek = $('payPeek'),
-    status = $('payStatus'), label = $('payLabel');
-  const G = { face: $('gFace'), glow: $('gGlow'), a: $('gRingA'), b: $('gRingB'), circle: $('gCircle'), phone: $('gPhone') };
+  /* =====================================================================
+     Pushed screens
+     ===================================================================== */
+  const SCREENS = {
+    inbox() {
+      after.push(() => { S.inbox.forEach((m) => { m.read = true; }); save(); });
+      const tagColor = { FEATURE: 'c-orange', FESTIVAL: 'c-orange', FAN: 'c-teal', LABEL: 'c-green' };
+      return `<div class="inbox"><div class="wrap">
+        <div class="hd"><button data-a="back">${IC.x}</button><h1>INBOX</h1></div>
+        <p class="intro">Check your inbox for new emails regarding feature requests, endorsements and career opportunities.</p>
+        <div class="lbl">MESSAGES</div>
+        ${S.inbox.length ? S.inbox.map((m) => `<div class="msg ${m.read ? '' : 'unread'} ${m.done ? 'done' : ''}">
+          <div class="mh"><div><b>${esc(m.from)}</b><small>${dateShort(m.date)}</small></div>
+          <button class="chip ${tagColor[m.tag] || 'c-teal'}" data-a="mail" data-id="${m.id}">${m.done ? 'DONE' : m.tag}</button></div>
+          <div class="subj">${esc(m.subj)}</div><div class="body">${esc(m.body)}</div></div>`).join('') : '<p class="intro">Noch keine Nachrichten.</p>'}
+      </div></div>`;
+    },
 
-  function play(el, frames, opts) {
-    const a = el.animate(frames, { fill: 'both', ...opts });
-    anims.push(a);
-    return a;
+    newSong(p) {
+      if (!draft) draft = { title: p.title || '', album: 0, artistry: 0, writing: 0, studio: 0, feat: p.feat || null, genre: S.trend, freeFeat: !!p.feat, mailId: p.mailId || null };
+      const albums = [null, ...S.albums];
+      const al = albums[draft.album];
+      const roleSel = (role, label) => {
+        const h = HIRES[role][draft[role]];
+        const name = h[0] || (role === 'studio' ? 'My Studio' : S.name);
+        const sk = h[0] ? h[1] : selfSkill[role]();
+        return selector(label, name, `<span class="sk ${sk < 30 ? 'low' : ''}">${sk}</span> | ${euro(h[2])}`, role);
+      };
+      const featNpc = draft.feat ? S.npcs.find((n) => n.name === draft.feat) : null;
+      const cost = songCost();
+      return pTitle('New Song', { energy: true }) + `
+        <div class="sub">Song name</div>
+        <div class="inp"><input id="songTitle" maxlength="40" placeholder="Enter a song title" value="${esc(draft.title)}"><button data-a="randTitle" aria-label="Zufallstitel">${IC.plus}</button></div>
+        ${selector('Assign album', al ? al.name : 'Single', '', 'album')}
+        ${roleSel('artistry', 'Artistry')}
+        ${roleSel('writing', 'Writing')}
+        ${roleSel('studio', 'Studio')}
+        ${selector('Feature', featNpc ? featNpc.name : 'None', featNpc ? `${compact(featNpc.listeners)} listeners | ${draft.freeFeat ? 'free' : euro(featureCost(featNpc))}` : '', 'feat')}
+        <div class="total"><span>TOTAL COST</span><b>${euro(cost)}</b></div>
+        <div class="row2 genre"><button class="chip c-salmon ${draft.genre === 'TRAP' ? 'on' : ''}" data-a="genre" data-g="TRAP">Trap</button><button class="chip c-green ${draft.genre === 'CLEAN' ? 'on' : ''}" data-a="genre" data-g="CLEAN">Clean</button></div>
+        <button class="big-btn c-teal" data-a="createSong" ${S.energy < 10 || S.cash < cost ? 'disabled' : ''}>Create 10 <span class="bolt">⚡</span></button>
+        <div class="avail">Cash available: ${euro(S.cash)}${S.energy < 10 ? ' · zu wenig Energie' : ''}</div>
+        <p class="note" style="margin-top:16px">Trend gerade: <b>${S.trend}</b> (+10 % Streams). Die Qualität hängt von den Skills der Leute ab – wer „${esc(S.name)}“ bzw. „My Studio“ wählt, nutzt deine eigenen Talente.</p>`;
+    },
+
+    newAlbum() {
+      if (!draft) draft = { name: '', cover: COVERS[0] };
+      return pTitle('New Album') + `
+        <div class="bigcover" style="background:${coverCss(draft.cover)};background-size:cover;background-position:center"></div>
+        <div class="sub">Album name</div>
+        <div class="inp"><input id="albumName" maxlength="40" placeholder="Enter an album name" value="${esc(draft.name)}"><button data-a="createAlbum" aria-label="Erstellen">${IC.plus}</button></div>
+        <div class="sub">Choose a cover</div>
+        <div class="covers">${COVERS.slice(0, 4).map((c, i) => `<button class="${draft.cover === c ? 'on' : ''}" data-a="cover" data-i="${i}" style="background:${c}"></button>`).join('')}</div>
+        <button class="big-btn c-teal" data-a="createAlbum">Create</button>
+        <button class="big-btn c-green" data-a="uploadCover">Upload your own</button>`;
+    },
+
+    songs() {
+      const list = S.songs.slice().reverse();
+      return pTitle('Songs') + (list.length ? list.map((s) => songRow(s)).join('') : '<p class="note">Noch keine Songs.</p>');
+    },
+
+    song(p) {
+      const s = S.songs.find((x) => x.id === p.id); if (!s) return pTitle('Song');
+      const units = Math.round(s.streams / 150);
+      const cert = certOf(units);
+      const al = songAlbum(s);
+      const released = S.week - s.week >= 1;
+      const w = s.weekly.slice(-20); const mx = Math.max(1, ...w);
+      return pTitle(s.title, { norm: true, extra: `<div class="sd-cov" style="background:${coverCss(songCover(s))};background-size:cover;background-position:center"></div>` }) + `
+        <p class="sd-desc">${released ? `"${esc(s.title)}" debuted with ${compact(s.debut || 0)} streams, generating ${euroK((s.debut || 0) * .004 * labelShare())} in its first week. 1 unit is equivalent to 150 streams.` : `"${esc(s.title)}" erscheint mit der nächsten Woche. Drück END WEEK.`}
+        <br>${al ? `Album: ${esc(al.name)} · ` : 'Single · '}${s.genre}${s.feat ? ` · feat. ${esc(s.feat)}` : ''} · Qualität ${s.quality}</p>
+        <div class="cert"><div class="disc" style="background:${cert.color}">♪</div><div class="r"><small>${cert.label}</small><b>${compact(units)} UNITS</b></div></div>
+        <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(s.streams)}</b></div><div><small>TOTAL REVENUE</small><b>${euroK(s.revenue)}</b></div></div>
+        <div class="bars">${w.map((v) => `<i style="height:${Math.max(3, (v / mx) * 100)}%"></i>`).join('')}</div>
+        ${s.video ? `<div class="card"><b>Music Video · ${esc(s.video.style)}</b><p>Directed by ${esc(s.video.director)} · +${Math.round(s.video.bonus * 100)} % Streams</p></div>` : `<button class="pill" data-a="go" data-s="newVideo" data-id="${s.id}">Music Video</button>`}`;
+    },
+
+    albums() {
+      const st = albumStats();
+      return pTitle('Albums') + (st.length ? st.map(({ album, streams }) => `<button class="srow" data-a="go" data-s="album" data-id="${album.id}">
+          <div class="cov" style="background:${coverCss(album.cover)};background-size:cover;background-position:center"></div>
+          <div class="info"><b>${esc(album.name)}</b><small>${S.songs.filter((s) => s.albumId === album.id).length} Songs • ${de(streams)} streams</small></div></button>`).join('')
+        : '<p class="note">Noch keine Alben.</p>') + '<button class="big-btn c-orange" data-a="go" data-s="newAlbum">New Album</button>';
+    },
+
+    album(p) {
+      const a = S.albums.find((x) => x.id === p.id); if (!a) return pTitle('Album');
+      const songs = S.songs.filter((s) => s.albumId === a.id);
+      return pTitle(a.name, { norm: true }) + `<div class="bigcover" style="width:180px;height:180px;background:${coverCss(a.cover)};background-size:cover;background-position:center"></div>
+        <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(songs.reduce((x, s) => x + s.streams, 0))}</b></div><div><small>SONGS</small><b>${songs.length}</b></div></div>
+        ${songs.length ? songs.map((s) => songRow(s)).join('') : '<p class="note">Noch keine Songs auf diesem Album. Wähle es bei NEW SONG unter „Assign album“ aus.</p>'}`;
+    },
+
+    videoPick() {
+      const list = S.songs.filter((s) => !s.video).slice().reverse();
+      return pTitle('Video') + `<p class="note">Wähle einen Song für das Musikvideo.</p>` + (list.length ? list.map((s) => songRow(s, 'newVideo')).join('') : '<p class="note">Alle Songs haben schon ein Video – oder du hast noch keine.</p>');
+    },
+
+    newVideo(p) {
+      const s = S.songs.find((x) => x.id === p.id); if (!s) return pTitle('New Video');
+      if (!draft) draft = { dir: 0, style: 0 };
+      const d = DIRECTORS[draft.dir], st = STYLES[draft.style];
+      const dirSkill = d[0] ? d[1] : selfSkill.video();
+      const cost = d[2] + st[1];
+      return pTitle('New Video', { energy: true }) + `
+        <div class="sub">Video name</div><div style="text-align:center;font-size:17px">${esc(s.title)} <span style="color:var(--orange)">(${s.quality})</span></div>
+        ${selector('Director', `Directed by ${d[0] || S.name}`, `<span class="sk ${dirSkill < 50 ? 'low' : ''}">${dirSkill}</span> | ${euro(d[2])}`, 'dir')}
+        ${selector('Style', st[0], euro(st[1]), 'style')}
+        <div class="sub">Description</div>
+        <p style="margin:0 0 4px;font-size:13px;font-weight:700">${st[2] ? `+${Math.round(st[2] * 100)} % BONUS` : 'NO BONUS'}</p>
+        <p class="note" style="margin:0;font-size:11px">${st[3]}</p>
+        <div class="total"><span>TOTAL COST</span><b>${euro(cost)}</b></div>
+        <button class="big-btn c-teal" data-a="produce" data-id="${s.id}" ${S.energy < 10 || S.cash < cost ? 'disabled' : ''}>Produce 10 <span class="bolt">⚡</span></button>
+        <div class="avail">Cash available: ${euro(S.cash)}</div>`;
+    },
+
+    studio() {
+      const lv = S.talents.studio, c = studioCost();
+      return pTitle('Studio') + `<div class="title" style="text-align:center;margin-top:20px"><span class="dim">LV</span> ${lv}</div>
+        <p class="note" style="text-align:center">Dein eigenes Studio. Wenn du bei NEW SONG „My Studio“ nimmst, zählt dieses Level als Studio-Qualität – kostenlos.</p>
+        ${lv < 100 ? `<button class="big-btn c-orange" data-a="studioUp" ${S.cash < c ? 'disabled' : ''}>Upgrade · ${euro(c)}</button>
+        <button class="big-btn c-gray" data-a="studioUp10" ${S.cash < studioCost(10) ? 'disabled' : ''}>+10 Level · ${euro(studioCost(10))}</button>` : '<p style="text-align:center">Maximales Level erreicht.</p>'}
+        <div class="avail" style="margin-top:8px">Cash available: ${euro(S.cash)}</div>`;
+    },
+
+    festivals() {
+      const invites = S.inbox.filter((m) => m.action && m.action.type === 'festival' && !m.done);
+      const past = S.festivals.slice().reverse();
+      return pTitle('Festivals') + `<div class="earn"><small>EARNINGS</small><b>${euro(S.earnings.festivals)}</b></div>
+        <div class="h3">Upcoming</div>
+        ${invites.length ? invites.map((m) => `<div class="lrow"><div><small>${esc(m.action.place)} • ${de(m.action.attended)} Attended</small><b>${esc(m.action.name)} ${year()}</b></div><button class="chip c-pink" data-a="go" data-s="festivalReview" data-id="${m.id}">Review</button></div>`).join('') : '<p class="note">Keine Einladungen. Mit mehr Fame melden sich Festivals in deiner Inbox.</p>'}
+        ${past.length ? `<div class="h3">Gespielt</div>${past.map((f) => `<div class="lrow"><div><small>${esc(f.place)}</small><b>${esc(f.name)} ${f.year}</b></div><span>${euro(f.fee)}</span></div>`).join('')}` : ''}`;
+    },
+
+    festivalReview(p) {
+      const m = S.inbox.find((x) => x.id === p.id); if (!m) return pTitle('Festival');
+      const a = m.action;
+      return pTitle(a.name, { norm: true }) + `<p class="note">${esc(a.place)}</p>
+        <div class="kv"><span>Besucher</span><span>${de(a.attended)}</span></div>
+        <div class="kv"><span>Gage</span><span style="color:var(--cash)">${euro(a.fee)}</span></div>
+        <div class="kv"><span>Energie</span><span>25 ⚡</span></div>
+        <div class="kv"><span>Neue Hörer (ca.)</span><span>+${de(festivalFans(a))}</span></div>
+        <button class="big-btn c-green" data-a="festAccept" data-id="${m.id}" ${S.energy < 25 ? 'disabled' : ''}>Annehmen & auftreten</button>
+        <button class="big-btn c-salmon" data-a="festDecline" data-id="${m.id}">Absagen</button>`;
+    },
+
+    tour() {
+      const f = fameScore();
+      const cd = S.week - S.lastTour;
+      return pTitle('Tour') + `<p class="note">Eine Tour kostet Vorab-Produktion und bringt Ticketeinnahmen plus neue Fans. Danach brauchst du 6 Wochen Pause.${cd < 6 ? ` <b>Noch ${6 - cd} Woche(n) Pause.</b>` : ''}</p>
+        ${TOURS.map((t, i) => {
+          const ok = f >= t.fame && cd >= 6 && S.energy >= t.energy && S.cash >= t.cost;
+          return `<div class="card"><b>${t.name}</b> <span class="note">· ${t.shows} Shows · ab Fame ${grade(t.fame)}</span>
+            <p>Kosten ${euro(t.cost)} · ${t.energy} ⚡ · Ticket ${t.price} € · erwartet ca. ${euro(tourEstimate(t))} Umsatz</p>
+            <button class="big-btn c-orange" data-a="tour" data-i="${i}" ${ok ? '' : 'disabled'} style="margin-bottom:0">${f < t.fame ? 'Zu wenig Fame' : 'Tour starten'}</button></div>`;
+        }).join('')}`;
+    },
+
+    social() {
+      return pTitle('Social') + `<div class="stats2"><div><small>FOLLOWERS</small><b>${compact(S.followers)}</b></div><div><small>FAME</small><b>${grade()}</b></div></div>
+        <button class="big-btn c-orange" data-a="post" ${S.energy < 5 ? 'disabled' : ''}>Post · 5 ⚡</button>
+        <p class="note">Mehr Charisma und Virality = mehr neue Follower pro Post. Follower hören deine Songs.</p>
+        ${S.posts.slice(0, 8).map((p) => `<div class="card"><b>@${esc(S.name.replace(/\s+/g, '').toLowerCase())}</b><p>${esc(p.text)}</p><p>♥ ${compact(p.likes)} · +${compact(p.gain)} Follower · ${dateShort(p.date)}</p></div>`).join('')}`;
+    },
+
+    trends() {
+      return pTitle('Trends') + `<div class="card"><b>Angesagt: ${S.trend}</b><p>${S.trend === 'TRAP' ? 'Harte 808s und Ad-libs dominieren die Playlists.' : 'Cleane Hooks und Radio-Sound laufen gerade überall.'} Songs in diesem Stil bekommen +10 % Streams und etwas höhere Qualität.</p><p>Wechselt in ca. ${S.trendWeeks} Woche(n).</p></div>
+        <div class="h3">Top-Artists diese Woche</div>
+        ${S.npcs.slice().sort((a, b) => b.listeners - a.listeners).slice(0, 5).map((n, i) => `<div class="kv"><span>${i + 1}. ${esc(n.name)} – ${esc(n.hit)}</span><span>${compact(n.listeners)}</span></div>`).join('')}`;
+    },
+
+    relationship() {
+      const pt = S.partner;
+      return pTitle('Relationship') + (pt ? `<div class="card"><b>❤ ${esc(pt.name)}</b><p>Liebe: ${pt.love}/100${pt.public ? ' · öffentlich' : ''}</p>
+          <div style="height:10px;border-radius:5px;background:#5c636b;margin-top:10px;overflow:hidden"><div style="height:100%;width:${pt.love}%;background:var(--salmon)"></div></div></div>
+          <button class="big-btn c-salmon" data-a="date" ${S.energy < 5 || S.cash < 200 ? 'disabled' : ''}>Date · 5 ⚡ · 200 €</button>
+          ${!pt.public ? `<button class="big-btn c-orange" data-a="goPublic" ${pt.love < 60 ? 'disabled' : ''}>Beziehung öffentlich machen${pt.love < 60 ? ' (ab 60 Liebe)' : ''}</button>` : ''}
+          <button class="big-btn c-gray" data-a="breakup">Schluss machen</button>`
+        : `<p class="note">Du bist gerade Single.</p><button class="big-btn c-salmon" data-a="meet" ${S.energy < 10 ? 'disabled' : ''}>Jemanden kennenlernen · 10 ⚡</button>`)
+        + '<p class="note">Die Liebe sinkt jede Woche ein bisschen – vergiss die Dates nicht. Eine öffentliche Beziehung bringt Follower.</p>';
+    },
+
+    label() {
+      const offers = S.inbox.filter((m) => m.action && m.action.type === 'label' && !m.done);
+      const l = S.label;
+      return pTitle('Contract') + (l ? `<div class="card"><b>${esc(l.name)}</b>
+          <p>Vorschuss erhalten: ${euro(l.advance)}<br>Du behältst: ${Math.round(l.keep * 100)} % der Streaming-Einnahmen<br>Promo: +${Math.round((l.boost - 1) * 100)} % Streams<br>${l.weeksLeft > 0 ? `Laufzeit: noch ${l.weeksLeft} Woche(n)` : 'Laufzeit abgelaufen'}</p></div>
+          <button class="big-btn c-salmon" data-a="leaveLabel" ${l.weeksLeft > 0 ? 'disabled' : ''}>Vertrag kündigen${l.weeksLeft > 0 ? ' (nach Laufzeit)' : ''}</button>`
+        : `<div class="card"><b>Independent</b><p>Du bist bei keinem Label. Du behältst 100 % deiner Einnahmen, bekommst aber keine Promo. Ab Fame ${grade(30)} melden sich Labels in deiner Inbox.</p></div>`)
+        + (offers.length && !l ? `<div class="h3">Angebote</div>${offers.map((m) => { const o = m.action.offer; return `<div class="card"><b>${esc(o.name)}</b><p>${euro(o.advance)} Vorschuss · du behältst ${Math.round(o.keep * 100)} % · +${Math.round((o.boost - 1) * 100)} % Streams · ${o.weeks} Wochen</p><button class="big-btn c-green" data-a="signLabel" data-id="${m.id}" style="margin-bottom:0">Unterschreiben</button></div>`; }).join('')}` : '');
+    },
+
+    artists() {
+      return pTitle('Artists') + S.npcs.slice().sort((a, b) => b.listeners - a.listeners).map((n) => `<div class="srow"><div class="info"><b>${esc(n.name)}</b><small>${de(n.listeners)} listeners · Feature ${euro(featureCost(n))}</small></div><div class="q" style="font-size:18px">${grade(clamp(Math.round(Math.log10(n.listeners + 1) / 7.9 * 100), 0, 100))}</div></div>`).join('');
+    },
+
+    songboard() {
+      const rows = S.npcs.map((n) => ({ t: n.hit, a: n.name, v: Math.round(n.listeners * .35 * (.8 + (Math.abs(hash(n.hit + S.week)) % 40) / 100)), me: false }))
+        .concat(S.songs.filter((s) => s.weekly.length).map((s) => ({ t: s.title, a: S.name, v: s.weekly[s.weekly.length - 1], me: true })))
+        .sort((a, b) => b.v - a.v).slice(0, 20);
+      return pTitle('Songboard') + `<p class="note">Die meistgestreamten Songs der letzten Woche.</p>` + rows.map((r, i) => `<div class="srow ${r.me ? 'hl' : ''}"><div class="q ${r.me ? 'me' : ''}" style="font-size:20px">${i + 1}</div><div class="info"><b>${esc(r.t)}</b><small>${esc(r.a)} • ${de(r.v)} streams</small></div></div>`).join('');
+    },
+
+    awards() {
+      return pTitle('Awards') + `<p class="note">Die Awards werden jedes Jahr in der ersten Januarwoche verliehen. Kategorien: Song des Jahres, Album des Jahres, Newcomer des Jahres, Artist des Jahres.</p>`
+        + (S.awards.length ? S.awards.slice().reverse().map((a) => `<div class="card"><b>🏆 ${esc(a.name)} ${a.year}</b><p>${esc(a.what)}</p></div>`).join('') : '<div class="card"><b>Noch keine Awards</b><p>Hau Hits raus und sammel Fame.</p></div>');
+    },
+  };
+
+  function selector(label, value, subline, key) {
+    return `<div class="sub" style="margin:10px 0 0">${label}</div><div class="sel">
+      <button data-a="cyc" data-k="${key}" data-d="-1" aria-label="zurück">${IC.larr}</button>
+      <div class="val"><b>${esc(value)}</b>${subline ? `<span>${subline}</span>` : ''}</div>
+      <button data-a="cyc" data-k="${key}" data-d="1" aria-label="weiter">${IC.rarr}</button></div>`;
   }
-  function stopAll() { anims.forEach((a) => a.cancel()); anims = []; }
-  const offTop = () => -(wrap.offsetTop + wrap.offsetHeight + 30);
-
-  function openPay(id) {
-    if (!cards.length) { toast('Keine Karten vorhanden'); return; }
-    if (payOpen) return;
-    payOpen = true;
-    const sel = cards.find((c) => c.id === id) || cards[0]; // top card of the stack
-    renderPay(sel.id);
-    $('detail').classList.remove('open');
-    closeSheet();
-    stopAll(); resetGlyph();
-    failNext = settings.failFirst;
-    pay.classList.add('open');
-    play(bg, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'cubic-bezier(.2,0,0,1)' });
-    play(wrap, [{ transform: `translateY(${offTop()}px)` }, { transform: 'translateY(0)' }], { ...SPRING_DROP, delay: 90 });
-    play(peek, [{ transform: 'translateY(0)' }, { transform: 'translateY(0)' }], { duration: 0 });
-    [...peek.children].forEach((el, i) =>
-      play(el, [{ transform: `translateY(${110 + i * 12}px)` }, { transform: 'translateY(0)' }], { ...SPRING_PEEK, delay: 130 + i * 30 }));
-    runAuth(200);
+  function songRow(s, target = 'song') {
+    const al = songAlbum(s);
+    const pending = S.week - s.week < 1;
+    return `<button class="srow" data-a="go" data-s="${target}" data-id="${s.id}"><div class="info"><b>${esc(s.title)}</b><small>${al ? esc(al.name) : 'Single'} • ${pending ? 'erscheint nächste Woche' : de(s.streams) + ' streams'}</small></div><div class="q">${s.quality}</div></button>`;
   }
-
-  function renderPay(id) {
-    currentId = id;
-    const c = cards.find((x) => x.id === id);
-    drag.innerHTML = cardHTML(c);
-    const rest = cards.filter((x) => x.id !== id);
-    peek.style.setProperty('--pn', Math.max(0, rest.length - 1));
-    peek.innerHTML = rest.map((x, i) =>
-      `<div class="peek-item" data-id="${x.id}" style="top:${i * 15}px">${cardHTML(x)}</div>`).join('');
+  function certOf(units) {
+    if (units >= 1e7) return { label: `${Math.floor(units / 1e7)}X DIAMOND-CERTIFIED`, color: '#cfe8f2' };
+    if (units >= 1e6) return { label: `${Math.floor(units / 1e6)}X PLATINUM-CERTIFIED`, color: '#d9d2a6' };
+    if (units >= 5e5) return { label: 'GOLD-CERTIFIED', color: '#e6c25a' };
+    return { label: 'NOT CERTIFIED', color: '#5c636b' };
   }
-
-  /* Face ID → ring → "hold near reader", frame-matched to the recording */
-  function resetGlyph() {
-    status.classList.remove('retry');
-    $('payCode').classList.remove('show');
-    Object.values(G).forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
-    label.getAnimations().forEach((a) => a.cancel());
-    label.textContent = ''; label.style.opacity = '';
+  const featureCost = (n) => Math.round(n.listeners * .02 / 100) * 100 + 500;
+  function songCost() {
+    const featNpc = draft.feat ? S.npcs.find((n) => n.name === draft.feat) : null;
+    return HIRES.artistry[draft.artistry][2] + HIRES.writing[draft.writing][2] + HIRES.studio[draft.studio][2] + (featNpc && !draft.freeFeat ? featureCost(featNpc) : 0);
   }
-  function g(el, frames, opts) { return el.animate(frames, { fill: 'both', ...opts }); }
-  function showLabel(text, delay = 0) {
-    label.getAnimations().forEach((a) => a.cancel());
-    const out = label.animate([{ opacity: label.textContent ? 1 : 0 }, { opacity: 0 }], { duration: 160, delay, fill: 'forwards', easing: 'ease-in' });
-    out.onfinish = () => {
-      label.textContent = text;
-      out.cancel();
-      label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, fill: 'both', easing: 'ease-out' });
-    };
+  const studioCost = (n = 1) => { let c = 0; for (let i = 0; i < n && S.talents.studio + i < 100; i++) c += Math.round(300 * 1.07 ** (S.talents.studio + i)); return c; };
+  const festivalFans = (a) => Math.round(a.attended * .03 * (1 + S.talents.charisma / 100));
+  const TOURS = [
+    { name: 'Club Tour', shows: 10, cap: 400, price: 30, cost: 3000, energy: 40, fame: 20 },
+    { name: 'Theater Tour', shows: 18, cap: 2500, price: 55, cost: 40000, energy: 55, fame: 42 },
+    { name: 'Arena Tour', shows: 24, cap: 14000, price: 85, cost: 400000, energy: 70, fame: 62 },
+    { name: 'Stadium Tour', shows: 30, cap: 55000, price: 120, cost: 3000000, energy: 90, fame: 82 },
+  ];
+  const tourEstimate = (t) => Math.round(Math.min(t.cap, (S.listeners + S.followers) * .03 / t.shows) * t.shows * t.price);
+
+  /* =====================================================================
+     Actions
+     ===================================================================== */
+  const ACTIONS = {
+    start() { newGame(($('#startName').value || '').trim() || 'Run It Up', false); render(true); },
+    startRich() { newGame(($('#startName').value || '').trim() || 'Run It Up', true); render(true); },
+    back,
+    go(el) { go(el.dataset.s, el.dataset.id ? { id: el.dataset.id } : {}); },
+    endweek() { endWeek(); },
+
+    train(el) {
+      const k = el.dataset.k, c = S.talents[k] + 1;
+      if (S.energy < c) { toast(`Zu wenig Energie (${c} ⚡ nötig)`); shake(el); return; }
+      S.energy -= c; S.talents[k] = Math.min(100, S.talents[k] + 1);
+      save(); render();
+    },
+    studioUp() { const c = studioCost(); if (S.cash < c) return; S.cash -= c; S.talents.studio++; save(); render(); },
+    studioUp10() { const c = studioCost(10); if (S.cash < c) return; S.cash -= c; S.talents.studio = Math.min(100, S.talents.studio + 10); save(); render(); },
+
+    cyc(el) {
+      const k = el.dataset.k, d = +el.dataset.d;
+      const top = stack[stack.length - 1];
+      if (top.name === 'newSong') {
+        keepSongInput();
+        if (k === 'album') draft.album = (draft.album + d + S.albums.length + 1) % (S.albums.length + 1);
+        else if (k === 'feat') {
+          const names = [null, ...S.npcs.map((n) => n.name)];
+          const i = names.indexOf(draft.feat);
+          draft.feat = names[(i + d + names.length) % names.length]; draft.freeFeat = false;
+        } else draft[k] = (draft[k] + d + HIRES[k].length) % HIRES[k].length;
+      } else if (top.name === 'newVideo') {
+        if (k === 'dir') draft.dir = (draft.dir + d + DIRECTORS.length) % DIRECTORS.length;
+        else draft.style = (draft.style + d + STYLES.length) % STYLES.length;
+      }
+      render();
+    },
+    genre(el) { keepSongInput(); draft.genre = el.dataset.g; render(); },
+    randTitle() { draft.title = songName().toLowerCase(); render(); },
+    createSong() {
+      keepSongInput();
+      const title = draft.title.trim();
+      if (!title) { toast('Gib dem Song einen Namen'); $('#songTitle').focus(); return; }
+      const featNpc = draft.feat ? S.npcs.find((n) => n.name === draft.feat) : null;
+      const cost = songCost();
+      if (S.energy < 10 || S.cash < cost) return;
+      const sk = (role) => (HIRES[role][draft[role]][0] ? HIRES[role][draft[role]][1] : selfSkill[role]());
+      let q = .36 * sk('artistry') + .36 * sk('writing') + .28 * sk('studio') + rnd(-5, 5) + (draft.genre === S.trend ? 4 : 0) + (featNpc ? 2 : 0);
+      q = clamp(Math.round(q), 1, 100);
+      S.energy -= 10; S.cash -= cost;
+      const albums = [null, ...S.albums];
+      const s = { id: uid(), title, albumId: albums[draft.album] ? albums[draft.album].id : null, quality: q, genre: draft.genre, feat: featNpc ? featNpc.name : null, week: S.week, streams: 0, revenue: 0, weekly: [], debut: 0, video: null };
+      S.songs.push(s);
+      if (draft.mailId) { const m = S.inbox.find((x) => x.id === draft.mailId); if (m) m.done = true; }
+      save();
+      stack.pop(); draft = null;
+      go('song', { id: s.id });
+      toast(`"${title}" aufgenommen – Qualität ${q}`);
+    },
+
+    cover(el) { keepAlbumInput(); draft.cover = COVERS[+el.dataset.i]; render(); },
+    uploadCover() { keepAlbumInput(); pickImage(400).then((d) => { draft.cover = d; render(); }).catch(() => {}); },
+    createAlbum() {
+      keepAlbumInput();
+      const name = draft.name.trim();
+      if (!name) { toast('Gib dem Album einen Namen'); $('#albumName').focus(); return; }
+      S.albums.push({ id: uid(), name, cover: draft.cover, week: S.week });
+      save(); stack.pop(); draft = null; go('albums');
+      toast(`Album „${name}“ erstellt – weise ihm bei NEW SONG Songs zu`);
+    },
+
+    produce(el) {
+      const s = S.songs.find((x) => x.id === el.dataset.id);
+      const d = DIRECTORS[draft.dir], st = STYLES[draft.style];
+      const cost = d[2] + st[1];
+      if (!s || S.energy < 10 || S.cash < cost) return;
+      const skill = d[0] ? d[1] : selfSkill.video();
+      const bonus = +(st[2] + skill / 400 + s.quality / 500).toFixed(2);
+      S.energy -= 10; S.cash -= cost;
+      s.video = { director: d[0] || S.name, style: st[0], bonus, week: S.week };
+      save(); stack.pop(); draft = null;
+      if (stack.length && stack[stack.length - 1].name === 'videoPick') stack.pop();
+      go('song', { id: s.id });
+      toast(`Video gedreht: +${Math.round(bonus * 100)} % Streams`);
+    },
+
+    mail(el) {
+      const m = S.inbox.find((x) => x.id === el.dataset.id); if (!m || m.done) return;
+      const a = m.action;
+      if (!a) { m.done = true; save(); render(); return; }
+      if (a.type === 'feature') go('newSong', { feat: a.npc, mailId: m.id, title: `${S.name.split(' ')[0].toLowerCase()} x ${a.npc.split(' ')[0].toLowerCase()}` });
+      else if (a.type === 'festival') go('festivalReview', { id: m.id });
+      else if (a.type === 'label') go('label');
+    },
+
+    festAccept(el) {
+      const m = S.inbox.find((x) => x.id === el.dataset.id); if (!m || S.energy < 25) return;
+      const a = m.action;
+      S.energy -= 25; S.cash += a.fee; S.earnings.festivals += a.fee;
+      const fans = festivalFans(a);
+      S.followers += Math.round(fans * .6); S.listeners += fans;
+      S.festivals.push({ name: a.name, place: a.place, fee: a.fee, year: year() });
+      m.done = true; save(); back();
+      toast(`${a.name}: +${euro(a.fee)}, +${de(fans)} Hörer`);
+    },
+    festDecline(el) { const m = S.inbox.find((x) => x.id === el.dataset.id); if (m) m.done = true; save(); back(); },
+
+    tour(el) {
+      const t = TOURS[+el.dataset.i];
+      if (S.energy < t.energy || S.cash < t.cost) return;
+      const sold = Math.round(Math.min(t.cap, (S.listeners + S.followers) * .03 / t.shows * rnd(.7, 1.15)));
+      const rev = sold * t.shows * t.price;
+      S.energy -= t.energy; S.cash += rev - t.cost; S.earnings.tours += rev - t.cost; S.lastTour = S.week;
+      const fans = Math.round(sold * t.shows * .4);
+      S.followers += fans; S.listeners += Math.round(fans * .5);
+      save(); render();
+      modal(`<h2>${t.name}</h2><p class="note">${t.shows} Shows, im Schnitt ${de(sold)} von ${de(t.cap)} Tickets verkauft.</p>
+        <div class="kv"><span>Ticketumsatz</span><span>${euro(rev)}</span></div><div class="kv"><span>Produktion</span><span>−${euro(t.cost)}</span></div>
+        <div class="kv"><span>Gewinn</span><span style="color:${rev - t.cost >= 0 ? 'var(--cash)' : 'var(--salmon)'}">${euro(rev - t.cost)}</span></div>
+        <div class="kv"><span>Neue Fans</span><span>+${de(fans)}</span></div><button class="big-btn c-green" data-a="closeModal">Weiter</button>`);
+    },
+
+    post() {
+      if (S.energy < 5) return;
+      S.energy -= 5;
+      const gain = Math.round((S.talents.charisma + S.talents.virality) * rnd(1, 4) + S.followers * rnd(.003, .015));
+      S.followers += gain;
+      const s = S.songs.length ? pick(S.songs).title : null;
+      const text = pick([s ? `"${s}" läuft bei euch? 🔥` : 'Studio. Nacht. Keine Ausreden.', 'Danke für alles. Wir sind erst am Anfang.', 'Neue Musik kommt. Bald.', s ? `Wer hat "${s}" schon 10x gehört? 👀` : `Wer ist ready für Woche ${S.week + 1}?`, 'Mama, ich hab’s geschafft (fast).']);
+      S.posts.unshift({ text, likes: Math.round(gain * rnd(3, 9) + S.followers * .02), gain, date: S.date });
+      S.posts.length = Math.min(S.posts.length, 20);
+      save(); render();
+    },
+    meet() {
+      if (S.energy < 10) return; S.energy -= 10;
+      S.partner = { name: pick(['Lea', 'Mila', 'Noah', 'Sofia', 'Elif', 'Jonas', 'Aylin', 'Kenji', 'Zoe', 'Luca']), love: rint(15, 30), public: false };
+      save(); render(); toast(`Du hast ${S.partner.name} kennengelernt`);
+    },
+    date() { if (!S.partner || S.energy < 5 || S.cash < 200) return; S.energy -= 5; S.cash -= 200; S.partner.love = clamp(S.partner.love + rint(8, 18), 0, 100); save(); render(); },
+    goPublic() { if (!S.partner) return; S.partner.public = true; const g = Math.round(S.followers * .08 + 200); S.followers += g; save(); render(); toast(`Beziehung öffentlich: +${de(g)} Follower`); },
+    breakup() { if (!S.partner) return; const n = S.partner.name; S.partner = null; save(); render(); toast(`Du und ${n} geht getrennte Wege`); },
+    signLabel(el) {
+      const m = S.inbox.find((x) => x.id === el.dataset.id); if (!m || S.label) return;
+      const o = m.action.offer;
+      S.label = { ...o, weeksLeft: o.weeks }; S.cash += o.advance;
+      S.inbox.forEach((x) => { if (x.action && x.action.type === 'label') x.done = true; });
+      save(); render(); toast(`Bei ${o.name} unterschrieben: +${euro(o.advance)}`);
+    },
+    leaveLabel() { if (!S.label || S.label.weeksLeft > 0) return; const n = S.label.name; S.label = null; save(); render(); toast(`Vertrag mit ${n} beendet – du bist wieder independent`); },
+    job() { if (S.energy < 20) return; S.energy -= 20; const p = jobPay(); S.cash += p; S.earnings.jobs += p; save(); render(); toast(`+${euro(p)}`); },
+    rename() { const v = $('#setName').value.trim(); if (v) { S.name = v; save(); toast('Name gespeichert'); } },
+    reset() { if (confirm('Wirklich neu anfangen? Dein Spielstand wird gelöscht.')) { S = null; try { localStorage.removeItem(KEY); } catch (e) {} tab = 'home'; stack = []; render(true); } },
+    resetRich() { if (confirm('Neues Spiel mit reichem Start? Dein Spielstand wird gelöscht.')) { newGame(S.name, true); tab = 'home'; stack = []; render(true); } },
+    closeModal() { $('#modalBg').classList.remove('show'); render(); },
+  };
+
+  function keepSongInput() { const i = $('#songTitle'); if (i && draft) draft.title = i.value; }
+  function keepAlbumInput() { const i = $('#albumName'); if (i && draft) draft.name = i.value; }
+
+  app.addEventListener('click', handle);
+  $('#modal').addEventListener('click', handle);
+  $('#modalBg').addEventListener('click', (e) => { if (e.target.id === 'modalBg') ACTIONS.closeModal(); });
+  function handle(e) {
+    const el = e.target.closest('[data-a]'); if (!el || el.disabled) return;
+    const f = ACTIONS[el.dataset.a]; if (f) f(el);
   }
-
-  async function runAuth(delay = 0) {
-    const t = ++payToken;
-    resetGlyph();
-    await wait(delay); if (t !== payToken) return;
-
-    // 1. grey Face ID glyph fades in, then turns blue (≈ 0–140 ms)
-    g(G.face, [
-      { opacity: 0, transform: 'scale(.92)', color: '#b4b4ba' },
-      { opacity: 1, transform: 'scale(1)', color: '#b4b4ba', offset: .35 },
-      { opacity: 1, transform: 'scale(1)', color: '#4f86e8' },
-    ], { duration: 260, easing: 'ease-out' });
-    label.textContent = 'Face ID';
-    label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: 'both', easing: 'ease-out' });
-    await wait(300); if (t !== payToken) return;
-
-    if (failNext) {
-      // Face ID "doesn't recognise" her: glyph shakes and greys out
-      failNext = false;
-      await wait(550); if (t !== payToken) return;
-      g(G.face, [
-        { opacity: 1, transform: 'translateX(0)', color: '#4f86e8' },
-        { transform: 'translateX(-10px)', offset: .14 },
-        { transform: 'translateX(9px)', offset: .32 },
-        { transform: 'translateX(-7px)', offset: .5 },
-        { transform: 'translateX(4px)', offset: .68 },
-        { transform: 'translateX(-2px)', offset: .84 },
-        { opacity: 1, transform: 'translateX(0)', color: '#b4b4ba' },
-      ], { duration: 560, easing: 'linear' });
-      await wait(600); if (t !== payToken) return;
-      showLabel('Erneut versuchen');
-      status.classList.add('retry');
-      $('payCode').classList.add('show');
-      return;
-    }
-
-    // 2. glyph glows and dissolves into two spinning rings (gyroscope)
-    g(G.face, [
-      { opacity: 1, transform: 'scale(1)', color: '#4f86e8', filter: 'blur(0px)' },
-      { opacity: .8, transform: 'scale(1.02)', color: '#3fb8f0', filter: 'blur(.8px)', offset: .4 },
-      { opacity: 0, transform: 'scale(.86)', color: '#3fb8f0', filter: 'blur(2px)' },
-    ], { duration: 260, easing: 'ease-in-out' });
-    g(G.glow, [{ opacity: 0 }, { opacity: .9, offset: .45 }, { opacity: 0 }], { duration: 520, delay: 60, easing: 'ease-in-out' });
-    g(G.a, [
-      { opacity: 0, transform: 'rotate(-30deg) scaleX(1)' },
-      { opacity: 1, transform: 'rotate(40deg) scaleX(.42)', offset: .35 },
-      { opacity: 1, transform: 'rotate(130deg) scaleX(.55)', offset: .65 },
-      { opacity: 0, transform: 'rotate(180deg) scaleX(1)' },
-    ], { duration: 520, delay: 90, easing: 'cubic-bezier(.3,0,.3,1)' });
-    g(G.b, [
-      { opacity: 0, transform: 'rotate(60deg) scaleY(1)' },
-      { opacity: 1, transform: 'rotate(-10deg) scaleY(.4)', offset: .35 },
-      { opacity: 1, transform: 'rotate(-100deg) scaleY(.6)', offset: .65 },
-      { opacity: 0, transform: 'rotate(-150deg) scaleY(1)' },
-    ], { duration: 520, delay: 90, easing: 'cubic-bezier(.3,0,.3,1)' });
-    // 3. rings settle into one clean blue circle
-    g(G.circle, [{ opacity: 0, transform: 'scale(1.08)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 300, delay: 420, easing: 'cubic-bezier(.2,.8,.2,1)' });
-    await wait(900); if (t !== payToken) return;
-
-    // 4. label fades, phone rises into the circle, new label
-    label.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'forwards', easing: 'ease-in' }).onfinish = () => {
-      if (t !== payToken) return;
-      label.getAnimations().forEach((a) => a.cancel());
-      label.textContent = 'An das Lesegerät halten';
-      label.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: 'both', easing: 'ease-out' });
-    };
-    g(G.phone, [{ opacity: 1, transform: 'translateY(46px)' }, { opacity: 1, transform: 'translateY(0)' }], { ...SPRING_POP, delay: 120 });
-  }
-
-  async function closePay() {
-    if (!payOpen) return;
-    payOpen = false;
-    payToken++;
-    const from = getComputedStyle(drag).transform;
-    stopAll();
-    if (from && from !== 'none') play(drag, [{ transform: from }, { transform: from }], { duration: 0 });
-    const a = play(wrap, [{ transform: 'translateY(0)' }, { transform: `translateY(${offTop()}px)` }], { duration: 280, easing: OUT });
-    play(peek, [{ transform: 'translateY(0)' }, { transform: 'translateY(100px)' }], { duration: 240, easing: OUT });
-    play(status, [{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: 'ease-in' });
-    play(bg, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: 120, easing: 'ease-in-out' });
-    await a.finished.catch(() => {});
-    await wait(110);
-    if (payOpen) return;
-    stopAll(); resetGlyph();
-    drag.style.transform = '';
-    pay.classList.remove('open');
-  }
-  $('payCancel').onclick = closePay;
-  const retry = () => { if (payOpen && status.classList.contains('retry')) runAuth(0); };
-  status.addEventListener('click', retry);
-  $('payCode').addEventListener('click', retry);
-
-  // tap a card in the bottom stack: it rises to the top, the current one drops into the stack
-  peek.addEventListener('click', (e) => {
-    const item = e.target.closest('.peek-item');
-    if (!payOpen || !item) return;
-    const top = (el) => el.getBoundingClientRect().top;
-    const before = { [currentId]: top(wrap) };
-    [...peek.children].forEach((el) => { before[el.dataset.id] = top(el); });
-    const oldId = currentId;
-    payToken++; resetGlyph();
-    [wrap, peek, ...peek.children].forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
-    renderPay(item.dataset.id);
-    peek.style.zIndex = 3; // the card going down passes in front, like on iOS
-    play(wrap, [{ transform: `translateY(${before[currentId] - top(wrap)}px)` }, { transform: 'translateY(0)' }], SPRING_SWAP);
-    let last;
-    [...peek.children].forEach((el) => {
-      const d = before[el.dataset.id] - top(el);
-      last = play(el, [{ transform: `translateY(${d}px)` }, { transform: 'translateY(0)' }],
-        { ...SPRING_SWAP, delay: el.dataset.id === oldId ? 60 : 0 });
-    });
-    if (last) last.finished.then(() => { peek.style.zIndex = ''; }).catch(() => {});
-    runAuth(380);
+  app.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (e.target.id === 'albumName') ACTIONS.createAlbum();
+    else if (e.target.id === 'songTitle' || e.target.id === 'startName' || e.target.id === 'setName') e.target.blur();
   });
 
-  // swipe the card down to dismiss (follows the finger, rubber-bands upward)
-  (() => {
-    let y0 = null, dy = 0, t0 = 0, snap = null;
-    drag.addEventListener('touchstart', (e) => {
-      if (snap) { snap.cancel(); snap = null; }
-      y0 = e.touches[0].clientY; dy = 0; t0 = Date.now();
-    }, { passive: true });
-    drag.addEventListener('touchmove', (e) => {
-      if (y0 == null) return;
-      const d = e.touches[0].clientY - y0;
-      dy = d > 0 ? d : -Math.sqrt(-d) * 3; // resistance when pulled up
-      drag.style.transform = `translateY(${dy}px)`;
-    }, { passive: true });
-    drag.addEventListener('touchend', () => {
-      if (y0 == null) return;
-      const v = dy / Math.max(1, Date.now() - t0); // px per ms
-      y0 = null;
-      if (dy > 140 || (dy > 40 && v > 0.6)) { closePay(); return; }
-      snap = drag.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }], SPRING_SNAP);
-      drag.style.transform = '';
+  /* ---------- helpers ---------- */
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2400); }
+  function shake(el) { el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 260 }); }
+  function modal(html) { $('#modal').innerHTML = html; $('#modalBg').classList.add('show'); }
+  function showReport(r, lBefore) {
+    const d = dateObj();
+    modal(`<h2>Woche ${S.week}</h2><p class="note">${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}</p>
+      <div class="kv"><span>Streams</span><span>${de(r.streams)}</span></div>
+      <div class="kv"><span>Einnahmen</span><span style="color:var(--cash)">+${euro(r.rev)}</span></div>
+      ${r.labelCut ? `<div class="kv"><span>Label-Anteil</span><span style="color:var(--salmon)">−${euro(r.labelCut)}</span></div>` : ''}
+      <div class="kv"><span>Monatliche Hörer</span><span>${de(S.listeners)} (${S.listeners - lBefore >= 0 ? '+' : ''}${de(S.listeners - lBefore)})</span></div>
+      <div class="kv"><span>Energie</span><span>⚡ ${S.energy} aufgefüllt</span></div>
+      ${r.events.map((x) => `<p style="margin:10px 0 0;font-size:14px">• ${esc(x)}</p>`).join('')}
+      <button class="big-btn c-green" data-a="closeModal" style="margin-top:18px">Weiter</button>`);
+  }
+  function pickImage(max) {
+    return new Promise((resolve, reject) => {
+      const inp = $('#file');
+      inp.onchange = () => {
+        const f = inp.files[0]; inp.value = ''; if (!f) return reject();
+        const url = URL.createObjectURL(f); const img = new Image();
+        img.onload = () => {
+          const s = Math.min(img.naturalWidth, img.naturalHeight);
+          const cv = document.createElement('canvas'); cv.width = cv.height = max;
+          cv.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, max, max);
+          URL.revokeObjectURL(url); resolve(cv.toDataURL('image/jpeg', .8));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); toast('Bild konnte nicht geladen werden'); reject(); };
+        img.src = url;
+      };
+      inp.click();
     });
-  })();
+  }
 
-  /* ---------- Home-screen app viewport fix ----------
-     iOS home-screen apps with a translucent status bar report a viewport that
-     is shorter than the screen, which leaves an empty strip at the bottom.
-     Measure the missing height once and let full-screen layers extend into it. */
+  /* ---------- home-screen app viewport fix (bottom strip on iOS) ---------- */
   function fixViewport() {
     const standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
     const portraitH = Math.max(screen.height, screen.width);
@@ -757,128 +1157,8 @@
   fixViewport();
   addEventListener('orientationchange', () => setTimeout(fixViewport, 400));
 
-  /* ---------- Settings & fake home screen ---------- */
-  const SKEY = 'wallet.settings.v1', HKEY = 'wallet.home.v1';
-  let settings = { failFirst: false, homeOnStart: false };
-  try { settings = { ...settings, ...JSON.parse(localStorage.getItem(SKEY) || '{}') }; } catch (e) {}
-  let homeImg = null;
-  try { homeImg = localStorage.getItem(HKEY); } catch (e) {}
-  const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch (e) {} };
-
-  function syncSettingsUI() {
-    $('failFirst').checked = settings.failFirst;
-    $('homeOnStart').checked = settings.homeOnStart;
-    $('homeThumb').style.backgroundImage = homeImg ? `url('${homeImg}')` : '';
-    $('homeRemove').hidden = !homeImg;
-    $('homeShow').disabled = !homeImg;
-    $('homeShow').style.opacity = homeImg ? 1 : .4;
-  }
-  $('setBtn').onclick = () => { syncSettingsUI(); $('backdrop').classList.add('open'); $('settings').classList.add('open'); };
-  const closeSettings = () => { $('backdrop').classList.remove('open'); $('settings').classList.remove('open'); };
-  $('setDone').onclick = closeSettings;
-  $('backdrop').addEventListener('click', closeSettings);
-  $('failFirst').onchange = (e) => { settings.failFirst = e.target.checked; saveSettings(); };
-  $('homeOnStart').onchange = (e) => { settings.homeOnStart = e.target.checked; saveSettings(); };
-  $('homeUpload').onclick = () => $('homeFile').click();
-  $('homeRemove').onclick = () => {
-    homeImg = null; settings.homeOnStart = false; saveSettings();
-    try { localStorage.removeItem(HKEY); } catch (e) {}
-    syncSettingsUI();
-  };
-  $('homeShow').onclick = () => { if (!homeImg) return; closeSettings(); showFakeHome(); };
-  $('homeFile').addEventListener('change', async () => {
-    const f = $('homeFile').files[0]; $('homeFile').value = ''; if (!f) return;
-    try {
-      const data = await prepHomeShot(f);
-      localStorage.setItem(HKEY, data);
-      homeImg = data; syncSettingsUI();
-    } catch (e) { toast('Bild zu groß oder nicht lesbar'); }
-  });
-
-  // Scale the screenshot down and paint over its (frozen) status bar, so the
-  // real, live status bar of the phone is the only one visible on top.
-  function prepHomeShot(file) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        const w = Math.min(1179, img.naturalWidth), h = Math.round(img.naturalHeight * (w / img.naturalWidth));
-        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-        const ctx = cv.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const sb = Math.round(w * 0.14);              // status bar height (≈ 54pt on a 390pt screen)
-        const tiny = document.createElement('canvas'); tiny.width = 12; tiny.height = 4;
-        // blur = downscale the wallpaper strip just below the status bar, then upscale
-        tiny.getContext('2d').drawImage(cv, 0, sb, w, Math.round(sb * .3), 0, 0, 12, 4);
-        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(tiny, 0, 0, 12, 4, 0, 0, w, sb + 2);
-        URL.revokeObjectURL(url);
-        let q = .82, out = cv.toDataURL('image/jpeg', q);
-        while (out.length > 1500000 && q > .4) { q -= .1; out = cv.toDataURL('image/jpeg', q); }
-        resolve(out);
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(); };
-      img.src = url;
-    });
-  }
-
-  function showFakeHome() {
-    if (!homeImg) return;
-    const fh = $('fakeHome');
-    fh.style.backgroundImage = `url('${homeImg}')`;
-    fh.classList.add('show');
-    document.documentElement.classList.add('fh');
-  }
-  function hideFakeHome() { $('fakeHome').classList.remove('show'); document.documentElement.classList.remove('fh'); }
-  (() => {
-    const fh = $('fakeHome');
-    let timer = null, x0 = 0, y0 = 0;
-    const cancel = () => { clearTimeout(timer); timer = null; };
-    const exit = () => { cancel(); hideFakeHome(); toast('Bearbeitungsmodus'); };
-    fh.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 1) return cancel();
-      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
-      timer = setTimeout(exit, 1000);
-    }, { passive: true });
-    fh.addEventListener('touchmove', (e) => {
-      const t = e.touches[0];
-      if (Math.hypot(t.clientX - x0, t.clientY - y0) > 12) cancel();
-    }, { passive: true });
-    fh.addEventListener('touchend', cancel);
-    fh.addEventListener('touchcancel', cancel);
-    fh.addEventListener('contextmenu', (e) => { e.preventDefault(); exit(); }); // desktop: right click
-  })();
-
-  /* ---------- Triggers ---------- */
-  function onDoubleTap(el, fn) {
-    let last = 0, down = 0;
-    el.addEventListener('touchstart', () => { down = Date.now(); }, { passive: true });
-    el.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - down > 300) { last = 0; return; } // was a long press
-      if (now - last < 350) { e.preventDefault(); last = 0; fn(); } else last = now;
-    });
-    el.addEventListener('dblclick', fn); // desktop testing
-  }
-  onDoubleTap($('sideZone'), () => openPay(null));
-  onDoubleTap($('fakeHome'), () => openPay(null));
-  onDoubleTap($('title'), () => openPay(null));
-  document.addEventListener('keydown', (e) => { if (e.key === 'p') openPay(null); if (e.key === 'Escape') closePay(); });
-
-  // URL trigger: …/index.html#pay opens pay mode directly.
-  // Used by an iOS Shortcut bound to Back Tap / Action Button (see README).
-  function checkHash() {
-    if (location.hash === '#pay') {
-      history.replaceState(null, '', location.pathname + location.search);
-      setTimeout(() => openPay(null), 60);
-    }
-  }
-  window.addEventListener('hashchange', checkHash);
-  window.addEventListener('pageshow', checkHash);
-
-  render();
-  if (settings.homeOnStart && homeImg) showFakeHome();
-  checkHash();
+  load();
+  render(true);
 })();
 </script>
 </body>
