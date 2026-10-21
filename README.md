@@ -17,7 +17,9 @@ Karriere-Simulator fürs iPhone, nachgebaut nach einer Bildschirmaufnahme.
 
 So hängen die Zahlen zusammen: Fans hören jede Woche deine Songs (neue und gute am meisten). Neue Songs werden von Fremden entdeckt (Playlists), ein Teil davon wird Fan. Monatliche Hörer = Fans + wer dich in den letzten 4 Wochen entdeckt hat. Ohne neue Songs gehen langsam Fans verloren.
 
-Alben: Preis einstellen und eine Promo-Phase starten (mehr Reichweite und Verkäufe für alle Songs des Albums).
+Alben: erst produzieren, dann veröffentlichen (danach abgeschlossen, neue Songs nur per Deluxe). Preis einstellen, Promo-Phase starten. Nach der ersten Woche gibt es Kritiken und eine Chartplatzierung (Songboard → Alben).
+
+Entwickleroptionen: Einstellungen → Entwickleroptionen (Wochenbericht an/aus, unendliche Energie, Geld/Fans setzen, Zeit vorspulen, Spielstand kopieren/laden).
 
 ## Installieren
 
