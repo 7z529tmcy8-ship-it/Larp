@@ -85,7 +85,73 @@
   .fame .track { flex: 1; height: 20px; border-radius: 10px; background: rgba(255,255,255,.35); overflow: hidden; }
   .fame .track i { display: block; height: 100%; background: #f1f1f1; border-radius: 10px; }
   .platforms { display: flex; justify-content: space-between; padding: 22px 10px 16px; border-bottom: 1px solid #3a4047; }
-  .plat { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; }
+  .plat { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; transition: transform .18s cubic-bezier(.3,.7,.4,1.4); }
+  .plat:active { transform: scale(.35); transition-duration: .08s; }
+
+  /* ---------- platform pages (slide up over the game) ---------- */
+  .pf { position: fixed; inset: 0; bottom: calc(-1 * var(--gap)); z-index: 35; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    transform: translateY(100%); transition: transform .42s cubic-bezier(.2,.9,.25,1); }
+  .pf.open { transform: none; }
+  .pf .wrap { max-width: 480px; margin: 0 auto; padding-bottom: calc(env(safe-area-inset-bottom) + 30px + var(--gap)); }
+  .pf .banner { position: relative; height: 300px; background-size: cover; background-position: center; }
+  .pf .cam { position: absolute; right: 14px; bottom: 14px; width: 36px; height: 36px; border-radius: 50%; background: rgba(60,60,60,.75); display: grid; place-items: center; }
+  .pf .cam svg { width: 20px; height: 20px; }
+  .pf .down { position: absolute; left: 14px; top: calc(env(safe-area-inset-top) + 8px); width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; z-index: 2; }
+  .pf .down svg { width: 14px; height: 9px; }
+
+  .pf.sp { background: #000; color: #fff; }
+  .sp .meta { display: flex; justify-content: space-between; padding: 12px 20px 8px; font-size: 11px; color: #b3b3b3; }
+  .sp .ctrl { display: flex; align-items: center; gap: 14px; padding: 0 20px; }
+  .sp .ava { width: 28px; height: 42px; border: 2px solid #b3b3b3; border-radius: 6px; }
+  .sp .follow { height: 34px; padding: 0 22px; border-radius: 17px; border: 1px solid #8a8a8a; font-size: 14px; font-weight: 700; }
+  .sp .shuffle { margin-left: auto; width: 30px; height: 30px; display: grid; place-items: center; }
+  .sp .play { width: 54px; height: 54px; border-radius: 50%; background: #1ed760; display: grid; place-items: center; }
+  .sp .play svg { width: 22px; height: 22px; }
+  .sp .tabsx { display: flex; gap: 30px; padding: 14px 20px 0; border-bottom: 1px solid #222; }
+  .sp .tabsx button { font-size: 15px; color: #a7a7a7; padding-bottom: 8px; border-bottom: 3px solid transparent; }
+  .sp .tabsx button.on { color: #fff; border-color: #1ed760; }
+  .sp h3 { display: flex; justify-content: space-between; align-items: center; margin: 22px 20px 10px; font-size: 21px; font-weight: 700; }
+  .sp .tg { width: 48px; height: 28px; border-radius: 14px; background: #444; position: relative; transition: background .2s; }
+  .sp .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; }
+  .sp .tg.on { background: #1ed760; } .sp .tg.on::after { transform: translateX(20px); }
+  .sp .tr { display: flex; align-items: center; gap: 12px; padding: 6px 20px; }
+  .sp .tr .n { width: 16px; font-size: 14px; color: #fff; text-align: center; }
+  .sp .tr .c { width: 48px; height: 48px; flex: none; background-size: cover; background-position: center; }
+  .sp .tr .t { flex: 1; min-width: 0; }
+  .sp .tr .t b { display: block; font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp .tr .t small { font-size: 13px; color: #a7a7a7; }
+  .sp .tr .dots { color: #a7a7a7; font-size: 18px; letter-spacing: 1px; }
+  .sp .tr.playing .t b { color: #1ed760; }
+  .sp .empty { padding: 10px 20px; color: #a7a7a7; font-size: 14px; }
+
+  .pf.am { background: #fff; color: #000; }
+  .am .banner .name { position: absolute; left: 16px; bottom: 14px; color: #fff; font-size: 34px; font-weight: 800; text-shadow: 0 2px 12px rgba(0,0,0,.35); }
+  .am .down { background: rgba(255,255,255,.25); }
+  .am .feat { display: flex; gap: 12px; align-items: center; padding: 16px; }
+  .am .feat .c { width: 74px; height: 74px; border-radius: 6px; background-size: cover; background-position: center; flex: none; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .am .feat small { font-size: 10px; font-weight: 600; color: #8a8a8e; display: block; }
+  .am .feat b { font-size: 15px; font-weight: 500; display: block; margin: 2px 0 6px; }
+  .am .feat .pillr { display: inline-block; font-size: 11px; color: #fa2d48; background: #f2f2f7; border-radius: 12px; padding: 4px 12px; font-weight: 600; }
+  .am h3 { margin: 10px 16px 6px; font-size: 21px; font-weight: 700; }
+  .am h3 span { color: #8a8a8e; font-weight: 400; }
+  .am .tr { padding: 8px 16px; border-bottom: .5px solid #e5e5ea; margin-left: 0; }
+  .am .tr b { display: block; font-size: 15px; font-weight: 500; }
+  .am .tr small { font-size: 12px; color: #8a8a8e; }
+  .am .albums { display: flex; gap: 12px; overflow-x: auto; padding: 4px 16px 10px; }
+  .am .albums div { flex: none; width: 150px; }
+  .am .albums i { display: block; width: 150px; height: 150px; border-radius: 8px; background-size: cover; background-position: center; }
+  .am .albums b { display: block; font-size: 13px; font-weight: 500; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .am .albums small { font-size: 12px; color: #8a8a8e; }
+
+  .pf.bs { background: #0f0f12; color: #fff; }
+  .bs .head { padding: 16px 18px; }
+  .bs .head b { font-size: 26px; font-weight: 800; display: block; }
+  .bs .head small { color: #aaa; font-size: 13px; }
+  .bs .vid { display: flex; gap: 12px; padding: 8px 18px; }
+  .bs .vid i { width: 150px; height: 84px; border-radius: 8px; flex: none; background-size: cover; background-position: center; position: relative; }
+  .bs .vid i::after { content: "▶"; position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-size: 22px; color: rgba(255,255,255,.85); }
+  .bs .vid b { display: block; font-size: 15px; font-weight: 600; }
+  .bs .vid small { font-size: 12px; color: #aaa; }
   .plat svg { width: 28px; height: 28px; }
   .listeners { text-align: center; margin: 16px 0 4px; font-size: 19px; font-weight: 700; }
   .listeners .plus { color: var(--cash); font-weight: 600; }
@@ -240,6 +306,7 @@
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="file" accept="image/*" hidden>
+<div class="pf" id="pf"></div>
 
 <script>
 (() => {
@@ -600,9 +667,9 @@
       return `
       <div class="fame"><b>FAME | ${grade(f)}</b><div class="track"><i style="width:${Math.max(4, f)}%"></i></div></div>
       <div class="platforms">
-        <div class="plat" style="background:#1fbf5c"><svg viewBox="0 0 28 28" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round"><path d="M7 11v6M11.5 8v12M16 10v8M20.5 12.5v3"/></svg></div>
-        <div class="plat" style="background:#fb2c48"><svg viewBox="0 0 28 28" fill="#fff"><path d="M20 4v14.5a3.5 3.5 0 1 1-2.2-3.25V9.2L11 10.6v9.9a3.5 3.5 0 1 1-2.2-3.25V6.5z"/></svg></div>
-        <div class="plat" style="background:#0b0b0b;box-shadow:0 0 0 1px #333"><svg viewBox="0 0 28 28" fill="#fff"><path d="M10 7l12 7-12 7z"/></svg></div>
+        <button class="plat" data-a="plat" data-p="sp" aria-label="Streaming-Profil" style="background:#1fbf5c"><svg viewBox="0 0 28 28" fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round"><path d="M7 11v6M11.5 8v12M16 10v8M20.5 12.5v3"/></svg></button>
+        <button class="plat" data-a="plat" data-p="am" aria-label="Musik-Profil" style="background:#fb2c48"><svg viewBox="0 0 28 28" fill="#fff"><path d="M20 4v14.5a3.5 3.5 0 1 1-2.2-3.25V9.2L11 10.6v9.9a3.5 3.5 0 1 1-2.2-3.25V6.5z"/></svg></button>
+        <button class="plat" data-a="plat" data-p="bs" aria-label="Video-Profil" style="background:#0b0b0b;box-shadow:0 0 0 1px #333"><svg viewBox="0 0 28 28" fill="#fff"><path d="M10 7l12 7-12 7z"/></svg></button>
       </div>
       <div class="listeners"><span class="plus" style="color:${delta < 0 ? 'var(--salmon)' : 'var(--cash)'}">${delta >= 0 ? '+' : ''}${de(delta)}</span> Listeners<small>LAST 12 MONTHS</small></div>
       ${chartSvg(h)}
@@ -1094,6 +1161,16 @@
     rename() { const v = $('#setName').value.trim(); if (v) { S.name = v; save(); toast('Name gespeichert'); } },
     reset() { if (confirm('Wirklich neu anfangen? Dein Spielstand wird gelöscht.')) { S = null; try { localStorage.removeItem(KEY); } catch (e) {} tab = 'home'; stack = []; render(true); } },
     resetRich() { if (confirm('Neues Spiel mit reichem Start? Dein Spielstand wird gelöscht.')) { newGame(S.name, true); tab = 'home'; stack = []; render(true); } },
+    plat(el) { const k = el.dataset.p; setTimeout(() => openPf(k), 120); },
+    pfClose() { closePf(); },
+    pfTab(el) { pfState.tab = el.dataset.t; refreshPf(); },
+    pfToggle() { pfState.popular = !pfState.popular; refreshPf(); },
+    pfFollow() { pfState.followed = !pfState.followed; refreshPf(); },
+    pfPlay(el) { const id = el.dataset.id; if (!id) return; pfState.playing = pfState.playing === id ? null : id; refreshPf(); },
+    pfBanner(el) {
+      const k = el.dataset.p;
+      pickImage(900, 1.4).then((d) => { S.banners = S.banners || {}; S.banners[k] = d; save(); refreshPf(); }).catch(() => {});
+    },
     closeModal() { $('#modalBg').classList.remove('show'); render(); },
   };
 
@@ -1113,6 +1190,89 @@
     else if (e.target.id === 'songTitle' || e.target.id === 'startName' || e.target.id === 'setName') e.target.blur();
   });
 
+  /* ---------- platform pages (green / red / black icon on Home) ---------- */
+  const PF_BANNER = {
+    sp: 'radial-gradient(circle at 60% 12%,#2bd1c4 0 7%,transparent 7.5%), radial-gradient(circle at 48% 30%,#7d3cff 0 5%,transparent 5.5%), radial-gradient(circle at 56% 48%,#ff3b30 0 6%,transparent 6.5%), radial-gradient(circle at 44% 62%,#1b5cff 0 4%,transparent 4.5%), radial-gradient(circle at 60% 78%,#ff9500 0 5%,transparent 5.5%), radial-gradient(circle at 40% 90%,#34c759 0 3.5%,transparent 4%), radial-gradient(circle at 70% 64%,#ff2d92 0 3%,transparent 3.5%), radial-gradient(circle at 35% 40%,#ffd60a 0 2.5%,transparent 3%), #fff',
+    am: 'radial-gradient(circle at 70% 30%,#ff5bd6 0%,#8b1fa8 35%,#2a0640 80%)',
+    bs: 'linear-gradient(135deg,#1d1d2a 0%,#3a1c5c 50%,#0f0f12 100%)',
+  };
+  const PF_SHARE = { sp: .62, am: .24, bs: .14 };
+  let pfState = { tab: 'music', popular: true, playing: null, followed: false };
+  const yearAt = (w) => { const d = dateObj(); d.setUTCDate(d.getUTCDate() - (S.week - w) * 7); return d.getUTCFullYear(); };
+  const bannerCss = (k) => (S.banners && S.banners[k] ? `url('${S.banners[k]}') center/cover` : PF_BANNER[k]);
+  const camBtn = (k) => `<button class="cam" data-a="pfBanner" data-p="${k}" aria-label="Bild ändern"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>`;
+  const downBtn = (dark) => `<button class="down" data-a="pfClose" aria-label="Schließen"><svg viewBox="0 0 14 9" fill="none" stroke="${dark ? '#000' : '#fff'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5 7 7.5l6-6"/></svg></button>`;
+
+  function pfHTML(k) {
+    const released = S.songs.filter((x) => S.week - x.week >= 1);
+    const byStreams = released.slice().sort((a, b) => b.streams - a.streams);
+    const albums = albumStats();
+    const latestAlbum = S.albums.slice().sort((a, b) => b.week - a.week)[0];
+    if (k === 'sp') {
+      const list = (pfState.popular ? byStreams : released.slice().reverse()).slice(0, 10);
+      const ml = Math.round(S.listeners * PF_SHARE.sp);
+      let body = '';
+      if (pfState.tab === 'music') {
+        body = `<h3>${pfState.popular ? 'Popular' : 'Latest'}<button class="tg ${pfState.popular ? 'on' : ''}" data-a="pfToggle" aria-label="Beliebt/Neu"></button></h3>
+          ${list.length ? list.map((x, i) => `<div class="tr ${pfState.playing === x.id ? 'playing' : ''}" data-a="pfPlay" data-id="${x.id}"><span class="n">${i + 1}</span><i class="c" style="background:${coverCss(songCover(x))};background-size:cover;background-position:center"></i><div class="t"><b>${esc(x.title)}</b><small>${de(x.streams)}</small></div><span class="dots">•••</span></div>`).join('') : '<p class="empty">Noch keine veröffentlichten Songs.</p>'}
+          <h3>Popular Releases</h3>
+          ${albums.length ? albums.map(({ album, streams }) => `<div class="tr"><i class="c" style="background:${coverCss(album.cover)};background-size:cover;background-position:center"></i><div class="t"><b>${esc(album.name)}</b><small>${yearAt(album.week)} • ${de(streams / 1500)} albums sold</small></div></div>`).join('') : '<p class="empty">Noch keine Alben.</p>'}`;
+      } else if (pfState.tab === 'events') {
+        const inv = S.inbox.filter((m) => m.action && m.action.type === 'festival' && !m.done);
+        const past = S.festivals.slice().reverse();
+        body = `<h3>Events</h3>${inv.concat(past).length ? inv.map((m) => `<div class="tr"><div class="t"><b>${esc(m.action.name)}</b><small>${esc(m.action.place)} · angefragt</small></div></div>`).join('') + past.map((f) => `<div class="tr"><div class="t"><b>${esc(f.name)} ${f.year}</b><small>${esc(f.place)} · gespielt</small></div></div>`).join('') : '<p class="empty">Keine Events. Festivals melden sich in deiner Inbox.</p>'}`;
+      } else {
+        const top = byStreams[0];
+        body = `<h3>Recap ${year()}</h3>
+          <div class="tr"><div class="t"><b>${de(ml)}</b><small>Monthly listeners</small></div></div>
+          <div class="tr"><div class="t"><b>${de(Math.round(totalListens() * PF_SHARE.sp))}</b><small>Streams auf dieser Plattform</small></div></div>
+          <div class="tr"><div class="t"><b>${top ? esc(top.title) : '—'}</b><small>Meistgehörter Song</small></div></div>
+          <div class="tr"><div class="t"><b>${de(S.followers)}</b><small>Follower</small></div></div>`;
+      }
+      return `<div class="wrap">
+        <div class="banner" style="background:${bannerCss('sp')}">${downBtn(true)}${camBtn('sp')}</div>
+        <div class="meta"><span>${compact(ml)} monthly listeners</span><span>0,004 €/stream</span></div>
+        <div class="ctrl"><span class="ava"></span><button class="follow" data-a="pfFollow">${pfState.followed ? 'Following' : 'Follow'}</button>
+          <span class="shuffle"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#b3b3b3" stroke-width="2" stroke-linecap="round"><path d="M3 7h3c5 0 7 10 12 10h3M3 17h3c2 0 3.5-1.6 4.8-3.6M21 7h-3c-2 0-3.5 1.6-4.8 3.6M18 4l3 3-3 3M18 14l3 3-3 3"/></svg></span>
+          <button class="play" data-a="pfPlay" data-id="${pfState.playing || (byStreams[0] || {}).id || ''}">${pfState.playing ? '<svg viewBox="0 0 24 24" fill="#000"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>' : '<svg viewBox="0 0 24 24" fill="#000"><path d="M7 4l14 8-14 8z"/></svg>'}</button></div>
+        <div class="tabsx">${[['music', 'Music'], ['events', 'Events'], ['recap', 'Recap']].map(([t, l]) => `<button class="${pfState.tab === t ? 'on' : ''}" data-a="pfTab" data-t="${t}">${l}</button>`).join('')}</div>
+        ${body}</div>`;
+    }
+    if (k === 'am') {
+      const la = latestAlbum;
+      return `<div class="wrap">
+        <div class="banner" style="background:${bannerCss('am')}">${downBtn(false)}<span class="name">${esc(S.name)}</span>${camBtn('am')}</div>
+        ${la ? `<div class="feat"><i class="c" style="background:${coverCss(la.cover)};background-size:cover;background-position:center"></i><div><small>FEATURED ALBUM</small><b>${esc(la.name)} (${yearAt(la.week)})</b><span class="pillr">See Artist View</span></div></div>` : '<div style="height:12px"></div>'}
+        <h3>Top Songs <span>›</span></h3>
+        ${byStreams.slice(0, 8).map((x) => { const al = songAlbum(x); return `<div class="tr"><b>${esc(x.title)}</b><small>${al ? esc(al.name) : 'Single'} • ${yearAt(x.week)}</small></div>`; }).join('') || '<div class="tr"><small>Noch keine veröffentlichten Songs.</small></div>'}
+        <h3>Albums</h3>
+        <div class="albums">${albums.map(({ album }) => `<div><i style="background:${coverCss(album.cover)};background-size:cover;background-position:center"></i><b>${esc(album.name)}</b><small>${yearAt(album.week)}</small></div>`).join('') || '<small style="color:#8a8a8e">Noch keine Alben.</small>'}</div></div>`;
+    }
+    const vids = S.songs.filter((x) => x.video);
+    return `<div class="wrap">
+      <div class="banner" style="height:200px;background:${bannerCss('bs')}">${downBtn(false)}${camBtn('bs')}</div>
+      <div class="head"><b>${esc(S.name)}</b><small>${compact(S.followers * .6)} Abonnenten · ${vids.length} Videos</small></div>
+      ${vids.length ? vids.slice().reverse().map((x) => `<div class="vid"><i style="background:${coverCss(songCover(x))};background-size:cover;background-position:center"></i><div><b>${esc(x.title)} (Official ${esc(x.video.style)} Video)</b><small>${compact(x.streams * .35)} Aufrufe · Regie: ${esc(x.video.director)}</small></div></div>`).join('')
+        : '<p style="padding:0 18px;color:#aaa;font-size:14px">Noch keine Musikvideos. Dreh eins unter Musik → Video.</p>'}</div>`;
+  }
+  let pfOpen = null;
+  function openPf(k) {
+    pfOpen = k; pfState = { tab: 'music', popular: true, playing: null, followed: pfState.followed };
+    const el = $('#pf');
+    el.className = `pf ${k}`; el.innerHTML = pfHTML(k); el.scrollTop = 0;
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('open')));
+  }
+  function refreshPf() { if (pfOpen) { const el = $('#pf'); const y = el.scrollTop; el.innerHTML = pfHTML(pfOpen); el.scrollTop = y; } }
+  function closePf() { pfOpen = null; $('#pf').classList.remove('open'); }
+  $('#pf').addEventListener('click', handle);
+  // swipe down from the top to close
+  (() => {
+    const el = $('#pf'); let y0 = null, dy = 0;
+    el.addEventListener('touchstart', (e) => { y0 = el.scrollTop <= 0 ? e.touches[0].clientY : null; dy = 0; }, { passive: true });
+    el.addEventListener('touchmove', (e) => { if (y0 == null) return; dy = e.touches[0].clientY - y0; if (dy > 0) { el.style.transition = 'none'; el.style.transform = `translateY(${dy}px)`; } }, { passive: true });
+    el.addEventListener('touchend', () => { if (y0 == null) return; el.style.transition = ''; el.style.transform = ''; if (dy > 120) closePf(); y0 = null; });
+  })();
+
   /* ---------- helpers ---------- */
   function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2400); }
   function shake(el) { el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 260 }); }
@@ -1128,16 +1288,17 @@
       ${r.events.map((x) => `<p style="margin:10px 0 0;font-size:14px">• ${esc(x)}</p>`).join('')}
       <button class="big-btn c-green" data-a="closeModal" style="margin-top:18px">Weiter</button>`);
   }
-  function pickImage(max) {
+  function pickImage(max, ratio = 1) {
     return new Promise((resolve, reject) => {
       const inp = $('#file');
       inp.onchange = () => {
         const f = inp.files[0]; inp.value = ''; if (!f) return reject();
         const url = URL.createObjectURL(f); const img = new Image();
         img.onload = () => {
-          const s = Math.min(img.naturalWidth, img.naturalHeight);
-          const cv = document.createElement('canvas'); cv.width = cv.height = max;
-          cv.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, max, max);
+          let sw = img.naturalWidth, sh = sw / ratio;
+          if (sh > img.naturalHeight) { sh = img.naturalHeight; sw = sh * ratio; }
+          const cv = document.createElement('canvas'); cv.width = max; cv.height = Math.round(max / ratio);
+          cv.getContext('2d').drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, 0, 0, cv.width, cv.height);
           URL.revokeObjectURL(url); resolve(cv.toDataURL('image/jpeg', .8));
         };
         img.onerror = () => { URL.revokeObjectURL(url); toast('Bild konnte nicht geladen werden'); reject(); };
@@ -1157,6 +1318,7 @@
   fixViewport();
   addEventListener('orientationchange', () => setTimeout(fixViewport, 400));
 
+  document.addEventListener('touchstart', () => {}, { passive: true }); // enables :active press states on iOS
   load();
   render(true);
 })();
