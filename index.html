@@ -410,7 +410,7 @@
     if (!S) return;
     // older saves: swap the made-up artist names for the real ones
     if (S.npcs.some((n) => OLD_NPC.includes(n.name))) S.npcs = makeNpcs(NPC_NAMES);
-    S.albums.forEach((a) => { if (a.price == null) a.price = ALBUM_PRICE; if (a.sold == null) a.sold = 0; if (a.salesRev == null) a.salesRev = 0; });
+    S.albums.forEach((a) => { if (a.released == null) a.released = true; if (a.price == null) a.price = ALBUM_PRICE; if (a.sold == null) a.sold = 0; if (a.salesRev == null) a.salesRev = 0; });
     if (!S.tourPrices) S.tourPrices = TOURS.map((t) => t.price);
     if (S.earnings.albums == null) S.earnings.albums = 0;
     if (!S.hist) {
@@ -456,7 +456,7 @@
     Object.assign(S, { cash: 442041757, date: '2033-09-16', week: 400, followers: 37000000, discHist: [1.5e6, 1.5e6, 1.5e6, 1.5e6] });
     S.listeners = Math.round(S.followers * .9 + 6e6 / 3);
     Object.assign(S.talents, { studio: 100, charisma: 1, musicality: 100, rhythm: 100, songwriting: 100, virality: 52, video: 48, leadership: 10 });
-    const al = [['Free Sex', 0], ['Berlin Hates You', 2], ['Beeil Dich Wir Werden Erwachsen', 3]].map(([n, c]) => ({ id: uid(), name: n, cover: COVERS[c], week: 380, price: ALBUM_PRICE, sold: 0, salesRev: 0 }));
+    const al = [['Free Sex', 0], ['Berlin Hates You', 2], ['Beeil Dich Wir Werden Erwachsen', 3]].map(([n, c]) => ({ id: uid(), name: n, cover: COVERS[c], week: 380, price: ALBUM_PRICE, sold: 0, salesRev: 0, released: true }));
     S.albums = al;
     const songs = [
       ["suv's x djunis", 0, 73, 1922194699], ['bentayga x toujour', 1, 72, 1400000000], ['work it x fdg', 2, 70, 1300000000],
@@ -502,6 +502,10 @@
     video: () => S.talents.video,
   };
   const songAlbum = (s) => S.albums.find((a) => a.id === s.albumId);
+  // a song with week == null sits on an album that hasn't been released yet
+  const isOut = (x) => x.week != null && S.week - x.week >= 1;
+  const draftAlbums = () => S.albums.filter((a) => !a.released);
+  const MIN_TRACKS = 3;
   const songCover = (s) => (songAlbum(s) || {}).cover || COVERS[Math.abs(hash(s.id)) % COVERS.length];
   const coverCss = (c) => (c && c.startsWith('data:') ? `url('${c}')` : c);
   function hash(t) { let h = 0; for (const ch of String(t)) h = (h * 31 + ch.charCodeAt(0)) | 0; return h; }
@@ -531,7 +535,7 @@
     return m;
   }
   function simulateStreams() {
-    const rel = S.songs.filter((x) => S.week - x.week >= 1);
+    const rel = S.songs.filter(isOut);
     const res = { total: 0, disc: 0, newFans: 0, per: new Map() };
     if (!rel.length) return res;
     const F = S.followers;
@@ -584,6 +588,7 @@
     S.albums.forEach((a) => {
       const promo = a.promo && a.promo.weeksLeft > 0 ? 1 + a.promo.boost : 1;
       const sold = Math.round(albumWeekSales(a, true) * promo);
+      if (a.released && S.week - a.week === 1) report.events.push(`💿 „${a.name}“ ist erschienen: ${de(sold)} Verkäufe in der ersten Woche.`);
       if (a.promo && a.promo.weeksLeft > 0 && --a.promo.weeksLeft === 0) report.events.push(`Promo-Phase für „${a.name}“ ist vorbei.`);
       if (!sold) return;
       const rev = sold * a.price * .7 * labelShare(); // 30 % go to the shops
@@ -595,7 +600,7 @@
     S.earnings.streams += report.rev;
 
     // listeners & followers
-    const lastRelease = S.songs.reduce((m, x) => Math.max(m, x.week), -99);
+    const lastRelease = S.songs.reduce((m, x) => Math.max(m, x.week ?? -99), -99);
     const churn = .005 + (S.followers / MARKET) ** 2 * .02 + (S.week - lastRelease > 10 ? .006 : 0);
     S.followers = Math.round(S.followers * (1 - churn) + sim.newFans);
     S.discHist.push(sim.disc); S.discHist = S.discHist.slice(-4);
@@ -870,7 +875,7 @@
 
     music() {
       const songs = S.songs.slice().sort((a, b) => b.streams - a.streams).slice(0, 3);
-      const albums = albumStats().slice(0, 3);
+      const albums = albumStats().filter(({ album }) => album.released).slice(0, 3);
       return `<div class="title"><span class="dim">${compact(totalListens())}</span> Listens</div>
         <div class="listhead"><span>Most popular songs</span><button class="chip c-orange" data-a="go" data-s="newSong">New Song</button></div>
         <div class="toplist">${songs.length ? songs.map((s, i) => `<div><small>${i + 1}</small>${esc(s.title)}<em>, ${compact(s.streams)}</em></div>`).join('') : '<p class="empty">Noch keine Songs. Tipp auf NEW SONG.</p>'}</div>
@@ -947,12 +952,15 @@
     return S.albums.map((a) => ({ album: a, streams: S.songs.filter((s) => s.albumId === a.id).reduce((x, s) => x + s.streams, 0) })).sort((p, q) => q.streams - p.streams);
   }
   const jobPay = () => 300 + S.week * 4;
-  function albumWeekSales(a, random) {
-    const songs = S.songs.filter((x) => x.albumId === a.id && x.weekly.length);
+  function albumWeekSales(a, random, ahead = 0) {
+    if (!a.released) return 0;
+    const songs = S.songs.filter((x) => x.albumId === a.id);
     if (!songs.length) return 0;
-    const streams = songs.reduce((t, x) => t + x.weekly[x.weekly.length - 1], 0);
+    const streams = songs.reduce((t, x) => t + (x.weekly.length ? x.weekly[x.weekly.length - 1] : 0), 0);
     const q = songs.reduce((t, x) => t + x.quality, 0) / songs.length;
-    const demand = streams / 900 * (.6 + q / 100) * (ALBUM_PRICE / a.price) ** 1.6;
+    const age = Math.max(1, S.week - a.week + ahead); // 1 = release week
+    const fanRush = S.followers * .03 * (q / 100) * .55 ** (age - 1); // die-hard fans buy right away
+    const demand = (streams / 900 * (.6 + q / 100) + fanRush) * (ALBUM_PRICE / a.price) ** 1.6;
     return Math.round(demand * (random ? rnd(.85, 1.15) : 1));
   }
   const priceStep = (p, d) => {
@@ -982,7 +990,7 @@
 
     newSong(p) {
       if (!draft) draft = { title: p.title || '', album: 0, artistry: 0, writing: 0, studio: 0, feat: p.feat || null, genre: S.trend, freeFeat: !!p.feat, mailId: p.mailId || null };
-      const albums = [null, ...S.albums];
+      const albums = [null, ...draftAlbums()];
       const al = albums[draft.album];
       const roleSel = (role, label) => {
         const h = HIRES[role][draft[role]];
@@ -995,7 +1003,7 @@
       return pTitle('New Song', { energy: true }) + `
         <div class="sub">Song name</div>
         <div class="inp"><input id="songTitle" maxlength="40" placeholder="Enter a song title" value="${esc(draft.title)}"><button data-a="randTitle" aria-label="Zufallstitel">${IC.plus}</button></div>
-        ${selector('Assign album', al ? al.name : 'Single', '', 'album')}
+        ${selector('Assign album', al ? al.name : 'Single', al ? 'erscheint mit dem Album' : (draftAlbums().length ? '' : 'kein Album in Produktion'), 'album')}
         ${roleSel('artistry', 'Artistry')}
         ${roleSel('writing', 'Writing')}
         ${roleSel('studio', 'Studio')}
@@ -1031,14 +1039,15 @@
       const units = Math.round(s.streams / 150);
       const cert = certOf(units);
       const al = songAlbum(s);
-      const released = S.week - s.week >= 1;
+      const released = isOut(s);
       const w = s.weekly.slice(-20); const mx = Math.max(1, ...w);
       return pTitle(s.title, { norm: true, extra: `<div class="sd-cov" style="background:${coverCss(songCover(s))};background-size:cover;background-position:center"></div>` }) + `
-        <p class="sd-desc">${released ? `"${esc(s.title)}" debuted with ${compact(s.debut || 0)} streams, generating ${euroK((s.debut || 0) * .004 * labelShare())} in its first week. 1 unit is equivalent to 150 streams.` : `"${esc(s.title)}" erscheint mit der nächsten Woche. Drück END WEEK.`}
+        <p class="sd-desc">${s.week == null ? `"${esc(s.title)}" liegt auf dem Album „${esc(al ? al.name : '')}“ und erscheint, wenn du das Album veröffentlichst.` : released ? `"${esc(s.title)}" debuted with ${compact(s.debut || 0)} streams, generating ${euroK((s.debut || 0) * .004 * labelShare())} in its first week. 1 unit is equivalent to 150 streams.` : `"${esc(s.title)}" erscheint mit der nächsten Woche. Drück END WEEK.`}
         <br>${al ? `Album: ${esc(al.name)} · ` : 'Single · '}${s.genre}${s.feat ? ` · feat. ${esc(s.feat)}` : ''} · Qualität ${s.quality}</p>
         <div class="cert"><div class="disc" style="background:${cert.color}">♪</div><div class="r"><small>${cert.label}</small><b>${compact(units)} UNITS</b></div></div>
         <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(s.streams)}</b></div><div><small>TOTAL REVENUE</small><b>${euroK(s.revenue)}</b></div></div>
         <div class="bars">${w.map((v) => `<i style="height:${Math.max(3, (v / mx) * 100)}%"></i>`).join('')}</div>
+        ${s.week == null ? `<button class="big-btn c-green" data-a="preSingle" data-id="${s.id}">Als Vorab-Single veröffentlichen</button><p class="note" style="text-align:center">Vorab-Singles machen Hype: Der Song läuft schon, das Album kommt später.</p>` : ''}
         ${s.video ? `<div class="card"><b>Music Video · ${esc(s.video.style)}</b><p>Directed by ${esc(s.video.director)} · +${Math.round(s.video.bonus * 100)} % Streams</p></div>` : `<button class="pill" data-a="go" data-s="newVideo" data-id="${s.id}">Music Video</button>`}`;
     },
 
@@ -1046,15 +1055,31 @@
       const st = albumStats();
       return pTitle('Albums') + (st.length ? st.map(({ album, streams }) => `<button class="srow" data-a="go" data-s="album" data-id="${album.id}">
           <div class="cov" style="background:${coverCss(album.cover)};background-size:cover;background-position:center"></div>
-          <div class="info"><b>${esc(album.name)}</b><small>${S.songs.filter((s) => s.albumId === album.id).length} Songs • ${compact(streams)} streams • ${compact(album.sold || 0)} sold • ${eur2(album.price)}</small></div></button>`).join('')
+          <div class="info"><b>${esc(album.name)}</b><small>${S.songs.filter((s) => s.albumId === album.id).length} Songs • ${album.released ? `${compact(streams)} streams • ${compact(album.sold || 0)} sold` : 'in Produktion'}</small></div></button>`).join('')
         : '<p class="note">Noch keine Alben.</p>') + '<button class="big-btn c-orange" data-a="go" data-s="newAlbum">New Album</button>';
     },
 
     album(p) {
       const a = S.albums.find((x) => x.id === p.id); if (!a) return pTitle('Album');
       const songs = S.songs.filter((s) => s.albumId === a.id);
-      const est = Math.round(albumWeekSales(a, false) * (a.promo && a.promo.weeksLeft > 0 ? 1 + a.promo.boost : 1));
+      const est = Math.round(albumWeekSales(a, false, 1) * (a.promo && a.promo.weeksLeft > 0 ? 1 + a.promo.boost : 1));
+      if (!a.released) {
+        const avgQ = songs.length ? Math.round(songs.reduce((t, x) => t + x.quality, 0) / songs.length) : 0;
+        const pre = songs.filter((x) => x.week != null).length;
+        return pTitle(a.name, { norm: true }) + `<div class="bigcover" style="width:180px;height:180px;background:${coverCss(a.cover)};background-size:cover;background-position:center"></div>
+          <div class="card" style="text-align:center"><b>🎛 In Produktion</b><p>${songs.length} Song${songs.length === 1 ? '' : 's'} · Ø Qualität ${avgQ}${pre ? ` · ${pre} Vorab-Single${pre > 1 ? 's' : ''}` : ''}<br>Songs auf dem Album erscheinen erst, wenn du es veröffentlichst. Einzelne Songs kannst du vorher als Vorab-Single rausbringen.</p></div>
+          ${a.promo && a.promo.weeksLeft > 0
+            ? `<div class="card" style="border:2px solid var(--orange)"><b>📣 Promo-Phase läuft</b><p>${esc(a.promo.name)} · noch ${a.promo.weeksLeft} Woche(n) · baut Hype für den Release auf</p></div>`
+            : `<button class="big-btn c-orange" data-a="go" data-s="promo" data-id="${a.id}">Promo-Phase starten</button>`}
+          <div class="sub" style="margin:4px 0 0">Album price</div>
+          <div class="sel"><button data-a="aprice" data-id="${a.id}" data-d="-1" aria-label="billiger">${IC.larr}</button><div class="val"><b>${eur2(a.price)}</b></div><button data-a="aprice" data-id="${a.id}" data-d="1" aria-label="teurer">${IC.rarr}</button></div>
+          <button class="big-btn c-green" data-a="releaseAlbum" data-id="${a.id}" ${songs.length < MIN_TRACKS || S.energy < 10 ? 'disabled' : ''}>Album veröffentlichen 10 <span class="bolt">⚡</span></button>
+          <div class="avail">${songs.length < MIN_TRACKS ? `Mindestens ${MIN_TRACKS} Songs nötig (noch ${MIN_TRACKS - songs.length})` : 'Danach ist das Album abgeschlossen – keine neuen Songs mehr.'}</div>
+          <div class="h3">Tracklist</div>
+          ${songs.length ? songs.map((x) => songRow(x)).join('') : '<p class="note">Noch keine Songs. Wähle das Album bei NEW SONG unter „Assign album“ aus.</p>'}`;
+      }
       return pTitle(a.name, { norm: true }) + `<div class="bigcover" style="width:180px;height:180px;background:${coverCss(a.cover)};background-size:cover;background-position:center"></div>
+        <p class="note" style="text-align:center;margin-top:-2px">Veröffentlicht ${dateShort(weekDate(a.week))} · abgeschlossen</p>
         <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(songs.reduce((x, s) => x + s.streams, 0))}</b></div><div><small>SONGS</small><b>${songs.length}</b></div></div>
         <div class="stats2"><div><small>ALBUMS SOLD</small><b>${compact(a.sold)}</b></div><div><small>SALES REVENUE</small><b>${euroK(a.salesRev)}</b></div></div>
         <div class="sub" style="margin:4px 0 0">Album price</div>
@@ -1065,7 +1090,9 @@
           ? `<div class="card" style="border:2px solid var(--orange)"><b>📣 Promo-Phase läuft</b><p>${esc(a.promo.name)} · noch ${a.promo.weeksLeft} Woche(n) · +${Math.round(a.promo.boost * 100)} % Reichweite & Verkäufe</p></div>`
           : `<button class="big-btn c-orange" data-a="go" data-s="promo" data-id="${a.id}">Promo-Phase starten</button>`}
         <p class="note" style="text-align:center;margin:4px 0 18px">Teurer = mehr pro Album, aber weniger Käufer. 30 % gehen an die Shops${S.label ? ', dein Label bekommt seinen Anteil' : ''}.</p>
-        ${songs.length ? songs.map((s) => songRow(s)).join('') : '<p class="note">Noch keine Songs auf diesem Album. Wähle es bei NEW SONG unter „Assign album“ aus.</p>'}`;
+        <div class="h3">Tracklist</div>
+        ${songs.map((s) => songRow(s)).join('')}
+        ${S.albums.some((x) => x.deluxeOf === a.id) ? '' : `<button class="big-btn c-gray" data-a="deluxe" data-id="${a.id}">Deluxe-Edition erstellen</button><p class="note" style="text-align:center">Neue Songs für dieses Album? Dafür gibt es eine Deluxe-Edition – ein eigenes Album mit Bonus-Tracks.</p>`}`;
     },
 
     promo(p) {
@@ -1211,8 +1238,8 @@
   }
   function songRow(s, target = 'song') {
     const al = songAlbum(s);
-    const pending = S.week - s.week < 1;
-    return `<button class="srow" data-a="go" data-s="${target}" data-id="${s.id}"><div class="info"><b>${esc(s.title)}</b><small>${al ? esc(al.name) : 'Single'} • ${pending ? 'erscheint nächste Woche' : de(s.streams) + ' streams'}</small></div><div class="q">${s.quality}</div></button>`;
+    const pending = !isOut(s);
+    return `<button class="srow" data-a="go" data-s="${target}" data-id="${s.id}"><div class="info"><b>${esc(s.title)}</b><small>${al ? esc(al.name) : 'Single'} • ${s.week == null ? 'unveröffentlicht – kommt mit dem Album' : pending ? 'erscheint nächste Woche' : de(s.streams) + ' streams'}</small></div><div class="q">${s.quality}</div></button>`;
   }
   function certOf(units) {
     if (units >= 1e7) return { label: `${Math.floor(units / 1e7)}X DIAMOND-CERTIFIED`, color: '#cfe8f2' };
@@ -1266,7 +1293,7 @@
       const top = stack[stack.length - 1];
       if (top.name === 'newSong') {
         keepSongInput();
-        if (k === 'album') draft.album = (draft.album + d + S.albums.length + 1) % (S.albums.length + 1);
+        if (k === 'album') { const n = draftAlbums().length + 1; draft.album = (draft.album + d + n) % n; }
         else if (k === 'feat') {
           const names = [null, ...S.npcs.map((n) => n.name)];
           const i = names.indexOf(draft.feat);
@@ -1294,14 +1321,15 @@
       let q = .36 * sk('artistry') + .36 * sk('writing') + .28 * sk('studio') + rnd(-5, 5) + (draft.genre === S.trend ? 4 : 0) + (featNpc ? 2 : 0);
       q = clamp(Math.round(q), 1, 100);
       S.energy -= 10; S.cash -= cost;
-      const albums = [null, ...S.albums];
-      const s = { id: uid(), title, albumId: albums[draft.album] ? albums[draft.album].id : null, quality: q, genre: draft.genre, feat: featNpc ? featNpc.name : null, week: S.week, streams: 0, revenue: 0, weekly: [], debut: 0, video: null };
+      const albums = [null, ...draftAlbums()];
+      const onAlbum = albums[draft.album] || null;
+      const s = { id: uid(), title, albumId: onAlbum ? onAlbum.id : null, quality: q, genre: draft.genre, feat: featNpc ? featNpc.name : null, week: onAlbum ? null : S.week, streams: 0, revenue: 0, weekly: [], debut: 0, video: null };
       S.songs.push(s);
       if (draft.mailId) { const m = S.inbox.find((x) => x.id === draft.mailId); if (m) m.done = true; }
       save();
       stack.pop(); draft = null;
       go('song', { id: s.id });
-      toast(`"${title}" aufgenommen – Qualität ${q}`);
+      toast(onAlbum ? `"${title}" (Qualität ${q}) liegt auf „${onAlbum.name}“ bereit` : `"${title}" aufgenommen – Qualität ${q}`);
     },
 
     cover(el) { keepAlbumInput(); draft.cover = COVERS[+el.dataset.i]; render(); },
@@ -1310,9 +1338,9 @@
       keepAlbumInput();
       const name = draft.name.trim();
       if (!name) { toast('Gib dem Album einen Namen'); $('#albumName').focus(); return; }
-      S.albums.push({ id: uid(), name, cover: draft.cover, week: S.week, price: draft.price, sold: 0, salesRev: 0 });
+      S.albums.push({ id: uid(), name, cover: draft.cover, week: S.week, price: draft.price, sold: 0, salesRev: 0, released: false });
       save(); stack.pop(); draft = null; go('albums');
-      toast(`Album „${name}“ erstellt – weise ihm bei NEW SONG Songs zu`);
+      toast(`Album „${name}“ ist in Produktion – nimm über NEW SONG mindestens ${MIN_TRACKS} Songs dafür auf`);
     },
 
     produce(el) {
@@ -1425,6 +1453,28 @@
       save(); back();
       toast(`📣 ${pr[0]} für „${a.name}“ läuft ${wk} Wochen`);
     },
+    releaseAlbum(el) {
+      const a = S.albums.find((x) => x.id === el.dataset.id); if (!a || a.released) return;
+      const songs = S.songs.filter((x) => x.albumId === a.id);
+      if (songs.length < MIN_TRACKS || S.energy < 10) return;
+      S.energy -= 10;
+      a.released = true; a.week = S.week;
+      songs.forEach((x) => { if (x.week == null) x.week = S.week; });
+      save(); render();
+      modal(`<h2>💿 ${esc(a.name)}</h2><p class="note">Das Album erscheint mit der nächsten Woche: ${songs.length} Songs, Preis ${eur2(a.price)}.${a.promo && a.promo.weeksLeft > 0 ? ' Die laufende Promo pusht den Release.' : ''}</p>
+        <p class="note">Drück END WEEK, um die ersten Verkäufe zu sehen. Das Album ist jetzt abgeschlossen – für neue Songs kannst du später eine Deluxe-Edition machen.</p>
+        <button class="big-btn c-green" data-a="closeModal">Weiter</button>`);
+    },
+    preSingle(el) {
+      const x = S.songs.find((y) => y.id === el.dataset.id); if (!x || x.week != null) return;
+      x.week = S.week; save(); render(); toast(`"${x.title}" erscheint nächste Woche als Vorab-Single`);
+    },
+    deluxe(el) {
+      const a = S.albums.find((x) => x.id === el.dataset.id); if (!a) return;
+      const d = { id: uid(), name: `${a.name} [Deluxe]`, cover: a.cover, week: S.week, price: a.price, sold: 0, salesRev: 0, released: false, deluxeOf: a.id };
+      S.albums.push(d); save(); stack.pop(); go('album', { id: d.id });
+      toast('Deluxe-Edition angelegt – füge Bonus-Tracks über NEW SONG hinzu');
+    },
     closeModal() {
       const bg = $('#modalBg'); if (bg.classList.contains('closing')) return;
       bg.classList.add('closing');
@@ -1456,16 +1506,17 @@
   };
   const PF_SHARE = { sp: .62, am: .24, bs: .14 };
   let pfState = { tab: 'music', popular: true, playing: null, followed: false };
+  const weekDate = (w) => { const d = dateObj(); d.setUTCDate(d.getUTCDate() - (S.week - w) * 7); return d.toISOString().slice(0, 10); };
   const yearAt = (w) => { const d = dateObj(); d.setUTCDate(d.getUTCDate() - (S.week - w) * 7); return d.getUTCFullYear(); };
   const bannerCss = (k) => (S.banners && S.banners[k] ? `url('${S.banners[k]}') center/cover` : PF_BANNER[k]);
   const camBtn = (k) => `<button class="cam" data-a="pfBanner" data-p="${k}" aria-label="Bild ändern"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>`;
   const downBtn = (dark) => `<button class="down" data-a="pfClose" aria-label="Schließen"><svg viewBox="0 0 14 9" fill="none" stroke="${dark ? '#000' : '#fff'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5 7 7.5l6-6"/></svg></button>`;
 
   function pfHTML(k) {
-    const released = S.songs.filter((x) => S.week - x.week >= 1);
+    const released = S.songs.filter(isOut);
     const byStreams = released.slice().sort((a, b) => b.streams - a.streams);
-    const albums = albumStats();
-    const latestAlbum = S.albums.slice().sort((a, b) => b.week - a.week)[0];
+    const albums = albumStats().filter(({ album }) => album.released);
+    const latestAlbum = S.albums.filter((a) => a.released).sort((a, b) => b.week - a.week)[0];
     if (k === 'sp') {
       const list = (pfState.popular ? byStreams : released.slice().reverse()).slice(0, 10);
       const ml = Math.round(S.listeners * PF_SHARE.sp);
