@@ -15,7 +15,9 @@ Karriere-Simulator fürs iPhone, nachgebaut nach einer Bildschirmaufnahme.
 - **Preise**: Albumpreis im Album (Musik → Albums), Ticketpreise bei Tour.
 - **Artists**: Liste unter Einstellungen bearbeiten (ein Name pro Zeile).
 
-Ohne neue Songs sinken die Hörerzahlen langsam – regelmäßig veröffentlichen.
+So hängen die Zahlen zusammen: Fans hören jede Woche deine Songs (neue und gute am meisten). Neue Songs werden von Fremden entdeckt (Playlists), ein Teil davon wird Fan. Monatliche Hörer = Fans + wer dich in den letzten 4 Wochen entdeckt hat. Ohne neue Songs gehen langsam Fans verloren.
+
+Alben: Preis einstellen und eine Promo-Phase starten (mehr Reichweite und Verkäufe für alle Songs des Albums).
 
 ## Installieren
 

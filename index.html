@@ -162,7 +162,7 @@
   .listeners { text-align: center; margin: 16px 0 4px; font-size: 19px; font-weight: 700; }
   .listeners .plus { color: var(--cash); font-weight: 600; }
   .listeners small { display: block; font-size: 11px; letter-spacing: 2px; color: #c9ccd0; font-weight: 600; margin-top: 3px; }
-  .chart { position: relative; height: 210px; margin: 6px 0 18px; }
+  .chart { position: relative; height: 228px; margin: 6px 0 14px; }
   .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   .chart .yl { position: absolute; left: 0; font-size: 10px; color: #c9ccd0; font-weight: 600; }
 
@@ -349,6 +349,13 @@
   const OLD_NPC = ['Kay Brix', 'Lio Vance', 'MC Salvo', 'Jaye Moon', 'Ricco 7'];
   const PRICES = [0.99, 1.99, 2.99, 4.99, 7.99, 9.99, 12.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 69.99, 99.99];
   const ALBUM_PRICE = 9.99;
+  const PROMOS = [
+    ['Social-Media-Ads', 2000, .25, 'Gezielte Ads auf Insta & TikTok. Günstig, bringt etwas Reichweite.'],
+    ['Influencer & Snippets', 12000, .45, 'Creator benutzen deine Songs, Snippets gehen viral.'],
+    ['Plakate & Radio', 60000, .7, 'Plakate in den großen Städten, Radio-Spots, Playlist-Pitching.'],
+    ['TV, Billboards & Pre-Release-Event', 300000, 1.1, 'Riesige Billboards, TV-Werbung, Listening-Party mit Presse.'],
+  ];
+  const PROMO_WEEKS = [2, 4, 6, 8];
   const WORDS1 = ['Berlin', 'Nachts', 'Kein', 'Gold', 'Blaue', 'Letzte', 'Mama', 'Paris', 'Benz', 'Hoch', 'Million', 'Block', 'Neon', 'Ghetto', 'Winter', 'Bando'];
   const WORDS2 = ['Lichter', 'Liebe', 'Kette', 'Träume', 'Flex', 'Runde', 'Stadt', 'Pläne', 'Tränen', 'Zeit', 'Gang', 'Regen', 'Wellen', 'Herz', 'Story', 'Drip'];
   const FESTIVALS = [
@@ -406,6 +413,12 @@
     S.albums.forEach((a) => { if (a.price == null) a.price = ALBUM_PRICE; if (a.sold == null) a.sold = 0; if (a.salesRev == null) a.salesRev = 0; });
     if (!S.tourPrices) S.tourPrices = TOURS.map((t) => t.price);
     if (S.earnings.albums == null) S.earnings.albums = 0;
+    if (!S.hist) {
+      const h = S.history || [S.listeners];
+      S.hist = h.map((l, i) => { const d = dateObj(); d.setUTCDate(d.getUTCDate() - (h.length - 1 - i) * 7); return { d: d.toISOString().slice(0, 10), l }; });
+      delete S.history;
+    }
+    if (!S.discHist) S.discHist = [0, 0, 0, 0];
   }
 
   function makeNpcs(names = NPC_NAMES, keep = []) {
@@ -423,7 +436,7 @@
       v: 1, name: name || 'Run It Up',
       cash: 2500, energy: 100, date: '2026-01-05', week: 0,
       talents: { studio: 1, charisma: 5, musicality: 5, rhythm: 5, songwriting: 5, virality: 5, video: 5, leadership: 1, marketing: 1, negotiation: 1 },
-      listeners: 0, followers: 50, history: [0],
+      listeners: 0, followers: 50, hist: [], discHist: [0, 0, 0, 0],
       songs: [], albums: [], inbox: [], festivals: [], posts: [],
       npcs: makeNpcs(),
       trend: 'TRAP', trendWeeks: 6,
@@ -433,13 +446,15 @@
       tourPrices: [30, 55, 85, 120],
       lastTour: -99,
     };
+    S.hist = [{ d: S.date, l: 0 }];
     welcomeMail();
     if (rich) makeRich();
     save();
   }
 
   function makeRich() {
-    Object.assign(S, { cash: 442041757, date: '2033-09-16', week: 400, listeners: 35535528, followers: 4200000 });
+    Object.assign(S, { cash: 442041757, date: '2033-09-16', week: 400, followers: 37000000, discHist: [1.5e6, 1.5e6, 1.5e6, 1.5e6] });
+    S.listeners = Math.round(S.followers * .9 + 6e6 / 3);
     Object.assign(S.talents, { studio: 100, charisma: 1, musicality: 100, rhythm: 100, songwriting: 100, virality: 52, video: 48, leadership: 10 });
     const al = [['Free Sex', 0], ['Berlin Hates You', 2], ['Beeil Dich Wir Werden Erwachsen', 3]].map(([n, c]) => ({ id: uid(), name: n, cover: COVERS[c], week: 380, price: ALBUM_PRICE, sold: 0, salesRev: 0 }));
     S.albums = al;
@@ -452,17 +467,30 @@
     S.songs = songs.map(([t, a, q, st], i) => {
       const weekly = []; let w = st / 60;
       for (let k = 0; k < 24; k++) { weekly.unshift(Math.round(w * rnd(.8, 1.2))); w *= 1.04; }
-      return { id: uid(), title: t, albumId: a == null ? null : al[a].id, quality: q, genre: 'TRAP', feat: null, week: 381 + i + (i > 5 ? 6 : 0),
+      return { id: uid(), title: t, albumId: a == null ? null : al[a].id, quality: q, genre: 'TRAP', feat: null, week: 370 + i * 2,
         streams: st, revenue: st * .001, weekly, debut: Math.round(st / 18), video: null };
     });
     S.albums.forEach((a) => { a.sold = Math.round(S.songs.filter((x) => x.albumId === a.id).reduce((t, x) => t + x.streams, 0) / 1500); a.salesRev = a.sold * a.price * .7; });
-    S.history = Array.from({ length: 52 }, (_, i) => Math.round(25163590 + (i / 51) * 10300000 + rnd(-3e5, 3e5)));
-    S.history[51] = S.listeners;
+    // a year of history: slow climb with two jumps (album releases), like a real artist page
+    S.hist = Array.from({ length: 52 }, (_, i) => {
+      const d = dateObj(); d.setUTCDate(d.getUTCDate() - (51 - i) * 7);
+      const base = 25.2e6 + i * 0.08e6 + (i > 14 ? 3.1e6 : 0) + (i > 38 ? 3.4e6 : 0);
+      return { d: d.toISOString().slice(0, 10), l: Math.round(base * rnd(.995, 1.005)) };
+    });
+    S.hist[51].l = S.listeners;
     S.awards = [{ year: 2031, name: 'Song des Jahres', what: "suv's x djunis" }];
+    // start in balance: fans + recent discovery should add up to ~35.5M monthly listeners
+    for (let k = 0; k < 4; k++) {
+      S.week++; const d = simulateStreams().disc; S.week--;
+      S.discHist = [d, d, d, d];
+      S.followers = Math.round((35.5e6 - 4 * d / 3) / .9);
+    }
+    S.listeners = Math.round(S.followers * .9 + S.discHist.reduce((x, y) => x + y, 0) / 3);
+    S.hist[S.hist.length - 1].l = S.listeners;
   }
 
   /* ---------- derived values ---------- */
-  const fameScore = () => clamp(Math.round(Math.log10(S.listeners + S.followers * .5 + 1) / 7.9 * 100), 0, 100);
+  const fameScore = () => clamp(Math.round(Math.log10(S.listeners + 1) / 7.75 * 100), 0, 100);
   const grade = (f = fameScore()) => GRADES[clamp(Math.floor(f / (100 / GRADES.length)), 0, GRADES.length - 1)];
   const maxEnergy = () => 100 + S.talents.leadership;
   const talentTotal = () => Math.round(Object.values(S.talents).reduce((a, b) => a + b, 0) / 10);
@@ -485,18 +513,44 @@
   /* =====================================================================
      Weekly simulation
      ===================================================================== */
-  function songWeekStreams(s) {
-    const age = S.week - s.week - 1; // 0 = release week
-    const feat = s.feat ? (S.npcs.find((n) => n.name === s.feat) || { listeners: 0 }).listeners : 0;
-    let audience = S.listeners + S.followers * .5 + 2000 + feat * .25 * Math.max(0, 1 - age / 8);
-    audience *= 1 - clamp(audience / 9e7, 0, .9); // market saturation
-    const q = (s.quality / 100) ** 1.6;
-    let mult = (1 + S.talents.virality / 150) * (1 + S.talents.marketing / 120);
-    if (S.label) mult *= S.label.boost;
-    if (s.video) mult *= 1 + s.video.bonus * Math.max(.3, 1 - (S.week - s.video.week) / 20);
-    if (s.genre === S.trend) mult *= 1.1;
-    const decay = .87 ** age + .03;
-    return Math.round(audience * 1.15 * q * mult * decay * rnd(.85, 1.2));
+  /* How the numbers hang together:
+     - FANS (S.followers) are your core audience. Each fan streams ~7 songs a week, spread over your
+       catalogue – new and good songs get most of it. More songs do NOT mean more fan streams.
+     - DISCOVERY: playlists/algorithm push new songs to strangers. Reach grows with your fanbase and
+       fades week by week; quality matters a lot. Releasing too many songs at once splits the reach.
+     - Some strangers become fans (better songs convert more). Fans slowly drift away (churn).
+     - MONTHLY LISTENERS = your fans + the strangers who heard you in the last 4 weeks. */
+  const MARKET = 6e7;
+  function songMult(s) {
+    let m = (1 + S.talents.virality / 150) * (1 + S.talents.marketing / 120);
+    if (S.label) m *= S.label.boost;
+    if (s.video) m *= 1 + s.video.bonus * Math.max(.3, 1 - (S.week - s.video.week) / 20);
+    if (s.genre === S.trend) m *= 1.1;
+    const al = songAlbum(s);
+    if (al && al.promo && al.promo.weeksLeft > 0) m *= 1 + al.promo.boost;
+    return m;
+  }
+  function simulateStreams() {
+    const rel = S.songs.filter((x) => S.week - x.week >= 1);
+    const res = { total: 0, disc: 0, newFans: 0, per: new Map() };
+    if (!rel.length) return res;
+    const F = S.followers;
+    const weights = rel.map((x) => (x.quality / 100) ** 2 * (.85 ** (S.week - x.week - 1) * .8 + .2));
+    const W = weights.reduce((a, b) => a + b, 0);
+    const top = rel.map((x) => x.quality / 100).sort((a, b) => b - a).slice(0, 3);
+    const fanStreams = F * 7 * (.6 + .6 * top.reduce((a, b) => a + b, 0) / top.length);
+    const recent = rel.filter((x) => S.week - x.week - 1 < 4).length;
+    const reach = (8000 + F * Math.max(0, 1 - F / MARKET)) / Math.max(1, recent / 2);
+    rel.forEach((x, k) => {
+      const age = S.week - x.week - 1, qf = x.quality / 100;
+      const feat = x.feat ? (S.npcs.find((n) => n.name === x.feat) || { listeners: 0 }).listeners * .08 * .75 ** age : 0;
+      const disc = (reach * qf ** 2.2 * .78 ** age + feat) * songMult(x) * rnd(.85, 1.15);
+      const st = Math.round(fanStreams * weights[k] / W * rnd(.95, 1.05) + disc);
+      res.per.set(x.id, st);
+      res.total += st; res.disc += disc;
+      res.newFans += disc * .1 * qf * (1 + S.talents.charisma / 150);
+    });
+    return res;
   }
 
   function endWeek() {
@@ -511,9 +565,11 @@
 
     // streams & money
     let weekTotal = 0;
+    const sim = simulateStreams();
+    const fansBefore = S.followers;
     S.songs.forEach((s) => {
-      if (S.week - s.week < 1) return;
-      const st = songWeekStreams(s);
+      if (!sim.per.has(s.id)) return;
+      const st = sim.per.get(s.id);
       const gross = st * .004;
       s.streams += st; s.revenue += gross * labelShare();
       s.weekly.push(st); if (s.weekly.length > 26) s.weekly.shift();
@@ -526,7 +582,9 @@
     // album sales: demand follows this week's streams of the album's songs, price scares buyers off
     report.albumSales = 0; report.albumRev = 0;
     S.albums.forEach((a) => {
-      const sold = albumWeekSales(a, true);
+      const promo = a.promo && a.promo.weeksLeft > 0 ? 1 + a.promo.boost : 1;
+      const sold = Math.round(albumWeekSales(a, true) * promo);
+      if (a.promo && a.promo.weeksLeft > 0 && --a.promo.weeksLeft === 0) report.events.push(`Promo-Phase für „${a.name}“ ist vorbei.`);
       if (!sold) return;
       const rev = sold * a.price * .7 * labelShare(); // 30 % go to the shops
       a.sold += sold; a.salesRev += rev;
@@ -537,10 +595,13 @@
     S.earnings.streams += report.rev;
 
     // listeners & followers
-    const target = weekTotal * .55 + S.followers * .15;
-    S.listeners = Math.round(S.listeners * .55 + target * .45);
-    S.followers = Math.round(S.followers * 1.002 + weekTotal * .004 * (1 + S.talents.charisma / 100));
-    S.history.push(S.listeners); if (S.history.length > 52) S.history.shift();
+    const lastRelease = S.songs.reduce((m, x) => Math.max(m, x.week), -99);
+    const churn = .005 + (S.followers / MARKET) ** 2 * .02 + (S.week - lastRelease > 10 ? .006 : 0);
+    S.followers = Math.round(S.followers * (1 - churn) + sim.newFans);
+    S.discHist.push(sim.disc); S.discHist = S.discHist.slice(-4);
+    S.listeners = Math.round(S.followers * .9 + S.discHist.reduce((a, b) => a + b, 0) / 3);
+    S.hist.push({ d: S.date, l: S.listeners }); if (S.hist.length > 60) S.hist.shift();
+    report.fans = S.followers - fansBefore;
 
     // relationship
     if (S.partner) {
@@ -580,7 +641,7 @@
     const y = year() - 1;
     const yearStreams = (s) => s.weekly.slice(-52).reduce((a, b) => a + b, 0);
     const best = S.songs.slice().sort((a, b) => yearStreams(b) - yearStreams(a))[0];
-    const topNpc = Math.max(...S.npcs.map((n) => n.listeners)) * 6;
+    const topNpc = Math.max(...S.npcs.map((n) => n.listeners)) * 8;
     const won = [];
     if (best && yearStreams(best) > topNpc) won.push({ year: y, name: 'Song des Jahres', what: best.title });
     if (fameScore() >= 85) won.push({ year: y, name: 'Artist des Jahres', what: S.name });
@@ -588,7 +649,7 @@
     const albumsY = S.albums.map((a) => ({ a, st: S.songs.filter((s) => s.albumId === a.id).reduce((x, s) => x + yearStreams(s), 0) })).sort((p, q) => q.st - p.st);
     if (albumsY[0] && albumsY[0].st > topNpc * 2) won.push({ year: y, name: 'Album des Jahres', what: albumsY[0].a.name });
     S.awards.push(...won);
-    if (won.length) { S.followers = Math.round(S.followers * (1 + .05 * won.length)); report.events.push(`🏆 Awards ${y}: ${won.map((w) => w.name).join(', ')}!`); }
+    if (won.length) { S.followers = Math.round(S.followers * (1 + .02 * won.length)); report.events.push(`🏆 Awards ${y}: ${won.map((w) => w.name).join(', ')}!`); }
     else report.events.push(`Awards ${y}: diesmal leer ausgegangen.`);
   }
 
@@ -766,8 +827,8 @@
     home() {
       const f = fameScore();
       const unread = S.inbox.filter((m) => !m.read).length;
-      const h = S.history;
-      const delta = S.listeners - h[0];
+      const months = monthlyHist();
+      const delta = S.listeners - (months.length ? months[0].l : 0);
       return `
       <div class="fame"><b>FAME | ${grade(f)}</b><div class="track"><i style="width:${Math.max(4, f)}%"></i></div></div>
       <div class="platforms">
@@ -776,7 +837,7 @@
         <button class="plat" data-a="plat" data-p="bs" aria-label="Video-Profil" style="background:#0b0b0b;box-shadow:0 0 0 1px #333"><svg viewBox="0 0 28 28" fill="#fff"><path d="M10 7l12 7-12 7z"/></svg></button>
       </div>
       <div class="listeners"><span class="plus" style="color:${delta < 0 ? 'var(--salmon)' : 'var(--cash)'}">${delta >= 0 ? '+' : ''}${de(delta)}</span> Listeners<small>LAST 12 MONTHS</small></div>
-      ${chartSvg(h)}
+      ${chartSvg(months)}
       <button class="pill" data-a="go" data-s="inbox">Inbox <span class="cnt">(${unread})</span></button>
       <button class="pill" data-a="go" data-s="relationship">Relationship</button>
       <button class="pill" data-a="go" data-s="social">Social</button>
@@ -857,19 +918,30 @@
     },
   };
 
-  function chartSvg(h) {
-    const W = 340, H = 200;
-    let lo = Math.min(...h), hi = Math.max(...h);
-    if (hi - lo < 10) hi = lo + 10;
-    const pad = (hi - lo) * .15; lo = Math.max(0, lo - pad); hi += pad;
-    const n = Math.max(2, h.length);
-    const pts = h.map((v, i) => [56 + (i / (n - 1)) * (W - 60), H - 10 - ((v - lo) / (hi - lo)) * (H - 20)]);
-    if (h.length === 1) pts.push([W - 4, pts[0][1]]);
+  const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  // last value of every month, the last 12 months
+  function monthlyHist() {
+    const byMonth = new Map();
+    S.hist.forEach((e) => byMonth.set(e.d.slice(0, 7), e.l));
+    byMonth.set(S.date.slice(0, 7), S.listeners);
+    return [...byMonth.entries()].slice(-13).map(([m, l]) => ({ m, l }));
+  }
+  function chartSvg(pts0) {
+    const W = 340, H = 200, X0 = 62;
+    const vals = pts0.map((p) => p.l);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if (hi - lo < Math.max(10, hi * .02)) { hi = hi * 1.05 + 10; lo = Math.max(0, lo * .95); }
+    const pad = (hi - lo) * .12; lo = Math.max(0, lo - pad); hi += pad;
+    const n = pts0.length;
+    const xy = pts0.map((p, i) => [n === 1 ? (X0 + W) / 2 : X0 + (i / (n - 1)) * (W - X0 - 8), H - 12 - ((p.l - lo) / (hi - lo)) * (H - 24)]);
     const ticks = [0, 1, 2, 3].map((i) => lo + ((hi - lo) * (3 - i)) / 3);
     return `<div class="chart">
       ${ticks.map((t, i) => `<span class="yl" style="top:${4 + i * 60}px">${de(t)}</span>`).join('')}
-      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polyline pathLength="1" stroke-dasharray="1" fill="none" stroke="#e9963f" stroke-width="2.2" stroke-linejoin="round" points="${pts.map((p) => p.join(',')).join(' ')}"/>
-      ${pts.map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="1.8" fill="#e9963f"/>`).join('')}</svg></div>`;
+      <svg viewBox="0 0 ${W} ${H + 18}" preserveAspectRatio="none">
+        ${n > 1 ? `<polyline pathLength="1" stroke-dasharray="1" fill="none" stroke="#e9963f" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" points="${xy.map((p) => p.join(',')).join(' ')}"/>` : ''}
+        ${xy.map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#e9963f"/>`).join('')}
+        ${xy.map((p, i) => `<text x="${p[0]}" y="${H + 14}" fill="#7d848c" font-size="9" font-weight="700" text-anchor="middle">${MON[+pts0[i].m.slice(5, 7) - 1]}</text>`).join('')}
+      </svg></div>`;
   }
   function albumStats() {
     return S.albums.map((a) => ({ album: a, streams: S.songs.filter((s) => s.albumId === a.id).reduce((x, s) => x + s.streams, 0) })).sort((p, q) => q.streams - p.streams);
@@ -981,7 +1053,7 @@
     album(p) {
       const a = S.albums.find((x) => x.id === p.id); if (!a) return pTitle('Album');
       const songs = S.songs.filter((s) => s.albumId === a.id);
-      const est = albumWeekSales(a, false);
+      const est = Math.round(albumWeekSales(a, false) * (a.promo && a.promo.weeksLeft > 0 ? 1 + a.promo.boost : 1));
       return pTitle(a.name, { norm: true }) + `<div class="bigcover" style="width:180px;height:180px;background:${coverCss(a.cover)};background-size:cover;background-position:center"></div>
         <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(songs.reduce((x, s) => x + s.streams, 0))}</b></div><div><small>SONGS</small><b>${songs.length}</b></div></div>
         <div class="stats2"><div><small>ALBUMS SOLD</small><b>${compact(a.sold)}</b></div><div><small>SALES REVENUE</small><b>${euroK(a.salesRev)}</b></div></div>
@@ -989,8 +1061,29 @@
         <div class="sel"><button data-a="aprice" data-id="${a.id}" data-d="-1" aria-label="billiger">${IC.larr}</button>
           <div class="val"><b>${eur2(a.price)}</b><span>~<span class="sk">${de(est)}</span>/Woche · ${euroK(est * a.price * .7 * labelShare())}</span></div>
           <button data-a="aprice" data-id="${a.id}" data-d="1" aria-label="teurer">${IC.rarr}</button></div>
+        ${a.promo && a.promo.weeksLeft > 0
+          ? `<div class="card" style="border:2px solid var(--orange)"><b>📣 Promo-Phase läuft</b><p>${esc(a.promo.name)} · noch ${a.promo.weeksLeft} Woche(n) · +${Math.round(a.promo.boost * 100)} % Reichweite & Verkäufe</p></div>`
+          : `<button class="big-btn c-orange" data-a="go" data-s="promo" data-id="${a.id}">Promo-Phase starten</button>`}
         <p class="note" style="text-align:center;margin:4px 0 18px">Teurer = mehr pro Album, aber weniger Käufer. 30 % gehen an die Shops${S.label ? ', dein Label bekommt seinen Anteil' : ''}.</p>
         ${songs.length ? songs.map((s) => songRow(s)).join('') : '<p class="note">Noch keine Songs auf diesem Album. Wähle es bei NEW SONG unter „Assign album“ aus.</p>'}`;
+    },
+
+    promo(p) {
+      const a = S.albums.find((x) => x.id === p.id); if (!a) return pTitle('Promo');
+      if (!draft) draft = { kind: 0, weeks: 1 };
+      const pr = PROMOS[draft.kind], wk = PROMO_WEEKS[draft.weeks];
+      const cost = Math.round(pr[1] * wk * (1 - S.talents.negotiation / 300));
+      const hasSongs = S.songs.some((x) => x.albumId === a.id);
+      return pTitle('Promo', { energy: true }) + `
+        <div class="bigcover" style="background:${coverCss(a.cover)};background-size:cover;background-position:center"></div>
+        <div style="text-align:center;font-size:17px;font-weight:800">${esc(a.name)}</div>
+        ${selector('Kampagne', pr[0], `+${Math.round(pr[2] * 100)} % · ${euro(pr[1])}/Woche`, 'pkind')}
+        ${selector('Dauer', `${wk} Wochen`, '', 'pweeks')}
+        <p class="note" style="text-align:center">${pr[3]}</p>
+        <p class="note" style="text-align:center">${hasSongs ? 'Gilt für alle Songs auf dem Album: mehr Leute entdecken sie (mehr neue Fans) und das Album verkauft sich besser.' : 'Noch keine Songs auf dem Album – die Promo baut Hype auf: Songs, die du während der Promo veröffentlichst, starten mit dem Bonus.'}</p>
+        <div class="total"><span>TOTAL COST</span><b>${euro(cost)}</b></div>
+        <button class="big-btn c-orange" data-a="startPromo" data-id="${a.id}" ${S.cash < cost || S.energy < 15 ? 'disabled' : ''}>Promo starten 15 <span class="bolt">⚡</span></button>
+        <div class="avail">Cash available: ${euro(S.cash)}</div>`;
     },
 
     videoPick() {
@@ -1098,7 +1191,7 @@
     },
 
     songboard() {
-      const rows = S.npcs.map((n) => ({ t: n.hit, a: n.name, v: Math.round(n.listeners * .35 * (.8 + (Math.abs(hash(n.hit + S.week)) % 40) / 100)), me: false }))
+      const rows = S.npcs.map((n) => ({ t: n.hit, a: n.name, v: Math.round(n.listeners * .6 * (.8 + (Math.abs(hash(n.hit + S.week)) % 40) / 100)), me: false }))
         .concat(S.songs.filter((s) => s.weekly.length).map((s) => ({ t: s.title, a: S.name, v: s.weekly[s.weekly.length - 1], me: true })))
         .sort((a, b) => b.v - a.v).slice(0, 20);
       return pTitle('Songboard') + `<p class="note">Die meistgestreamten Songs der letzten Woche.</p>` + rows.map((r, i) => `<div class="srow ${r.me ? 'hl' : ''}"><div class="q ${r.me ? 'me' : ''}" style="font-size:20px">${i + 1}</div><div class="info"><b>${esc(r.t)}</b><small>${esc(r.a)} • ${de(r.v)} streams</small></div></div>`).join('');
@@ -1140,7 +1233,7 @@
     { name: 'Arena Tour', shows: 24, cap: 14000, price: 85, cost: 400000, energy: 70, fame: 62 },
     { name: 'Stadium Tour', shows: 30, cap: 55000, price: 120, cost: 3000000, energy: 90, fame: 82 },
   ];
-  const tourSold = (i, random) => { const t = TOURS[i], pr = S.tourPrices[i]; return Math.round(Math.min(t.cap, (S.listeners + S.followers) * .03 / t.shows * (t.price / pr) ** 1.4 * (random ? rnd(.7, 1.15) : 1))); };
+  const tourSold = (i, random) => { const t = TOURS[i], pr = S.tourPrices[i]; return Math.round(Math.min(t.cap, (S.followers * .05 + S.listeners * .01) / t.shows * (t.price / pr) ** 1.4 * (random ? rnd(.7, 1.15) : 1))); };
   const tourEstimate = (i) => tourSold(i, false) * TOURS[i].shows * S.tourPrices[i];
 
   /* =====================================================================
@@ -1179,6 +1272,9 @@
           const i = names.indexOf(draft.feat);
           draft.feat = names[(i + d + names.length) % names.length]; draft.freeFeat = false;
         } else draft[k] = (draft[k] + d + HIRES[k].length) % HIRES[k].length;
+      } else if (top.name === 'promo') {
+        if (k === 'pkind') draft.kind = (draft.kind + d + PROMOS.length) % PROMOS.length;
+        else draft.weeks = (draft.weeks + d + PROMO_WEEKS.length) % PROMO_WEEKS.length;
       } else if (top.name === 'newVideo') {
         if (k === 'dir') draft.dir = (draft.dir + d + DIRECTORS.length) % DIRECTORS.length;
         else draft.style = (draft.style + d + STYLES.length) % STYLES.length;
@@ -1248,7 +1344,7 @@
       const a = m.action;
       S.energy -= 25; S.cash += a.fee; S.earnings.festivals += a.fee;
       const fans = festivalFans(a);
-      S.followers += Math.round(fans * .6); S.listeners += fans;
+      S.followers += Math.round(fans * .5);
       S.festivals.push({ name: a.name, place: a.place, fee: a.fee, year: year() });
       m.done = true; save(); back();
       toast(`${a.name}: +${euro(a.fee)}, +${de(fans)} Hörer`);
@@ -1261,8 +1357,8 @@
       const sold = tourSold(+el.dataset.i, true);
       const rev = sold * t.shows * S.tourPrices[+el.dataset.i];
       S.energy -= t.energy; S.cash += rev - t.cost; S.earnings.tours += rev - t.cost; S.lastTour = S.week;
-      const fans = Math.round(sold * t.shows * .4);
-      S.followers += fans; S.listeners += Math.round(fans * .5);
+      const fans = Math.round(sold * t.shows * .3);
+      S.followers += fans;
       save(); render();
       modal(`<h2>${t.name}</h2><p class="note">${t.shows} Shows, im Schnitt ${de(sold)} von ${de(t.cap)} Tickets verkauft.</p>
         <div class="kv"><span>Ticketumsatz</span><span>${euro(rev)}</span></div><div class="kv"><span>Produktion</span><span>−${euro(t.cost)}</span></div>
@@ -1273,7 +1369,7 @@
     post() {
       if (S.energy < 5) return;
       S.energy -= 5;
-      const gain = Math.round((S.talents.charisma + S.talents.virality) * rnd(1, 4) + S.followers * rnd(.003, .015));
+      const gain = Math.round((S.talents.charisma + S.talents.virality) * rnd(.5, 2) + S.followers * rnd(.0005, .002));
       S.followers += gain;
       const s = S.songs.length ? pick(S.songs).title : null;
       const text = pick([s ? `"${s}" läuft bei euch? 🔥` : 'Studio. Nacht. Keine Ausreden.', 'Danke für alles. Wir sind erst am Anfang.', 'Neue Musik kommt. Bald.', s ? `Wer hat "${s}" schon 10x gehört? 👀` : `Wer ist ready für Woche ${S.week + 1}?`, 'Mama, ich hab’s geschafft (fast).']);
@@ -1287,7 +1383,7 @@
       save(); render(); toast(`Du hast ${S.partner.name} kennengelernt`);
     },
     date() { if (!S.partner || S.energy < 5 || S.cash < 200) return; S.energy -= 5; S.cash -= 200; S.partner.love = clamp(S.partner.love + rint(8, 18), 0, 100); save(); render(); },
-    goPublic() { if (!S.partner) return; S.partner.public = true; const g = Math.round(S.followers * .08 + 200); S.followers += g; save(); render(); toast(`Beziehung öffentlich: +${de(g)} Follower`); },
+    goPublic() { if (!S.partner) return; S.partner.public = true; const g = Math.round(S.followers * .03 + 100); S.followers += g; save(); render(); toast(`Beziehung öffentlich: +${de(g)} Follower`); },
     breakup() { if (!S.partner) return; const n = S.partner.name; S.partner = null; save(); render(); toast(`Du und ${n} geht getrennte Wege`); },
     signLabel(el) {
       const m = S.inbox.find((x) => x.id === el.dataset.id); if (!m || S.label) return;
@@ -1318,6 +1414,16 @@
       const names = [...new Set($('#artistList').value.split(/[\n,]/).map((x) => x.trim()).filter(Boolean))].slice(0, 40);
       if (!names.length) { toast('Mindestens ein Name'); return; }
       S.npcs = makeNpcs(names, S.npcs); save(); render(); toast(`${names.length} Artists gespeichert`);
+    },
+    startPromo(el) {
+      const a = S.albums.find((x) => x.id === el.dataset.id); if (!a) return;
+      const pr = PROMOS[draft.kind], wk = PROMO_WEEKS[draft.weeks];
+      const cost = Math.round(pr[1] * wk * (1 - S.talents.negotiation / 300));
+      if (S.cash < cost || S.energy < 15) return;
+      S.cash -= cost; S.energy -= 15;
+      a.promo = { name: pr[0], boost: pr[2], weeksLeft: wk };
+      save(); back();
+      toast(`📣 ${pr[0]} für „${a.name}“ läuft ${wk} Wochen`);
     },
     closeModal() {
       const bg = $('#modalBg'); if (bg.classList.contains('closing')) return;
@@ -1436,6 +1542,7 @@
       <div class="kv"><span>Einnahmen</span><span style="color:var(--cash)">+${euro(r.rev)}</span></div>
       ${r.albumSales ? `<div class="kv"><span>Album-Verkäufe</span><span>${de(r.albumSales)} · <span style="color:var(--cash)">+${euro(r.albumRev)}</span></span></div>` : ''}
       ${r.labelCut ? `<div class="kv"><span>Label-Anteil</span><span style="color:var(--salmon)">−${euro(r.labelCut)}</span></div>` : ''}
+      <div class="kv"><span>Fans</span><span>${de(S.followers)} (${r.fans >= 0 ? '+' : ''}${de(r.fans || 0)})</span></div>
       <div class="kv"><span>Monatliche Hörer</span><span>${de(S.listeners)} (${S.listeners - lBefore >= 0 ? '+' : ''}${de(S.listeners - lBefore)})</span></div>
       <div class="kv"><span>Energie</span><span>⚡ ${S.energy} aufgefüllt</span></div>
       ${r.events.map((x) => `<p style="margin:10px 0 0;font-size:14px">• ${esc(x)}</p>`).join('')}
