@@ -19,6 +19,9 @@ So hängen die Zahlen zusammen: Fans hören jede Woche deine Songs (neue und gut
 
 Alben: erst produzieren, dann veröffentlichen (danach abgeschlossen, neue Songs nur per Deluxe). Preis einstellen, Promo-Phase starten. Nach der ersten Woche gibt es Kritiken und eine Chartplatzierung (Songboard → Alben).
 
+Release planen: Album ankündigen (2–8 Wochen) → Hype & Vorbestellungen, erscheint automatisch am Datum.
+Erfolge: 22 Ziele mit Belohnungen (Home → Erfolge), Feiern bei Gold/Platin/Diamant und Platz 1.
+
 Entwickleroptionen: Einstellungen → Entwickleroptionen (Wochenbericht an/aus, unendliche Energie, Geld/Fans setzen, Zeit vorspulen, Spielstand kopieren/laden).
 
 ## Installieren

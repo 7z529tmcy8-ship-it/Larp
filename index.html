@@ -298,6 +298,65 @@
   .modal-bg.closing .modal { transform: translateY(100%); transition: transform .24s cubic-bezier(.4,0,1,1); }
   .modal h2 { margin: 0 0 4px; font-size: 26px; font-weight: 900; text-transform: uppercase; }
 
+  /* ---------- metallic discs ---------- */
+  .mdisc { position: relative; border-radius: 50%; background: var(--metal); box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 10px 40px var(--glow); }
+  .mdisc::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,.09) 0 1px, transparent 1px 4px); }
+  .mdisc::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 200deg, transparent 0 20%, rgba(255,255,255,.55) 25%, transparent 32% 70%, rgba(255,255,255,.35) 75%, transparent 82%); mix-blend-mode: overlay; }
+  .mdisc .lbl { position: absolute; inset: 34%; border-radius: 50%; background-size: cover; background-position: center; box-shadow: 0 0 0 3px rgba(0,0,0,.25); z-index: 1; }
+  .mdisc .lbl::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12%; height: 12%; margin: -6% 0 0 -6%; border-radius: 50%; background: #111; }
+  .m-gold { --metal: conic-gradient(#fff3c4, #d9a520, #8f6513, #f5d77a, #b8861a, #fff3c4, #d9a520, #8f6513, #f5d77a, #fff3c4); --glow: rgba(233,180,60,.45); --mtxt: linear-gradient(180deg, #fff6d0, #e8b730 45%, #9b6c12 55%, #f7dc7c); }
+  .m-plat { --metal: conic-gradient(#ffffff, #c9ced6, #7d8590, #eef1f5, #a3aab5, #ffffff, #c9ced6, #7d8590, #eef1f5, #ffffff); --glow: rgba(210,220,235,.4); --mtxt: linear-gradient(180deg, #ffffff, #cfd5de 45%, #7d8590 55%, #f2f4f7); }
+  .m-diamond { --metal: conic-gradient(#e9fbff, #7fd6ff, #3a8bd1, #c8f2ff, #62b8ff, #e9fbff, #7fd6ff, #3a8bd1, #c8f2ff, #e9fbff); --glow: rgba(110,200,255,.55); --mtxt: linear-gradient(180deg, #f2fdff, #8fdcff 45%, #3a8bd1 55%, #d9f6ff); }
+  .m-none { --metal: conic-gradient(#4b5159, #3a4047, #4b5159, #5c636b, #4b5159); --glow: rgba(0,0,0,0); }
+  .m-orange { --mtxt: linear-gradient(180deg, #ffe0b8, #e9963f 50%, #b8621b); --glow: rgba(233,150,63,.5); }
+
+  /* ---------- celebration overlay ---------- */
+  .celeb { position: fixed; inset: 0; bottom: calc(-1 * var(--gap)); z-index: 90; display: none; align-items: center; justify-content: center; overflow: hidden; }
+  .celeb.show { display: flex; }
+  .celeb .bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, var(--glow, rgba(233,180,60,.35)) 0%, rgba(12,13,15,.985) 58%); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); animation: fadeIn .35s ease both; }
+  .celeb .rays { position: absolute; left: 50%; top: 40%; width: 900px; height: 900px; margin: -450px 0 0 -450px; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.06) 0 6deg, transparent 6deg 18deg); animation: spin 30s linear infinite; mask-image: radial-gradient(circle, #000 0%, transparent 60%); -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 60%); }
+  .celeb .in { position: relative; text-align: center; padding: 0 26px; max-width: 420px; }
+  .celeb .kick { font-size: 12px; letter-spacing: 4px; font-weight: 800; color: #c9ccd0; text-transform: uppercase; animation: up2 .5s .15s cubic-bezier(.2,.9,.3,1.2) both; }
+  .celeb .mdisc { width: 210px; height: 210px; margin: 22px auto 18px; animation: discIn .9s cubic-bezier(.2,.9,.25,1.15) both, spin 9s 1s linear infinite; }
+  .celeb .badge { width: 170px; height: 170px; margin: 24px auto 18px; border-radius: 50%; display: grid; place-items: center; font-size: 84px; background: radial-gradient(circle at 35% 30%, #ffd9a0, #e9963f 55%, #8a4a12); box-shadow: 0 10px 50px rgba(233,150,63,.55), inset 0 -6px 0 rgba(0,0,0,.2); animation: discIn .8s cubic-bezier(.2,.9,.25,1.3) both; }
+  .celeb .big { font-size: 66px; font-weight: 900; line-height: .95; letter-spacing: -1px; background: var(--mtxt); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 100% 200%; animation: up2 .6s .3s cubic-bezier(.2,.9,.3,1.2) both, shimmer 2.4s 1s ease-in-out infinite; text-transform: uppercase; }
+  .celeb .sub2 { font-size: 17px; font-weight: 700; margin-top: 8px; animation: up2 .6s .45s cubic-bezier(.2,.9,.3,1.2) both; }
+  .celeb .rew { display: inline-block; margin-top: 12px; padding: 6px 14px; border-radius: 14px; background: rgba(147,196,147,.15); color: var(--cash); font-weight: 800; font-size: 15px; animation: up2 .6s .6s cubic-bezier(.2,.9,.3,1.2) both; }
+  .celeb .big-btn { margin-top: 26px; background: #f2f2f2; animation: up2 .6s .75s cubic-bezier(.2,.9,.3,1.2) both; }
+  .confetti i { position: absolute; top: -20px; width: 8px; height: 14px; border-radius: 2px; animation: fall linear forwards; }
+  @keyframes fadeIn { from { opacity: 0; } }
+  @keyframes up2 { from { opacity: 0; transform: translateY(24px) scale(.96); } }
+  @keyframes discIn { from { opacity: 0; transform: scale(.2) rotate(-200deg); } }
+  @keyframes shimmer { 0%, 100% { background-position: 0 0; } 50% { background-position: 0 100%; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fall { to { transform: translate3d(var(--dx), 112vh, 0) rotate(var(--rot)); } }
+
+  /* ---------- polish ---------- */
+  .goal { position: relative; border-radius: 18px; padding: 14px 16px; margin: 4px 0 16px; background: linear-gradient(135deg, rgba(233,150,63,.18), rgba(118,164,119,.12)); box-shadow: inset 0 0 0 1px rgba(233,150,63,.35); }
+  .goal small { font-size: 10px; letter-spacing: 2px; color: var(--orange); font-weight: 800; }
+  .goal b { display: block; font-size: 16px; margin: 3px 0 8px; }
+  .goal .pb { height: 8px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .goal .pb i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--orange), #ffcf7a); }
+  .goal span { position: absolute; right: 16px; top: 14px; font-size: 12px; color: #c9ccd0; font-weight: 700; }
+  .ach { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border-radius: 16px; background: var(--panel); margin-bottom: 10px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+  .ach .ic { width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 22px; background: #2c3136; filter: grayscale(1); opacity: .6; }
+  .ach.done .ic { background: radial-gradient(circle at 35% 30%, #ffe6b0, #e9963f 60%, #8a4a12); filter: none; opacity: 1; box-shadow: 0 4px 16px rgba(233,150,63,.4); }
+  .ach .tx { flex: 1; min-width: 0; }
+  .ach .tx b { display: block; font-size: 15px; }
+  .ach .tx small { display: block; font-size: 12px; color: #aab0b6; margin-top: 2px; }
+  .ach .pb { height: 6px; border-radius: 3px; background: rgba(255,255,255,.1); margin-top: 6px; overflow: hidden; }
+  .ach .pb i { display: block; height: 100%; background: var(--orange); }
+  .ach .rw { font-size: 12px; font-weight: 800; color: var(--cash); text-align: right; flex: none; }
+  .srow .q.r1 { background: linear-gradient(135deg, #fff1b8, #e3ad2b 50%, #a87510); }
+  .srow .q.r2 { background: linear-gradient(135deg, #ffffff, #c4cad3 50%, #8a929d); }
+  .srow .q.r3 { background: linear-gradient(135deg, #ffd2a8, #c9773a 50%, #8a4a1c); }
+  .fame { overflow: hidden; }
+  .fame::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent); animation: sweep 4s ease-in-out infinite; }
+  @keyframes sweep { 0%, 60% { left: -40%; } 100% { left: 120%; } }
+  .cert .mdisc { width: 66px; height: 66px; }
+  .hype { height: 10px; border-radius: 5px; background: rgba(255,255,255,.1); overflow: hidden; margin: 8px 0 2px; }
+  .hype i { display: block; height: 100%; background: linear-gradient(90deg, #ea7a6b, #e9963f, #ffd46b); }
+
   .toast { white-space: pre-line; position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 86px); transform: translate(-50%, 20px); background: #f2f2f2; color: #111; padding: 10px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; opacity: 0; transition: .3s; z-index: 80; pointer-events: none; max-width: 90vw; width: max-content; text-align: center; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
@@ -318,6 +377,7 @@
 </div></nav>
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
+<div class="celeb" id="celeb"></div>
 <input type="file" id="file" accept="image/*" hidden>
 <div class="pf" id="pf"></div>
 
@@ -361,6 +421,37 @@
   ];
   const PROMO_WEEKS = [2, 4, 6, 8];
   const OUTLETS = ['Beat Kritik', 'Straßenecho', 'Pitch Score'];
+  const REL_WEEKS = [0, 2, 4, 6, 8];
+  const songUnits = (x) => Math.round(x.streams / 150);
+  const albumUnits = (a) => Math.round((a.sold || 0) + S.songs.filter((x) => x.albumId === a.id).reduce((t, x) => t + x.streams, 0) / 1500);
+  const maxOf = (arr, f) => arr.reduce((m, x) => Math.max(m, f(x)), 0);
+  // [id, icon, title, description, progress () => [current, target], reward {cash, fans}]
+  const ACH = [
+    ['song1', '🎤', 'Erster Track', 'Nimm deinen ersten Song auf', () => [S.songs.length, 1], { cash: 500 }],
+    ['fans1k', '👥', '1.000 Fans', 'Sammle deine ersten 1.000 Fans', () => [S.followers, 1e3], { cash: 2000 }],
+    ['video1', '🎬', 'Regie-Debüt', 'Dreh dein erstes Musikvideo', () => [S.songs.filter((x) => x.video).length, 1], { cash: 5000 }],
+    ['songs10', '📀', '10 Songs', 'Nimm 10 Songs auf', () => [S.songs.length, 10], { cash: 5000 }],
+    ['fest1', '🎪', 'Erste Bühne', 'Spiel dein erstes Festival', () => [S.festivals.length, 1], { cash: 5000 }],
+    ['album1', '💿', 'Debütalbum', 'Veröffentliche dein erstes Album', () => [S.albums.filter((a) => a.released).length, 1], { cash: 10000 }],
+    ['tour1', '🚌', 'On Tour', 'Geh zum ersten Mal auf Tour', () => [S.toursDone || 0, 1], { cash: 10000 }],
+    ['fans100k', '🔥', '100K Fans', 'Erreiche 100.000 Fans', () => [S.followers, 1e5], { cash: 50000 }],
+    ['gold', '🥇', 'Gold', 'Ein Song mit 500.000 Units', () => [maxOf(S.songs, songUnits), 5e5], { cash: 25000 }],
+    ['top10', '📈', 'Top 10', 'Ein Album in den Top 10 der Charts', () => [S.albums.some((a) => a.chart && a.chart.peak && a.chart.peak <= 10) ? 1 : 0, 1], { cash: 50000 }],
+    ['label', '✍️', 'Gesignt', 'Unterschreib bei einem Label', () => [S.everLabel ? 1 : 0, 1], { cash: 10000 }],
+    ['million', '💰', 'Erste Million', 'Hab 1 Mio. € auf dem Konto', () => [S.cash, 1e6], { fans: 10000 }],
+    ['plat', '💎', 'Platin', 'Ein Song mit 1 Mio. Units', () => [maxOf(S.songs, songUnits), 1e6], { cash: 100000 }],
+    ['agold', '🏅', 'Gold-Album', 'Ein Album mit 500.000 Units', () => [maxOf(S.albums.filter((a) => a.released), albumUnits), 5e5], { cash: 100000 }],
+    ['no1', '👑', 'Nummer 1', 'Ein Album auf Platz 1 der Charts', () => [S.albums.some((a) => a.chart && a.chart.peak === 1) ? 1 : 0, 1], { cash: 250000 }],
+    ['fans1m', '🌍', '1 Mio. Fans', 'Erreiche 1 Million Fans', () => [S.followers, 1e6], { cash: 500000 }],
+    ['award', '🏆', 'Ausgezeichnet', 'Gewinne einen Award', () => [S.awards.length, 1], { cash: 500000 }],
+    ['songs50', '⚙️', 'Hitmaschine', 'Nimm 50 Songs auf', () => [S.songs.length, 50], { cash: 50000 }],
+    ['stadium', '🏟', 'Stadion voll', 'Verkauf eine Stadion-Tour fast komplett aus', () => [S.stadiumSoldOut ? 1 : 0, 1], { cash: 2000000 }],
+    ['fameA', '⭐', 'Superstar', 'Erreiche Fame A+', () => [fameScore(), 93], { cash: 1000000 }],
+    ['diamond', '💠', 'Diamant', 'Ein Song mit 10 Mio. Units', () => [maxOf(S.songs, songUnits), 1e7], { cash: 1000000 }],
+    ['fans10m', '🚀', '10 Mio. Fans', 'Erreiche 10 Millionen Fans', () => [S.followers, 1e7], { cash: 5000000 }],
+  ];
+  // 0 none, 1 gold, 11..19 = 1x..9x platinum, 101.. = 1x.. diamond
+  const certLevel = (u) => (u >= 1e7 ? 100 + Math.floor(u / 1e7) : u >= 1e6 ? 10 + Math.floor(u / 1e6) : u >= 5e5 ? 1 : 0);
   const CHART_SIZE = 30;
   // other (non-rap) albums in the charts, scaled to the biggest artist
   const CHART_FILL = [['Sommer Hits', 'Various Artists', 1.25], ['Schlager Party', 'Various Artists', .9], ['Original Soundtrack', 'Film', .72],
@@ -415,7 +506,66 @@
      State
      ===================================================================== */
   let S = null;
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Speicher voll – Cover-Bilder verkleinern'); } }
+  function save() {
+    if (S && S.ach) checkAch(false);
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Speicher voll – Cover-Bilder verkleinern'); }
+  }
+  let celebQ = [], celebrating = false;
+  function checkAch(silent) {
+    ACH.forEach(([id, icon, title, desc, prog, rw]) => {
+      if (id in S.ach) return;
+      const [cur, target] = prog();
+      if (cur < target) return;
+      S.ach[id] = S.week;
+      if (silent) return;
+      if (rw.cash) S.cash += rw.cash;
+      if (rw.fans) S.followers += rw.fans;
+      celebQ.push({ type: 'ach', icon, title, sub: desc, rew: rw.cash ? `+${euro(rw.cash)}` : `+${de(rw.fans)} Fans` });
+    });
+  }
+  // song/album certifications → celebrations (gold, first platinum, every diamond); quiet init for old saves
+  function checkCerts(silent) {
+    const items = S.songs.map((x) => ({ o: x, u: songUnits(x), name: x.title, kind: 'Song', cover: songCover(x) }))
+      .concat(S.albums.filter((a) => a.released).map((a) => ({ o: a, u: albumUnits(a), name: a.name, kind: 'Album', cover: a.cover })));
+    const groups = {};
+    items.forEach(({ o, u, name, kind, cover }) => {
+      const lv = certLevel(u), old = o.cert || 0;
+      o.cert = lv;
+      if (silent || lv <= old) return;
+      const type = lv >= 100 ? 'diamond' : lv >= 11 ? 'plat' : 'gold';
+      const mult = lv >= 100 ? lv - 100 : lv >= 11 ? lv - 10 : 0;
+      if (type === 'plat' && old >= 11) { toast(`💿 „${name}“ ist jetzt ${mult}x Platin`); return; }
+      (groups[type] = groups[type] || []).push({ name, kind, cover, u, mult });
+    });
+    // one celebration per type and week, even if several songs hit it at once
+    ['diamond', 'plat', 'gold'].forEach((type) => {
+      const g = groups[type]; if (!g) return;
+      const word = type === 'gold' ? 'Gold' : type === 'plat' ? 'Platin' : 'Diamant';
+      const top = g.sort((x, y) => y.u - x.u)[0];
+      celebQ.push(g.length === 1
+        ? { type, cover: top.cover, title: `${top.mult > 1 ? top.mult + 'x ' : ''}${word}`, sub: `${top.kind} „${top.name}“ · ${de(top.u)} Units` }
+        : { type, cover: top.cover, title: word, sub: `${g.length} Songs: ${g.map((x) => `„${x.name}“`).join(', ')}` });
+    });
+  }
+  function flushCeleb() {
+    if (celebrating || !celebQ.length || $('#modalBg').classList.contains('show')) return;
+    celebrating = true;
+    const c = celebQ.shift();
+    const el = $('#celeb');
+    const metal = c.type === 'gold' || c.type === 'no1' ? 'm-gold' : c.type === 'plat' ? 'm-plat' : c.type === 'diamond' ? 'm-diamond' : 'm-orange';
+    const colors = c.type === 'diamond' ? ['#e9fbff', '#7fd6ff', '#3a8bd1', '#ffffff'] : c.type === 'plat' ? ['#ffffff', '#c9ced6', '#7d8590', '#eef1f5'] : ['#ffd46b', '#e9963f', '#ea7a6b', '#76a477', '#fff3c4'];
+    const conf = Array.from({ length: 46 }, () => `<i style="left:${rnd(0, 100)}%;background:${pick(colors)};--dx:${rint(-80, 80)}px;--rot:${rint(-720, 720)}deg;animation-duration:${rnd(2.2, 4.2)}s;animation-delay:${rnd(.1, 1.2)}s;width:${rint(6, 10)}px;height:${rint(10, 16)}px"></i>`).join('');
+    const kick = { gold: 'Zertifiziert', plat: 'Zertifiziert', diamond: 'Zertifiziert', no1: 'Album-Charts', ach: 'Erfolg freigeschaltet' }[c.type];
+    const visual = c.type === 'ach'
+      ? `<div class="badge">${c.icon}</div>`
+      : `<div class="mdisc ${metal}"><div class="lbl" style="background:${coverCss(c.cover)};background-size:cover;background-position:center"></div></div>`;
+    el.className = `celeb show ${metal}`;
+    el.innerHTML = `<div class="bg"></div><div class="rays"></div><div class="confetti">${conf}</div>
+      <div class="in"><div class="kick">${kick}</div>${visual}
+      <div class="big" style="font-size:${c.title.length > 9 ? 40 : c.title.length > 6 ? 52 : 66}px">${esc(c.title)}</div><div class="sub2">${esc(c.sub)}</div>${c.rew ? `<div class="rew">${esc(c.rew)}</div>` : ''}
+      <button class="big-btn" data-a="celebNext">${c.type === 'ach' ? 'Weiter' : 'Let’s go'}</button></div>`;
+  }
+  $('#celeb').addEventListener('click', (e) => { if (e.target.closest('[data-a=celebNext]')) { $('#celeb').classList.remove('show'); celebrating = false; setTimeout(flushCeleb, 250); render(); } });
   function load() {
     try { const r = localStorage.getItem(KEY); if (r) S = JSON.parse(r); } catch (e) {}
     if (!S) return;
@@ -432,6 +582,7 @@
     if (!S.discHist) S.discHist = [0, 0, 0, 0];
     S.npcs.forEach((n) => { if (!n.album) n.album = `${pick(WORDS1)} ${pick(WORDS2)}`; });
     if (!S.settings) S.settings = { weeklyReport: false, infEnergy: false };
+    if (!S.ach) { S.everLabel = !!S.label; S.ach = {}; checkAch(true); checkCerts(true); }
   }
 
   function makeNpcs(names = NPC_NAMES, keep = []) {
@@ -463,6 +614,7 @@
     S.hist = [{ d: S.date, l: 0 }];
     welcomeMail();
     if (rich) makeRich();
+    S.ach = {}; checkAch(true); checkCerts(true);
     save();
   }
 
@@ -547,6 +699,7 @@
     const al = songAlbum(s);
     if (al && al.promo && al.promo.weeksLeft > 0) m *= 1 + al.promo.boost;
     if (al && al.review) m *= al.review.mult;
+    if (al && al.released && al.hypeMult && S.week - al.week <= 3) m *= al.hypeMult;
     return m;
   }
   function simulateStreams() {
@@ -602,7 +755,8 @@
     report.albumSales = 0; report.albumRev = 0;
     S.albums.forEach((a) => {
       const promo = a.promo && a.promo.weeksLeft > 0 ? 1 + a.promo.boost : 1;
-      const sold = Math.round(albumWeekSales(a, true) * promo);
+      let sold = Math.round(albumWeekSales(a, true) * promo);
+      if (a.released && S.week - a.week === 1 && a.preorders) { sold += a.preorders; a.preordersDone = a.preorders; a.preorders = 0; }
       if (a.released) {
         if (S.week - a.week === 1 && !a.review) a.review = makeReview(a);
         a.lastUnits = sold + Math.round(S.songs.filter((x) => x.albumId === a.id).reduce((t, x) => t + (sim.per.get(x.id) || 0), 0) / 1500);
@@ -613,7 +767,22 @@
       a.sold += sold; a.salesRev += rev;
       report.albumSales += sold; report.albumRev += rev;
     });
+    // announced albums: hype and pre-orders grow, release happens automatically on the date
+    S.albums.filter((a) => !a.released && a.planned != null).forEach((a) => {
+      const songs = S.songs.filter((x) => x.albumId === a.id);
+      const q = songs.length ? songs.reduce((t, x) => t + x.quality, 0) / songs.length : 30;
+      const pre = Math.min(3, songs.filter((x) => x.week != null && x.week < S.week).length);
+      const promo = a.promo && a.promo.weeksLeft > 0 ? 1 + a.promo.boost : 1;
+      const closer = 1 + 1 / Math.max(1, a.planned - S.week); // hype peaks right before the release
+      a.preorders += Math.round(S.followers * .004 * (q / 100) * promo * (1 + pre * .4) * closer * (ALBUM_PRICE / a.price) ** 1.6 * rnd(.85, 1.15));
+      if (S.week >= a.planned) {
+        if (songs.length < MIN_TRACKS) { a.planned++; report.events.push(`⏳ „${a.name}“ wurde verschoben – zu wenig Songs (min. ${MIN_TRACKS}).`); return; }
+        doRelease(a);
+        report.events.unshift(`💿 Heute erscheint „${a.name}“ – ${de(a.preorders)} Vorbestellungen!`);
+      }
+    });
     S.cash += report.albumRev; S.earnings.albums += report.albumRev;
+    checkCerts(silent);
     // album chart positions
     const chart = albumChart();
     S.albums.filter((a) => a.released).forEach((a) => {
@@ -621,6 +790,7 @@
       const first = S.week - a.week === 1;
       a.chart = a.chart || { debut: null, peak: null, weeks: 0, last: null };
       a.chart.last = pos;
+      if (pos === 1 && a.chart.peak !== 1) celebQ.push({ type: 'no1', cover: a.cover, title: '#1', sub: `„${a.name}“ ist auf Platz 1 der Album-Charts` });
       if (pos) { a.chart.weeks++; a.chart.peak = Math.min(a.chart.peak || 99, pos); }
       if (first) {
         a.chart.debut = pos;
@@ -829,6 +999,7 @@
     app.innerHTML = top ? (SCREENS[top.name] || (() => ''))(top.p) : topBar() + TABS[tab]();
     if (scrollTop) window.scrollTo(0, 0);
     after.forEach((f) => f()); after = [];
+    setTimeout(flushCeleb, 60);
     const cv = $('#cashv');
     if (cv && shownCash != null && Math.round(shownCash) !== Math.round(S.cash)) countUp(cv, shownCash, S.cash);
     shownCash = S.cash;
@@ -883,7 +1054,9 @@
       </div>
       <div class="listeners"><span class="plus" style="color:${delta < 0 ? 'var(--salmon)' : 'var(--cash)'}">${delta >= 0 ? '+' : ''}${de(delta)}</span> Listeners<small>LAST 12 MONTHS</small></div>
       ${chartSvg(months)}
+      ${nextGoalHTML()}
       <button class="pill" data-a="go" data-s="inbox">Inbox <span class="cnt">(${unread})</span></button>
+      <button class="pill" data-a="go" data-s="goals">Erfolge <span class="cnt">(${Object.keys(S.ach).length}/${ACH.length})</span></button>
       <button class="pill" data-a="go" data-s="relationship">Relationship</button>
       <button class="pill" data-a="go" data-s="social">Social</button>
       <button class="pill" data-a="go" data-s="trends">Trends</button>
@@ -1012,6 +1185,11 @@
     return { score: +score.toFixed(1), outlets, mult: +(.7 + score / 10 * .6).toFixed(2) };
   }
 
+  function doRelease(a) {
+    a.released = true; a.week = S.week; a.planned = null;
+    a.hypeMult = +(1 + clamp((a.preorders || 0) / (S.followers * .05 + 1), 0, 1) * .6).toFixed(2);
+    S.songs.forEach((x) => { if (x.albumId === a.id && x.week == null) x.week = S.week; });
+  }
   function albumWeekSales(a, random, ahead = 0) {
     if (!a.released) return 0;
     const songs = S.songs.filter((x) => x.albumId === a.id);
@@ -1030,6 +1208,13 @@
   const ticketStep = (p, d) => clamp(Math.round(p / 5) * 5 + d * 5, 5, 500);
   const eur2 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
+  function nextGoalHTML() {
+    const g = ACH.find(([id]) => !(id in S.ach));
+    if (!g) return '';
+    const [cur, target] = g[4]();
+    const pct = clamp(cur / target * 100, 0, 100);
+    return `<button class="goal" data-a="go" data-s="goals" style="display:block;width:100%;text-align:left"><small>🎯 NÄCHSTES ZIEL</small><b>${g[1]} ${g[2]} – ${g[3]}</b><span>${target > 1 ? `${compact(Math.min(cur, target))} / ${compact(target)}` : ''}</span><div class="pb"><i style="width:${Math.max(3, pct)}%"></i></div></button>`;
+  }
   let devOpen = false;
   function devHTML() {
     const sw = (k, label) => `<div class="kv" style="align-items:center"><span>${label}</span><button class="sw2 ${S.settings[k] ? 'on' : ''}" data-a="devSet" data-k="${k}" aria-label="${label}"></button></div>`;
@@ -1126,7 +1311,7 @@
       return pTitle(s.title, { norm: true, extra: `<div class="sd-cov" style="background:${coverCss(songCover(s))};background-size:cover;background-position:center"></div>` }) + `
         <p class="sd-desc">${s.week == null ? `"${esc(s.title)}" liegt auf dem Album „${esc(al ? al.name : '')}“ und erscheint, wenn du das Album veröffentlichst.` : released ? `"${esc(s.title)}" debuted with ${compact(s.debut || 0)} streams, generating ${euroK((s.debut || 0) * .004 * labelShare())} in its first week. 1 unit is equivalent to 150 streams.` : `"${esc(s.title)}" erscheint mit der nächsten Woche. Drück END WEEK.`}
         <br>${al ? `Album: ${esc(al.name)} · ` : 'Single · '}${s.genre}${s.feat ? ` · feat. ${esc(s.feat)}` : ''} · Qualität ${s.quality}</p>
-        <div class="cert"><div class="disc" style="background:${cert.color}">♪</div><div class="r"><small>${cert.label}</small><b>${compact(units)} UNITS</b></div></div>
+        <div class="cert"><div class="mdisc ${cert.cls}"><div class="lbl" style="background:${coverCss(songCover(s))};background-size:cover;background-position:center"></div></div><div class="r"><small>${cert.label}</small><b>${compact(units)} UNITS</b></div></div>
         <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(s.streams)}</b></div><div><small>TOTAL REVENUE</small><b>${euroK(s.revenue)}</b></div></div>
         <div class="bars">${w.map((v) => `<i style="height:${Math.max(3, (v / mx) * 100)}%"></i>`).join('')}</div>
         ${s.week == null ? `<button class="big-btn c-green" data-a="preSingle" data-id="${s.id}">Als Vorab-Single veröffentlichen</button><p class="note" style="text-align:center">Vorab-Singles machen Hype: Der Song läuft schon, das Album kommt später.</p>` : ''}
@@ -1155,13 +1340,21 @@
             : `<button class="big-btn c-orange" data-a="go" data-s="promo" data-id="${a.id}">Promo-Phase starten</button>`}
           <div class="sub" style="margin:4px 0 0">Album price</div>
           <div class="sel"><button data-a="aprice" data-id="${a.id}" data-d="-1" aria-label="billiger">${IC.larr}</button><div class="val"><b>${eur2(a.price)}</b></div><button data-a="aprice" data-id="${a.id}" data-d="1" aria-label="teurer">${IC.rarr}</button></div>
-          <button class="big-btn c-green" data-a="releaseAlbum" data-id="${a.id}" ${songs.length < MIN_TRACKS || S.energy < 10 ? 'disabled' : ''}>Album veröffentlichen 10 <span class="bolt">⚡</span></button>
-          <div class="avail">${songs.length < MIN_TRACKS ? `Mindestens ${MIN_TRACKS} Songs nötig (noch ${MIN_TRACKS - songs.length})` : 'Danach ist das Album abgeschlossen – keine neuen Songs mehr.'}</div>
+          ${a.planned != null ? (() => {
+            const left = a.planned - S.week, hp = clamp(Math.round((a.preorders || 0) / (S.followers * .05 + 1) * 100), 0, 100);
+            return `<div class="card" style="box-shadow:inset 0 0 0 2px var(--salmon)"><b>📅 Release am ${dateShort(weekDate(a.planned))}</b>
+              <p>noch ${left} Woche${left === 1 ? '' : 'n'} · ${de(a.preorders || 0)} Vorbestellungen</p>
+              <div class="hype"><i style="width:${Math.max(3, hp)}%"></i></div><p style="margin:0">Hype ${hp} %${songs.length < MIN_TRACKS ? ` · ⚠️ noch ${MIN_TRACKS - songs.length} Song(s) nötig, sonst wird verschoben` : ' · bis zum Release kannst du noch Songs hinzufügen'}</p></div>
+              <div class="row2"><button class="chip c-green" data-a="releaseAlbum" data-id="${a.id}" ${songs.length < MIN_TRACKS || S.energy < 10 ? 'disabled' : ''}>Sofort raus</button><button class="chip c-gray" data-a="cancelRelease" data-id="${a.id}">Absagen</button></div>`;
+          })() : `${selector('Release', REL_WEEKS[relIdx()] ? `in ${REL_WEEKS[relIdx()]} Wochen` : 'Sofort', REL_WEEKS[relIdx()] ? `${dateShort(weekDate(S.week + REL_WEEKS[relIdx()]))} · Hype & Vorbestellungen` : 'ohne Hype-Phase', 'rel')}
+          <button class="big-btn c-green" data-a="${REL_WEEKS[relIdx()] ? 'announce' : 'releaseAlbum'}" data-id="${a.id}" ${(REL_WEEKS[relIdx()] ? false : songs.length < MIN_TRACKS) || S.energy < 10 ? 'disabled' : ''}>${REL_WEEKS[relIdx()] ? 'Release ankündigen' : 'Album veröffentlichen'} 10 <span class="bolt">⚡</span></button>
+          <div class="avail">${songs.length < MIN_TRACKS ? `Mindestens ${MIN_TRACKS} Songs bis zum Release (noch ${MIN_TRACKS - songs.length})` : 'Nach dem Release ist das Album abgeschlossen.'}</div>`}
           <div class="h3">Tracklist</div>
           ${songs.length ? songs.map((x) => songRow(x)).join('') : '<p class="note">Noch keine Songs. Wähle das Album bei NEW SONG unter „Assign album“ aus.</p>'}`;
       }
       return pTitle(a.name, { norm: true }) + `<div class="bigcover" style="width:180px;height:180px;background:${coverCss(a.cover)};background-size:cover;background-position:center"></div>
-        <p class="note" style="text-align:center;margin-top:-2px">Veröffentlicht ${dateShort(weekDate(a.week))} · abgeschlossen</p>
+        <p class="note" style="text-align:center;margin-top:-2px">Veröffentlicht ${dateShort(weekDate(a.week))} · abgeschlossen${a.preordersDone ? ` · ${de(a.preordersDone)} Vorbestellungen` : ''}</p>
+        <div class="cert" style="margin:4px 0 16px">${(() => { const u = albumUnits(a), c = certOf(u); return `<div class="mdisc ${c.cls}"><div class="lbl" style="background:${coverCss(a.cover)};background-size:cover;background-position:center"></div></div><div class="r"><small>${c.label}</small><b>${compact(u)} UNITS</b></div>`; })()}</div>
         ${a.chart ? `<div class="stats2"><div><small>CHARTS</small><b>${a.chart.last ? '#' + a.chart.last : '—'}</b></div><div><small>DEBÜT · PEAK · WOCHEN</small><b style="font-size:22px">${a.chart.debut ? '#' + a.chart.debut : '—'} · ${a.chart.peak ? '#' + a.chart.peak : '—'} · ${a.chart.weeks}</b></div></div>` : `<p class="note" style="text-align:center">Charts & Kritiken kommen nach der ersten Woche.</p>`}
         ${a.review ? `<div class="card"><b>Kritiken · ${a.review.score}/10</b>${a.review.outlets.map((o) => `<p><b style="font-size:14px">${o.name} ${o.score}</b> – „${o.quote}“</p>`).join('')}</div>` : ''}
         <div class="stats2"><div><small>TOTAL STREAMS</small><b>${compact(songs.reduce((x, s) => x + s.streams, 0))}</b></div><div><small>SONGS</small><b>${songs.length}</b></div></div>
@@ -1177,6 +1370,18 @@
         <div class="h3">Tracklist</div>
         ${songs.map((s) => songRow(s)).join('')}
         ${S.albums.some((x) => x.deluxeOf === a.id) ? '' : `<button class="big-btn c-gray" data-a="deluxe" data-id="${a.id}">Deluxe-Edition erstellen</button><p class="note" style="text-align:center">Neue Songs für dieses Album? Dafür gibt es eine Deluxe-Edition – ein eigenes Album mit Bonus-Tracks.</p>`}`;
+    },
+
+    goals() {
+      const done = ACH.filter(([id]) => id in S.ach).length;
+      return pTitle('Erfolge') + `<p class="note">${done} von ${ACH.length} freigeschaltet. Jeder Erfolg bringt eine Belohnung.</p>
+        <div class="hype" style="height:12px;margin-bottom:18px"><i style="width:${done / ACH.length * 100}%"></i></div>`
+        + ACH.map(([id, icon, title, desc, prog, rw]) => {
+          const ok = id in S.ach;
+          const [cur, target] = prog();
+          return `<div class="ach ${ok ? 'done' : ''}"><div class="ic">${icon}</div><div class="tx"><b>${title}</b><small>${desc}${ok ? ` · ✓ ${dateShort(weekDate(S.ach[id]))}` : ''}</small>
+            ${ok ? '' : `<div class="pb"><i style="width:${clamp(cur / target * 100, 0, 100)}%"></i></div>`}</div><div class="rw">${rw.cash ? '+' + euroK(rw.cash) : '+' + compact(rw.fans) + ' Fans'}</div></div>`;
+        }).join('');
     },
 
     promo(p) {
@@ -1309,9 +1514,9 @@
         const ch = albumChart();
         return pTitle('Album Charts') + `<div class="row2"><button class="chip c-gray" data-a="sbMode" data-m="songs" style="width:134px;opacity:.5">Songs</button><button class="chip c-teal" data-a="sbMode" data-m="albums" style="width:134px">Alben</button></div>
           <p class="note">Album-Charts dieser Woche (Verkäufe + Streams, 1.500 Streams = 1 Album).</p>`
-          + ch.map((r, i) => `<div class="srow ${r.me ? 'hl' : ''}"><div class="q ${r.me ? 'me' : ''}" style="font-size:20px">${i + 1}</div><div class="info"><b>${esc(r.t)}</b><small>${esc(r.a)} • ${de(r.u)} Einheiten</small></div></div>`).join('');
+          + ch.map((r, i) => `<div class="srow ${r.me ? 'hl' : ''}"><div class="q ${r.me ? 'me' : ''} ${i < 3 ? 'r' + (i + 1) : ''}" style="font-size:20px">${i + 1}</div><div class="info"><b>${esc(r.t)}</b><small>${esc(r.a)} • ${de(r.u)} Einheiten</small></div></div>`).join('');
       }
-      return pTitle('Songboard') + `<div class="row2"><button class="chip c-teal" data-a="sbMode" data-m="songs" style="width:134px">Songs</button><button class="chip c-gray" data-a="sbMode" data-m="albums" style="width:134px;opacity:.5">Alben</button></div><p class="note">Die meistgestreamten Songs der letzten Woche.</p>` + rows.map((r, i) => `<div class="srow ${r.me ? 'hl' : ''}"><div class="q ${r.me ? 'me' : ''}" style="font-size:20px">${i + 1}</div><div class="info"><b>${esc(r.t)}</b><small>${esc(r.a)} • ${de(r.v)} streams</small></div></div>`).join('');
+      return pTitle('Songboard') + `<div class="row2"><button class="chip c-teal" data-a="sbMode" data-m="songs" style="width:134px">Songs</button><button class="chip c-gray" data-a="sbMode" data-m="albums" style="width:134px;opacity:.5">Alben</button></div><p class="note">Die meistgestreamten Songs der letzten Woche.</p>` + rows.map((r, i) => `<div class="srow ${r.me ? 'hl' : ''}"><div class="q ${r.me ? 'me' : ''} ${i < 3 ? 'r' + (i + 1) : ''}" style="font-size:20px">${i + 1}</div><div class="info"><b>${esc(r.t)}</b><small>${esc(r.a)} • ${de(r.v)} streams</small></div></div>`).join('');
     },
 
     awards() {
@@ -1332,10 +1537,10 @@
     return `<button class="srow" data-a="go" data-s="${target}" data-id="${s.id}"><div class="info"><b>${esc(s.title)}</b><small>${al ? esc(al.name) : 'Single'} • ${s.week == null ? 'unveröffentlicht – kommt mit dem Album' : pending ? 'erscheint nächste Woche' : de(s.streams) + ' streams'}</small></div><div class="q">${s.quality}</div></button>`;
   }
   function certOf(units) {
-    if (units >= 1e7) return { label: `${Math.floor(units / 1e7)}X DIAMOND-CERTIFIED`, color: '#cfe8f2' };
-    if (units >= 1e6) return { label: `${Math.floor(units / 1e6)}X PLATINUM-CERTIFIED`, color: '#d9d2a6' };
-    if (units >= 5e5) return { label: 'GOLD-CERTIFIED', color: '#e6c25a' };
-    return { label: 'NOT CERTIFIED', color: '#5c636b' };
+    if (units >= 1e7) return { label: `${Math.floor(units / 1e7)}X DIAMOND-CERTIFIED`, cls: 'm-diamond' };
+    if (units >= 1e6) return { label: `${Math.floor(units / 1e6)}X PLATINUM-CERTIFIED`, cls: 'm-plat' };
+    if (units >= 5e5) return { label: 'GOLD-CERTIFIED', cls: 'm-gold' };
+    return { label: `NOT CERTIFIED · ${Math.round(units / 5e3)} % ZU GOLD`, cls: 'm-none' };
   }
   const featureCost = (n) => Math.round(n.listeners * .02 / 100) * 100 + 500;
   function songCost() {
@@ -1389,6 +1594,9 @@
           const i = names.indexOf(draft.feat);
           draft.feat = names[(i + d + names.length) % names.length]; draft.freeFeat = false;
         } else draft[k] = (draft[k] + d + HIRES[k].length) % HIRES[k].length;
+      } else if (top.name === 'album') {
+        if (!draft) draft = { rel: 2 };
+        draft.rel = (relIdx() + d + REL_WEEKS.length) % REL_WEEKS.length;
       } else if (top.name === 'promo') {
         if (k === 'pkind') draft.kind = (draft.kind + d + PROMOS.length) % PROMOS.length;
         else draft.weeks = (draft.weeks + d + PROMO_WEEKS.length) % PROMO_WEEKS.length;
@@ -1475,6 +1683,8 @@
       const sold = tourSold(+el.dataset.i, true);
       const rev = sold * t.shows * S.tourPrices[+el.dataset.i];
       S.energy -= t.energy; S.cash += rev - t.cost; S.earnings.tours += rev - t.cost; S.lastTour = S.week;
+      S.toursDone = (S.toursDone || 0) + 1;
+      if (+el.dataset.i === 3 && sold >= t.cap * .95) S.stadiumSoldOut = true;
       const fans = Math.round(sold * t.shows * .3);
       S.followers += fans;
       save(); render();
@@ -1506,7 +1716,7 @@
     signLabel(el) {
       const m = S.inbox.find((x) => x.id === el.dataset.id); if (!m || S.label) return;
       const o = m.action.offer;
-      S.label = { ...o, weeksLeft: o.weeks }; S.cash += o.advance;
+      S.label = { ...o, weeksLeft: o.weeks }; S.cash += o.advance; S.everLabel = true;
       S.inbox.forEach((x) => { if (x.action && x.action.type === 'label') x.done = true; });
       save(); render(); toast(`Bei ${o.name} unterschrieben: +${euro(o.advance)}`);
     },
@@ -1548,12 +1758,23 @@
       const songs = S.songs.filter((x) => x.albumId === a.id);
       if (songs.length < MIN_TRACKS || S.energy < 10) return;
       S.energy -= 10;
-      a.released = true; a.week = S.week;
-      songs.forEach((x) => { if (x.week == null) x.week = S.week; });
+      doRelease(a);
       save(); render();
-      modal(`<h2>💿 ${esc(a.name)}</h2><p class="note">Das Album erscheint mit der nächsten Woche: ${songs.length} Songs, Preis ${eur2(a.price)}.${a.promo && a.promo.weeksLeft > 0 ? ' Die laufende Promo pusht den Release.' : ''}</p>
+      modal(`<h2>💿 ${esc(a.name)}</h2><p class="note">Das Album erscheint mit der nächsten Woche: ${songs.length} Songs, Preis ${eur2(a.price)}.${a.hypeMult > 1 ? ` Vorbestellungen: ${de(a.preorders)}.` : ''}${a.promo && a.promo.weeksLeft > 0 ? ' Die laufende Promo pusht den Release.' : ''}</p>
         <p class="note">Drück END WEEK, um die ersten Verkäufe zu sehen. Das Album ist jetzt abgeschlossen – für neue Songs kannst du später eine Deluxe-Edition machen.</p>
         <button class="big-btn c-green" data-a="closeModal">Weiter</button>`);
+    },
+    announce(el) {
+      const a = S.albums.find((x) => x.id === el.dataset.id); if (!a || a.released || S.energy < 10) return;
+      const w = REL_WEEKS[relIdx()];
+      S.energy -= 10; a.planned = S.week + w; a.preorders = 0;
+      mail('Chart News', 'NEWS', `${S.name} kündigt „${a.name}“ an`, `Das neue Album erscheint am ${dateShort(weekDate(a.planned))}. Die Fans drehen durch – Vorbestellungen laufen.`);
+      save(); render(); toast(`📅 „${a.name}“ erscheint in ${w} Wochen – Vorbestellungen laufen`);
+    },
+    cancelRelease(el) {
+      const a = S.albums.find((x) => x.id === el.dataset.id); if (!a) return;
+      a.planned = null; a.preorders = 0; S.followers = Math.round(S.followers * .99);
+      save(); render(); toast('Release abgesagt – ein paar Fans sind enttäuscht');
     },
     preSingle(el) {
       const x = S.songs.find((y) => y.id === el.dataset.id); if (!x || x.week != null) return;
@@ -1620,6 +1841,7 @@
   };
   const PF_SHARE = { sp: .62, am: .24, bs: .14 };
   let pfState = { tab: 'music', popular: true, playing: null, followed: false };
+  const relIdx = () => (draft && draft.rel != null ? draft.rel : 2);
   const weekDate = (w) => { const d = dateObj(); d.setUTCDate(d.getUTCDate() - (S.week - w) * 7); return d.toISOString().slice(0, 10); };
   const yearAt = (w) => { const d = dateObj(); d.setUTCDate(d.getUTCDate() - (S.week - w) * 7); return d.getUTCFullYear(); };
   const bannerCss = (k) => (S.banners && S.banners[k] ? `url('${S.banners[k]}') center/cover` : PF_BANNER[k]);
