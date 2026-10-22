@@ -332,21 +332,6 @@
   @keyframes fall { to { transform: translate3d(var(--dx), 112vh, 0) rotate(var(--rot)); } }
 
   /* ---------- polish ---------- */
-  .goal { position: relative; border-radius: 18px; padding: 14px 16px; margin: 4px 0 16px; background: linear-gradient(135deg, rgba(233,150,63,.18), rgba(118,164,119,.12)); box-shadow: inset 0 0 0 1px rgba(233,150,63,.35); }
-  .goal small { font-size: 10px; letter-spacing: 2px; color: var(--orange); font-weight: 800; }
-  .goal b { display: block; font-size: 16px; margin: 3px 0 8px; }
-  .goal .pb { height: 8px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
-  .goal .pb i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--orange), #ffcf7a); }
-  .goal span { position: absolute; right: 16px; top: 14px; font-size: 12px; color: #c9ccd0; font-weight: 700; }
-  .ach { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border-radius: 16px; background: var(--panel); margin-bottom: 10px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
-  .ach .ic { width: 46px; height: 46px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 22px; background: #2c3136; filter: grayscale(1); opacity: .6; }
-  .ach.done .ic { background: radial-gradient(circle at 35% 30%, #ffe6b0, #e9963f 60%, #8a4a12); filter: none; opacity: 1; box-shadow: 0 4px 16px rgba(233,150,63,.4); }
-  .ach .tx { flex: 1; min-width: 0; }
-  .ach .tx b { display: block; font-size: 15px; }
-  .ach .tx small { display: block; font-size: 12px; color: #aab0b6; margin-top: 2px; }
-  .ach .pb { height: 6px; border-radius: 3px; background: rgba(255,255,255,.1); margin-top: 6px; overflow: hidden; }
-  .ach .pb i { display: block; height: 100%; background: var(--orange); }
-  .ach .rw { font-size: 12px; font-weight: 800; color: var(--cash); text-align: right; flex: none; }
   .srow .q.r1 { background: linear-gradient(135deg, #fff1b8, #e3ad2b 50%, #a87510); }
   .srow .q.r2 { background: linear-gradient(135deg, #ffffff, #c4cad3 50%, #8a929d); }
   .srow .q.r3 { background: linear-gradient(135deg, #ffd2a8, #c9773a 50%, #8a4a1c); }
@@ -424,32 +409,6 @@
   const REL_WEEKS = [0, 2, 4, 6, 8];
   const songUnits = (x) => Math.round(x.streams / 150);
   const albumUnits = (a) => Math.round((a.sold || 0) + S.songs.filter((x) => x.albumId === a.id).reduce((t, x) => t + x.streams, 0) / 1500);
-  const maxOf = (arr, f) => arr.reduce((m, x) => Math.max(m, f(x)), 0);
-  // [id, icon, title, description, progress () => [current, target], reward {cash, fans}]
-  const ACH = [
-    ['song1', '🎤', 'Erster Track', 'Nimm deinen ersten Song auf', () => [S.songs.length, 1], { cash: 500 }],
-    ['fans1k', '👥', '1.000 Fans', 'Sammle deine ersten 1.000 Fans', () => [S.followers, 1e3], { cash: 2000 }],
-    ['video1', '🎬', 'Regie-Debüt', 'Dreh dein erstes Musikvideo', () => [S.songs.filter((x) => x.video).length, 1], { cash: 5000 }],
-    ['songs10', '📀', '10 Songs', 'Nimm 10 Songs auf', () => [S.songs.length, 10], { cash: 5000 }],
-    ['fest1', '🎪', 'Erste Bühne', 'Spiel dein erstes Festival', () => [S.festivals.length, 1], { cash: 5000 }],
-    ['album1', '💿', 'Debütalbum', 'Veröffentliche dein erstes Album', () => [S.albums.filter((a) => a.released).length, 1], { cash: 10000 }],
-    ['tour1', '🚌', 'On Tour', 'Geh zum ersten Mal auf Tour', () => [S.toursDone || 0, 1], { cash: 10000 }],
-    ['fans100k', '🔥', '100K Fans', 'Erreiche 100.000 Fans', () => [S.followers, 1e5], { cash: 50000 }],
-    ['gold', '🥇', 'Gold', 'Ein Song mit 500.000 Units', () => [maxOf(S.songs, songUnits), 5e5], { cash: 25000 }],
-    ['top10', '📈', 'Top 10', 'Ein Album in den Top 10 der Charts', () => [S.albums.some((a) => a.chart && a.chart.peak && a.chart.peak <= 10) ? 1 : 0, 1], { cash: 50000 }],
-    ['label', '✍️', 'Gesignt', 'Unterschreib bei einem Label', () => [S.everLabel ? 1 : 0, 1], { cash: 10000 }],
-    ['million', '💰', 'Erste Million', 'Hab 1 Mio. € auf dem Konto', () => [S.cash, 1e6], { fans: 10000 }],
-    ['plat', '💎', 'Platin', 'Ein Song mit 1 Mio. Units', () => [maxOf(S.songs, songUnits), 1e6], { cash: 100000 }],
-    ['agold', '🏅', 'Gold-Album', 'Ein Album mit 500.000 Units', () => [maxOf(S.albums.filter((a) => a.released), albumUnits), 5e5], { cash: 100000 }],
-    ['no1', '👑', 'Nummer 1', 'Ein Album auf Platz 1 der Charts', () => [S.albums.some((a) => a.chart && a.chart.peak === 1) ? 1 : 0, 1], { cash: 250000 }],
-    ['fans1m', '🌍', '1 Mio. Fans', 'Erreiche 1 Million Fans', () => [S.followers, 1e6], { cash: 500000 }],
-    ['award', '🏆', 'Ausgezeichnet', 'Gewinne einen Award', () => [S.awards.length, 1], { cash: 500000 }],
-    ['songs50', '⚙️', 'Hitmaschine', 'Nimm 50 Songs auf', () => [S.songs.length, 50], { cash: 50000 }],
-    ['stadium', '🏟', 'Stadion voll', 'Verkauf eine Stadion-Tour fast komplett aus', () => [S.stadiumSoldOut ? 1 : 0, 1], { cash: 2000000 }],
-    ['fameA', '⭐', 'Superstar', 'Erreiche Fame A+', () => [fameScore(), 93], { cash: 1000000 }],
-    ['diamond', '💠', 'Diamant', 'Ein Song mit 10 Mio. Units', () => [maxOf(S.songs, songUnits), 1e7], { cash: 1000000 }],
-    ['fans10m', '🚀', '10 Mio. Fans', 'Erreiche 10 Millionen Fans', () => [S.followers, 1e7], { cash: 5000000 }],
-  ];
   // 0 none, 1 gold, 11..19 = 1x..9x platinum, 101.. = 1x.. diamond
   const certLevel = (u) => (u >= 1e7 ? 100 + Math.floor(u / 1e7) : u >= 1e6 ? 10 + Math.floor(u / 1e6) : u >= 5e5 ? 1 : 0);
   const CHART_SIZE = 30;
@@ -507,22 +466,9 @@
      ===================================================================== */
   let S = null;
   function save() {
-    if (S && S.ach) checkAch(false);
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Speicher voll – Cover-Bilder verkleinern'); }
   }
   let celebQ = [], celebrating = false;
-  function checkAch(silent) {
-    ACH.forEach(([id, icon, title, desc, prog, rw]) => {
-      if (id in S.ach) return;
-      const [cur, target] = prog();
-      if (cur < target) return;
-      S.ach[id] = S.week;
-      if (silent) return;
-      if (rw.cash) S.cash += rw.cash;
-      if (rw.fans) S.followers += rw.fans;
-      celebQ.push({ type: 'ach', icon, title, sub: desc, rew: rw.cash ? `+${euro(rw.cash)}` : `+${de(rw.fans)} Fans` });
-    });
-  }
   // song/album certifications → celebrations (gold, first platinum, every diamond); quiet init for old saves
   function checkCerts(silent) {
     const items = S.songs.map((x) => ({ o: x, u: songUnits(x), name: x.title, kind: 'Song', cover: songCover(x) }))
@@ -582,7 +528,7 @@
     if (!S.discHist) S.discHist = [0, 0, 0, 0];
     S.npcs.forEach((n) => { if (!n.album) n.album = `${pick(WORDS1)} ${pick(WORDS2)}`; });
     if (!S.settings) S.settings = { weeklyReport: false, infEnergy: false };
-    if (!S.ach) { S.everLabel = !!S.label; S.ach = {}; checkAch(true); checkCerts(true); }
+    if (!S.certInit) { S.certInit = true; checkCerts(true); }
   }
 
   function makeNpcs(names = NPC_NAMES, keep = []) {
@@ -614,7 +560,7 @@
     S.hist = [{ d: S.date, l: 0 }];
     welcomeMail();
     if (rich) makeRich();
-    S.ach = {}; checkAch(true); checkCerts(true);
+    S.certInit = true; checkCerts(true);
     save();
   }
 
@@ -712,7 +658,7 @@
     const top = rel.map((x) => x.quality / 100).sort((a, b) => b - a).slice(0, 3);
     const fanStreams = F * 7 * (.6 + .6 * top.reduce((a, b) => a + b, 0) / top.length);
     const recent = rel.filter((x) => S.week - x.week - 1 < 4).length;
-    const reach = (8000 + F * Math.max(0, 1 - F / MARKET)) / Math.max(1, recent / 2);
+    const reach = (8000 + F * Math.max(0, 1 - F / MARKET)) / Math.max(1, recent / 2) * competition().factor;
     rel.forEach((x, k) => {
       const age = S.week - x.week - 1, qf = x.quality / 100;
       const feat = x.feat ? (S.npcs.find((n) => n.name === x.feat) || { listeners: 0 }).listeners * .08 * .75 ** age : 0;
@@ -825,7 +771,7 @@
       report.events.push(`Neuer Trend: ${S.trend} ist gerade angesagt.`);
     }
     // npc drift
-    S.npcs.forEach((n) => { n.listeners = Math.round(n.listeners * rnd(.96, 1.05)); if (Math.random() < .15) n.hit = songName(n.name); });
+    npcWeek(report);
 
     // awards at new year
     if (yearChanged) awardsCeremony(report);
@@ -845,7 +791,7 @@
     if (silent) return report;
     if (S.settings.weeklyReport) { showReport(report, lBefore); return report; }
     // no summary – only important things pop up briefly
-    const important = report.events.filter((e) => /^(💿|🏆|Fame|.* hat Schluss|Dein Vertrag)/.test(e));
+    const important = report.events.filter((e) => /^(💿|🏆|🆕|Fame|.* hat Schluss|Dein Vertrag)/.test(e));
     render();
     if (important.length) toast(important.slice(0, 2).join('\n'), 4200);
     return report;
@@ -1054,9 +1000,7 @@
       </div>
       <div class="listeners"><span class="plus" style="color:${delta < 0 ? 'var(--salmon)' : 'var(--cash)'}">${delta >= 0 ? '+' : ''}${de(delta)}</span> Listeners<small>LAST 12 MONTHS</small></div>
       ${chartSvg(months)}
-      ${nextGoalHTML()}
       <button class="pill" data-a="go" data-s="inbox">Inbox <span class="cnt">(${unread})</span></button>
-      <button class="pill" data-a="go" data-s="goals">Erfolge <span class="cnt">(${Object.keys(S.ach).length}/${ACH.length})</span></button>
       <button class="pill" data-a="go" data-s="relationship">Relationship</button>
       <button class="pill" data-a="go" data-s="social">Social</button>
       <button class="pill" data-a="go" data-s="trends">Trends</button>
@@ -1167,7 +1111,42 @@
     return S.albums.map((a) => ({ album: a, streams: S.songs.filter((s) => s.albumId === a.id).reduce((x, s) => x + s.streams, 0) })).sort((p, q) => q.streams - p.streams);
   }
   const jobPay = () => 300 + S.week * 4;
-  const npcAlbumUnits = (n) => Math.round(n.listeners * .02 * (.6 + (Math.abs(hash(n.name + S.week)) % 80) / 100));
+  // a fresh album sells big in its first weeks
+  const npcAlbumBoost = (n) => (n.albumWeek != null ? 1 + 7 * .5 ** Math.max(0, S.week - n.albumWeek - 1) : 1);
+  const npcAlbumUnits = (n) => Math.round(n.listeners * .02 * (.6 + (Math.abs(hash(n.name + S.week)) % 80) / 100) * npcAlbumBoost(n));
+  // big artists dropping an album this week steal attention from your new songs
+  function competition() {
+    const big = S.npcs.filter((n) => n.albumWeek != null && S.week - n.albumWeek <= 1 && n.listeners > S.listeners * .3);
+    return { factor: Math.max(.6, .85 ** big.length), who: big.map((n) => n.name) };
+  }
+  function npcWeek(report) {
+    S.npcs.forEach((n) => {
+      n.listeners = Math.round(n.listeners * rnd(.985, 1.012)); // slow drift
+      if (n.rel && S.week >= n.rel.week) {
+        if (n.rel.type === 'album') {
+          n.album = n.rel.title; n.albumWeek = S.week;
+          n.listeners = Math.round(n.listeners * rnd(1.08, 1.25));
+          mail('Chart News', 'NEWS', `${n.name} hat „${n.album}“ veröffentlicht`, `Das neue Album von ${n.name} ist ab heute überall erhältlich. Die Fans feiern, die Charts beben.`);
+          report.events.push(`🆕 ${n.name} droppt „${n.album}“`);
+        } else {
+          n.hit = n.rel.title; n.hitWeek = S.week;
+          n.listeners = Math.round(n.listeners * rnd(1.02, 1.08));
+        }
+        n.rel = null;
+        return;
+      }
+      if (n.rel) return;
+      const sinceAlbum = n.albumWeek != null ? S.week - n.albumWeek : 99;
+      if (sinceAlbum > 12 && Math.random() < .05) {
+        const w = rint(2, 5);
+        n.rel = { type: 'album', title: `${pick(WORDS1)} ${pick(WORDS2)}`, week: S.week + w };
+        mail('Chart News', 'NEWS', `${n.name} kündigt neues Album an`, `${n.name} bringt „${n.rel.title}“ am ${dateShort(weekDate(n.rel.week))} raus. Wer am selben Tag released, bekommt harte Konkurrenz.`);
+      } else if (Math.random() < .12) {
+        n.rel = { type: 'single', title: songName(n.name), week: S.week + 1 };
+      }
+    });
+  }
+  const npcReleasesIn = (w) => S.npcs.filter((n) => n.rel && n.rel.type === 'album' && n.rel.week === w);
   // album chart of the current week: other artists, filler albums and your released albums
   function albumChart() {
     const top = Math.max(...S.npcs.map((n) => n.listeners)) * .02;
@@ -1208,13 +1187,6 @@
   const ticketStep = (p, d) => clamp(Math.round(p / 5) * 5 + d * 5, 5, 500);
   const eur2 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
-  function nextGoalHTML() {
-    const g = ACH.find(([id]) => !(id in S.ach));
-    if (!g) return '';
-    const [cur, target] = g[4]();
-    const pct = clamp(cur / target * 100, 0, 100);
-    return `<button class="goal" data-a="go" data-s="goals" style="display:block;width:100%;text-align:left"><small>🎯 NÄCHSTES ZIEL</small><b>${g[1]} ${g[2]} – ${g[3]}</b><span>${target > 1 ? `${compact(Math.min(cur, target))} / ${compact(target)}` : ''}</span><div class="pb"><i style="width:${Math.max(3, pct)}%"></i></div></button>`;
-  }
   let devOpen = false;
   function devHTML() {
     const sw = (k, label) => `<div class="kv" style="align-items:center"><span>${label}</span><button class="sw2 ${S.settings[k] ? 'on' : ''}" data-a="devSet" data-k="${k}" aria-label="${label}"></button></div>`;
@@ -1343,10 +1315,10 @@
           ${a.planned != null ? (() => {
             const left = a.planned - S.week, hp = clamp(Math.round((a.preorders || 0) / (S.followers * .05 + 1) * 100), 0, 100);
             return `<div class="card" style="box-shadow:inset 0 0 0 2px var(--salmon)"><b>📅 Release am ${dateShort(weekDate(a.planned))}</b>
-              <p>noch ${left} Woche${left === 1 ? '' : 'n'} · ${de(a.preorders || 0)} Vorbestellungen</p>
+              <p>noch ${left} Woche${left === 1 ? '' : 'n'} · ${de(a.preorders || 0)} Vorbestellungen${npcReleasesIn(a.planned).length ? `<br><span style="color:var(--salmon)">⚠️ Am selben Tag: ${npcReleasesIn(a.planned).map((n) => esc(n.name)).join(', ')}</span>` : ''}</p>
               <div class="hype"><i style="width:${Math.max(3, hp)}%"></i></div><p style="margin:0">Hype ${hp} %${songs.length < MIN_TRACKS ? ` · ⚠️ noch ${MIN_TRACKS - songs.length} Song(s) nötig, sonst wird verschoben` : ' · bis zum Release kannst du noch Songs hinzufügen'}</p></div>
               <div class="row2"><button class="chip c-green" data-a="releaseAlbum" data-id="${a.id}" ${songs.length < MIN_TRACKS || S.energy < 10 ? 'disabled' : ''}>Sofort raus</button><button class="chip c-gray" data-a="cancelRelease" data-id="${a.id}">Absagen</button></div>`;
-          })() : `${selector('Release', REL_WEEKS[relIdx()] ? `in ${REL_WEEKS[relIdx()]} Wochen` : 'Sofort', REL_WEEKS[relIdx()] ? `${dateShort(weekDate(S.week + REL_WEEKS[relIdx()]))} · Hype & Vorbestellungen` : 'ohne Hype-Phase', 'rel')}
+          })() : `${selector('Release', REL_WEEKS[relIdx()] ? `in ${REL_WEEKS[relIdx()]} Wochen` : 'Sofort', REL_WEEKS[relIdx()] ? `${dateShort(weekDate(S.week + REL_WEEKS[relIdx()]))}${npcReleasesIn(S.week + REL_WEEKS[relIdx()]).length ? ` · ⚠️ ${npcReleasesIn(S.week + REL_WEEKS[relIdx()]).map((n) => n.name).join(', ')} droppt auch` : ' · freie Woche'}` : 'ohne Hype-Phase', 'rel')}
           <button class="big-btn c-green" data-a="${REL_WEEKS[relIdx()] ? 'announce' : 'releaseAlbum'}" data-id="${a.id}" ${(REL_WEEKS[relIdx()] ? false : songs.length < MIN_TRACKS) || S.energy < 10 ? 'disabled' : ''}>${REL_WEEKS[relIdx()] ? 'Release ankündigen' : 'Album veröffentlichen'} 10 <span class="bolt">⚡</span></button>
           <div class="avail">${songs.length < MIN_TRACKS ? `Mindestens ${MIN_TRACKS} Songs bis zum Release (noch ${MIN_TRACKS - songs.length})` : 'Nach dem Release ist das Album abgeschlossen.'}</div>`}
           <div class="h3">Tracklist</div>
@@ -1370,18 +1342,6 @@
         <div class="h3">Tracklist</div>
         ${songs.map((s) => songRow(s)).join('')}
         ${S.albums.some((x) => x.deluxeOf === a.id) ? '' : `<button class="big-btn c-gray" data-a="deluxe" data-id="${a.id}">Deluxe-Edition erstellen</button><p class="note" style="text-align:center">Neue Songs für dieses Album? Dafür gibt es eine Deluxe-Edition – ein eigenes Album mit Bonus-Tracks.</p>`}`;
-    },
-
-    goals() {
-      const done = ACH.filter(([id]) => id in S.ach).length;
-      return pTitle('Erfolge') + `<p class="note">${done} von ${ACH.length} freigeschaltet. Jeder Erfolg bringt eine Belohnung.</p>
-        <div class="hype" style="height:12px;margin-bottom:18px"><i style="width:${done / ACH.length * 100}%"></i></div>`
-        + ACH.map(([id, icon, title, desc, prog, rw]) => {
-          const ok = id in S.ach;
-          const [cur, target] = prog();
-          return `<div class="ach ${ok ? 'done' : ''}"><div class="ic">${icon}</div><div class="tx"><b>${title}</b><small>${desc}${ok ? ` · ✓ ${dateShort(weekDate(S.ach[id]))}` : ''}</small>
-            ${ok ? '' : `<div class="pb"><i style="width:${clamp(cur / target * 100, 0, 100)}%"></i></div>`}</div><div class="rw">${rw.cash ? '+' + euroK(rw.cash) : '+' + compact(rw.fans) + ' Fans'}</div></div>`;
-        }).join('');
     },
 
     promo(p) {
@@ -1477,6 +1437,15 @@
 
     trends() {
       return pTitle('Trends') + `<div class="card"><b>Angesagt: ${S.trend}</b><p>${S.trend === 'TRAP' ? 'Harte 808s und Ad-libs dominieren die Playlists.' : 'Cleane Hooks und Radio-Sound laufen gerade überall.'} Songs in diesem Stil bekommen +10 % Streams und etwas höhere Qualität.</p><p>Wechselt in ca. ${S.trendWeeks} Woche(n).</p></div>
+        <div class="h3">📅 Release-Kalender</div>
+        ${(() => {
+          const up = S.npcs.filter((n) => n.rel && n.rel.type === 'album').sort((a, b) => a.rel.week - b.rel.week);
+          const mine = S.albums.filter((a) => !a.released && a.planned != null);
+          const rows = up.map((n) => ({ w: n.rel.week, t: `${n.name} – „${n.rel.title}“`, me: false })).concat(mine.map((a) => ({ w: a.planned, t: `${S.name} – „${a.name}“`, me: true }))).sort((a, b) => a.w - b.w);
+          return rows.length ? rows.map((r) => `<div class="kv"><span style="${r.me ? 'color:var(--orange);font-weight:800' : ''}">${esc(r.t)}</span><span>${dateShort(weekDate(r.w))}</span></div>`).join('') : '<p class="note">Gerade sind keine Alben angekündigt.</p>';
+        })()}
+        ${(() => { const fresh = S.npcs.filter((n) => n.albumWeek != null && S.week - n.albumWeek <= 3); return fresh.length ? `<div class="h3">🆕 Gerade erschienen</div>${fresh.map((n) => `<div class="kv"><span>${esc(n.name)} – „${esc(n.album)}“</span><span>${S.week - n.albumWeek <= 1 ? 'diese Woche' : `vor ${S.week - n.albumWeek} Wo.`}</span></div>`).join('')}` : ''; })()}
+        ${competition().who.length ? `<p class="note" style="color:var(--salmon)">⚠️ Gerade viel Konkurrenz (${competition().who.map(esc).join(', ')}): neue Songs werden ${Math.round((1 - competition().factor) * 100)} % weniger entdeckt.</p>` : ''}
         <div class="h3">Top-Artists diese Woche</div>
         ${S.npcs.slice().sort((a, b) => b.listeners - a.listeners).slice(0, 5).map((n, i) => `<div class="kv"><span>${i + 1}. ${esc(n.name)} – ${esc(n.hit)}</span><span>${compact(n.listeners)}</span></div>`).join('')}`;
     },
@@ -1507,7 +1476,7 @@
     },
 
     songboard(p) {
-      const rows = S.npcs.map((n) => ({ t: n.hit, a: n.name, v: Math.round(n.listeners * .6 * (.8 + (Math.abs(hash(n.hit + S.week)) % 40) / 100)), me: false }))
+      const rows = S.npcs.map((n) => ({ t: n.hit, a: n.name, v: Math.round(n.listeners * .6 * (.8 + (Math.abs(hash(n.hit + S.week)) % 40) / 100) * (n.hitWeek != null ? 1 + 2 * .6 ** Math.max(0, S.week - n.hitWeek - 1) : 1) * (n.albumWeek != null && S.week - n.albumWeek <= 2 ? 1.6 : 1)), me: false }))
         .concat(S.songs.filter((s) => s.weekly.length).map((s) => ({ t: s.title, a: S.name, v: s.weekly[s.weekly.length - 1], me: true })))
         .sort((a, b) => b.v - a.v).slice(0, 20);
       if (p.albums) {
@@ -1683,8 +1652,6 @@
       const sold = tourSold(+el.dataset.i, true);
       const rev = sold * t.shows * S.tourPrices[+el.dataset.i];
       S.energy -= t.energy; S.cash += rev - t.cost; S.earnings.tours += rev - t.cost; S.lastTour = S.week;
-      S.toursDone = (S.toursDone || 0) + 1;
-      if (+el.dataset.i === 3 && sold >= t.cap * .95) S.stadiumSoldOut = true;
       const fans = Math.round(sold * t.shows * .3);
       S.followers += fans;
       save(); render();
@@ -1716,7 +1683,7 @@
     signLabel(el) {
       const m = S.inbox.find((x) => x.id === el.dataset.id); if (!m || S.label) return;
       const o = m.action.offer;
-      S.label = { ...o, weeksLeft: o.weeks }; S.cash += o.advance; S.everLabel = true;
+      S.label = { ...o, weeksLeft: o.weeks }; S.cash += o.advance;
       S.inbox.forEach((x) => { if (x.action && x.action.type === 'label') x.done = true; });
       save(); render(); toast(`Bei ${o.name} unterschrieben: +${euro(o.advance)}`);
     },
